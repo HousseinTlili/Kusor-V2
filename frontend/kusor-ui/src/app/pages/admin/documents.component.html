@@ -1,0 +1,220 @@
+<div class="documents-page">
+  <header class="page-header">
+    <div class="header-text">
+      <h1>Gestion des Circulaires</h1>
+      <p class="text-secondary">Consultez, ajoutez et indexez des circulaires de la Banque Centrale de Tunisie.</p>
+    </div>
+  </header>
+
+  @if (successMessage()) {
+    <div class="alert alert-success animate-fade-in">
+      <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <span>{{ successMessage() }}</span>
+    </div>
+  }
+
+  @if (errorMessage()) {
+    <div class="alert alert-danger animate-fade-in">
+      <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+      </svg>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+
+  <div class="main-layout">
+    <!-- List of circulars -->
+    <div class="list-section glass-card">
+      <h3>Circulaires Disponibles</h3>
+      
+      @if (isLoading()) {
+        <div class="loading-container">
+          <app-loading-spinner message="Chargement de la liste..."></app-loading-spinner>
+        </div>
+      } @else {
+        @if (documents().length === 0) {
+          <div class="empty-docs text-muted">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="empty-icon">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+            </svg>
+            Aucun document indexé pour le moment.
+          </div>
+        } @else {
+          <div class="table-wrapper">
+            <table class="docs-table">
+              <thead>
+                <tr>
+                  <th>N° Circulaire</th>
+                  <th>Titre</th>
+                  <th>Catégorie</th>
+                  <th>Statut Indexation</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (doc of documents(); track doc.id) {
+                  <tr>
+                    <td class="doc-num">{{ doc.number }}</td>
+                    <td class="doc-title" [title]="doc.title">{{ doc.title }}</td>
+                    <td><span class="category-tag">{{ doc.category }}</span></td>
+                    <td>
+                      <span class="badge {{ getStateBadgeClass(doc.indexation_state) }}">
+                        {{ getStateLabel(doc.indexation_state) }}
+                      </span>
+                    </td>
+                    <td class="actions-cell">
+                      <button 
+                        (click)="reindexDocument(doc.id)" 
+                        title="Réindexer"
+                        [disabled]="doc.indexation_state === 'PROCESSING' || doc.indexation_state === 'PENDING'"
+                        class="action-btn reindex-btn"
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                        </svg>
+                      </button>
+                      <button 
+                        (click)="deleteDocument(doc.id)" 
+                        title="Supprimer" 
+                        class="action-btn delete-btn"
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                        </svg>
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination Controls -->
+          @if (totalPages() > 1) {
+            <div class="pagination">
+              <button 
+                [disabled]="currentPage() === 1" 
+                (click)="loadDocuments(currentPage() - 1)" 
+                class="pag-btn"
+              >
+                Précédent
+              </button>
+              <span class="pag-info">Page {{ currentPage() }} sur {{ totalPages() }}</span>
+              <button 
+                [disabled]="currentPage() === totalPages()" 
+                (click)="loadDocuments(currentPage() + 1)" 
+                class="pag-btn"
+              >
+                Suivant
+              </button>
+            </div>
+          }
+        }
+      }
+    </div>
+
+    <!-- Upload side section -->
+    <div class="upload-section glass-card">
+      <h3>Indexation de Fichier</h3>
+      
+      <form [formGroup]="uploadForm" (submit)="uploadDocument()" class="upload-form">
+        <!-- Drag & Drop Zone -->
+        <div 
+          class="drag-drop-zone"
+          [class.drag-over]="isDragOver()"
+          (dragover)="onDragOver($event)"
+          (dragleave)="onDragLeave($event)"
+          (drop)="onDrop($event)"
+          (click)="fileInput.click()"
+        >
+          <input 
+            #fileInput 
+            type="file" 
+            accept="application/pdf" 
+            (change)="onFileSelected($event)" 
+            style="display: none;"
+          />
+          
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="upload-cloud-icon">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
+          </svg>
+
+          @if (selectedFile) {
+            <div class="selected-file-info">
+              <span class="file-name">{{ selectedFile.name }}</span>
+              <span class="file-size text-secondary">{{ (selectedFile.size / 1024 / 1024) | number:'1.1-2' }} Mo</span>
+            </div>
+          } @else {
+            <p>Glissez-déposez un fichier PDF ici, ou <span>parcourez</span></p>
+            <span class="file-limit text-muted">Fichiers PDF uniquement (Max 50Mo)</span>
+          }
+        </div>
+
+        <!-- Document metadata fields -->
+        <div class="form-group">
+          <label for="number">Numéro de Circulaire (Optionnel)</label>
+          <input 
+            id="number" 
+            formControlName="number" 
+            placeholder="Ex: 2024-01" 
+            class="form-control"
+          />
+          @if (uploadForm.get('number')?.invalid && uploadForm.get('number')?.dirty) {
+            <span class="error-tip">Le format doit être YYYY-NN (ex: 2024-01).</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="title">Titre de la Circulaire (Optionnel)</label>
+          <input 
+            id="title" 
+            formControlName="title" 
+            placeholder="Ex: Conditions de réserve obligatoire" 
+            class="form-control"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="category">Catégorie</label>
+          <select id="category" formControlName="category" class="form-control">
+            <option value="Politique monétaire">Politique monétaire</option>
+            <option value="Supervision bancaire">Supervision bancaire</option>
+            <option value="Opérations de change">Opérations de change</option>
+            <option value="Stabilité financière">Stabilité financière</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="date">Date de Publication (Optionnel)</label>
+          <input 
+            id="date" 
+            type="date" 
+            formControlName="date" 
+            class="form-control"
+          />
+        </div>
+
+        <button 
+          type="submit" 
+          [disabled]="uploadForm.invalid || !selectedFile || isUploading()" 
+          class="btn-primary upload-submit-btn"
+        >
+          @if (isUploading()) {
+            <svg class="spinner-icon animate-spin" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Traitement en cours...
+          } @else {
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h10a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15m0-3l-3-3m0 0l-3 3m3-3V15" />
+            </svg>
+            Lancer l'Indexation
+          }
+        </button>
+      </form>
+    </div>
+  </div>
+</div>

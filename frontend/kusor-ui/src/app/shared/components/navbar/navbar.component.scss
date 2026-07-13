@@ -1,0 +1,135 @@
+.navbar {
+  height: 64px;
+  background: rgba(13, 17, 23, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(48, 54, 61, 0.6);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  width: 100%;
+}
+
+.nav-container {
+  max-width: 1400px;
+  height: 100%;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  position: relative;
+
+  .logo-glow {
+    width: 10px;
+    height: 10px;
+    background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+    border-radius: 50%;
+    box-shadow: 0 0 10px #00f2fe;
+    animation: pulse-glow 2s infinite;
+  }
+
+  .brand-text {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #f0f6fc;
+    letter-spacing: -0.02em;
+  }
+
+  .badge-tag {
+    font-size: 0.6rem;
+    background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+    color: #0d1117;
+    padding: 0.08rem 0.3rem;
+    border-radius: 4px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  height: 100%;
+}
+
+.nav-link {
+  color: #8b949e;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  height: 64px;
+  display: inline-flex;
+  align-items: center;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+  padding: 0 0.1rem;
+
+  &:hover {
+    color: #f0f6fc;
+  }
+
+  &.active {
+    color: #00f2fe;
+    border-bottom-color: #00f2fe;
+  }
+
+  &.nav-admin {
+    &.active {
+      color: #ffc107;
+      border-bottom-color: #ffc107;
+    }
+  }
+}
+
+.nav-user-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  .username {
+    color: #c9d1d9;
+    font-size: 0.8rem;
+    font-weight: 500;
+    background: rgba(48, 54, 61, 0.4);
+    padding: 0.25rem 0.65rem;
+    border-radius: 8px;
+    border: 1px solid rgba(48, 54, 61, 0.5);
+  }
+
+  .btn-logout {
+    background: transparent;
+    border: 1px solid rgba(248, 81, 73, 0.4);
+    color: #f85149;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.3rem 0.75rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba(248, 81, 73, 0.1);
+      border-color: #f85149;
+    }
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.6;
+    box-shadow: 0 0 6px #00f2fe;
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 12px #00f2fe;
+  }
+}

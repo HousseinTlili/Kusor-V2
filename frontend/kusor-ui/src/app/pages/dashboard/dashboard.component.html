@@ -1,0 +1,163 @@
+<div class="dashboard-page">
+  <header class="dashboard-header">
+    <div class="header-text">
+      <h1>Tableau de Bord</h1>
+      <p class="text-secondary">Statistiques globales et gestion de la synchronisation BCT.</p>
+    </div>
+    <div class="header-actions">
+      <button 
+        (click)="triggerManualSync()" 
+        [disabled]="isSyncing()" 
+        class="btn-primary"
+      >
+        @if (isSyncing()) {
+          <svg class="spinner-icon animate-spin" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Sync en cours...
+        } @else {
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+          </svg>
+          Lancer la Synchro
+        }
+      </button>
+    </div>
+  </header>
+
+  @if (syncMessage()) {
+    <div class="alert alert-success animate-fade-in">
+      <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <span>{{ syncMessage() }}</span>
+    </div>
+  }
+
+  @if (syncError()) {
+    <div class="alert alert-danger animate-fade-in">
+      <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+      </svg>
+      <span>{{ syncError() }}</span>
+    </div>
+  }
+
+  @if (isLoading()) {
+    <div class="spinner-container">
+      <app-loading-spinner message="Chargement des données..."></app-loading-spinner>
+    </div>
+  } @else {
+    <div class="stats-grid">
+      <!-- Total Documents -->
+      <div class="stat-card glass-card">
+        <div class="stat-icon docs-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+          </svg>
+        </div>
+        <div class="stat-content">
+          <span class="stat-label">Circulaires Indexées</span>
+          <span class="stat-value">{{ stats()?.document_count || 0 }}</span>
+        </div>
+      </div>
+
+      <!-- Chunks Count -->
+      <div class="stat-card glass-card">
+        <div class="stat-icon chunks-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+          </svg>
+        </div>
+        <div class="stat-content">
+          <span class="stat-label">Fragments Vectoriels</span>
+          <span class="stat-value">{{ stats()?.chunk_count || 0 }}</span>
+        </div>
+      </div>
+
+      <!-- Graph Nodes -->
+      <div class="stat-card glass-card">
+        <div class="stat-icon graph-nodes-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94-3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+          </svg>
+        </div>
+        <div class="stat-content">
+          <span class="stat-label">Entités & Circulaires (Graphe)</span>
+          <span class="stat-value">
+            {{ (stats()?.neo4j_stats?.circular_nodes || 0) + (stats()?.neo4j_stats?.entity_nodes || 0) }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Graph Relationships -->
+      <div class="stat-card glass-card">
+        <div class="stat-icon graph-rel-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+          </svg>
+        </div>
+        <div class="stat-content">
+          <span class="stat-label">Relations Capturées</span>
+          <span class="stat-value">{{ stats()?.neo4j_stats?.relationships || 0 }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="dashboard-details">
+      <!-- Database Health Panel -->
+      <div class="panel glass-card">
+        <h3>Santé du Système</h3>
+        <div class="health-list">
+          <div class="health-item">
+            <span class="indicator green"></span>
+            <div class="health-info">
+              <span class="health-name">PostgreSQL 16</span>
+              <span class="health-status text-secondary">Connecté • OK</span>
+            </div>
+          </div>
+          <div class="health-item">
+            <span class="indicator green"></span>
+            <div class="health-info">
+              <span class="health-name">Neo4j Graph Database</span>
+              <span class="health-status text-secondary">Connecté • APOC Actif</span>
+            </div>
+          </div>
+          <div class="health-item">
+            <span class="indicator green"></span>
+            <div class="health-info">
+              <span class="health-name">ChromaDB Vector Store</span>
+              <span class="health-status text-secondary">Connecté • {{ stats()?.chroma_stats?.count || 0 }} fragment(s)</span>
+            </div>
+          </div>
+          <div class="health-item">
+            <span class="indicator green"></span>
+            <div class="health-info">
+              <span class="health-name">Ollama Engine</span>
+              <span class="health-status text-secondary">Qwen2.5:7b & Nomic Actifs</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sync History Panel -->
+      <div class="panel glass-card">
+        <h3>Dernière Synchronisation</h3>
+        <div class="sync-info-box">
+          <div class="sync-info-row">
+            <span class="text-secondary">Dernier passage automatique :</span>
+            <strong>{{ formatDate(stats()?.last_sync_at) }}</strong>
+          </div>
+          <div class="sync-info-row margin-top">
+            <span class="text-secondary">Fréquence de vérification BCT :</span>
+            <strong>Tous les jours à 06:00 (Tunis)</strong>
+          </div>
+          <p class="sync-description text-muted">
+            Le collecteur récupère automatiquement les dernières publications de circulaires publiées sur le site officiel de la Banque Centrale de Tunisie, les télécharge et lance le pipeline de traitement de manière asynchrone.
+          </p>
+        </div>
+      </div>
+    </div>
+  }
+</div>

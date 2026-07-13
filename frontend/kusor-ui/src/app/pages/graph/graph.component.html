@@ -1,0 +1,240 @@
+<div class="graph-page">
+  <!-- Left Control Sidebar -->
+  <aside class="control-sidebar glass-card">
+    <div class="sidebar-section">
+      <h3>Recherche</h3>
+      <div class="search-box-wrapper">
+        <input 
+          [(ngModel)]="searchQuery" 
+          (keyup.enter)="searchCircular()" 
+          placeholder="Ex: 2024-01" 
+          class="form-control"
+        />
+        <div class="search-actions">
+          <button (click)="searchCircular()" class="btn-primary search-btn" title="Rechercher">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.637 10.637z" />
+            </svg>
+          </button>
+          @if (searchQuery) {
+            <button (click)="clearSearch()" class="action-btn clear-btn" title="Réinitialiser">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Graph Legend -->
+    <div class="sidebar-section">
+      <h3>Légende des Nœuds</h3>
+      <div class="legend-list">
+        <div class="legend-item">
+          <span class="legend-dot circular-dot"></span>
+          <span class="legend-label">Circulaire BCT</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-dot entity-dot"></span>
+          <span class="legend-label">Entité (Organisme, Loi, etc.)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Relationship Filters -->
+    <div class="sidebar-section">
+      <h3>Types de Relation</h3>
+      <div class="filter-list">
+        <label class="filter-item">
+          <input type="checkbox" [checked]="relationshipFilters().MODIFIES" (change)="toggleFilter('MODIFIES')" />
+          <span class="filter-dot modifies-dot"></span>
+          <span class="filter-label">MODIFIES (Modifie)</span>
+        </label>
+        <label class="filter-item">
+          <input type="checkbox" [checked]="relationshipFilters().ABROGATES" (change)="toggleFilter('ABROGATES')" />
+          <span class="filter-dot abrogates-dot"></span>
+          <span class="filter-label">ABROGATES (Abroge)</span>
+        </label>
+        <label class="filter-item">
+          <input type="checkbox" [checked]="relationshipFilters().REFERENCES" (change)="toggleFilter('REFERENCES')" />
+          <span class="filter-dot references-dot"></span>
+          <span class="filter-label">REFERENCES (Référence)</span>
+        </label>
+        <label class="filter-item">
+          <input type="checkbox" [checked]="relationshipFilters().COMPLEMENTS" (change)="toggleFilter('COMPLEMENTS')" />
+          <span class="filter-dot complements-dot"></span>
+          <span class="filter-label">COMPLEMENTS (Complète)</span>
+        </label>
+        <label class="filter-item">
+          <input type="checkbox" [checked]="relationshipFilters().CONCERNS" (change)="toggleFilter('CONCERNS')" />
+          <span class="filter-dot concerns-dot"></span>
+          <span class="filter-label">CONCERNS (Concerne)</span>
+        </label>
+        <label class="filter-item">
+          <input type="checkbox" [checked]="relationshipFilters().MENTIONS" (change)="toggleFilter('MENTIONS')" />
+          <span class="filter-dot mentions-dot"></span>
+          <span class="filter-label">MENTIONS (Mentionne)</span>
+        </label>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Interactive Graph Viewport -->
+  <section class="graph-viewport glass-card">
+    @if (isLoading()) {
+      <div class="loading-overlay">
+        <app-loading-spinner message="Modélisation du graphe..."></app-loading-spinner>
+      </div>
+    } @else {
+      @if (errorMessage()) {
+        <div class="alert alert-danger animate-fade-in">
+          <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <span>{{ errorMessage() }}</span>
+        </div>
+      } @else {
+        @if (nodes().length === 0) {
+          <div class="empty-graph text-muted">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="empty-icon">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94-3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+            </svg>
+            Aucun élément à afficher. Veuillez relancer l'indexation de circulaires.
+          </div>
+        } @else {
+          <div class="graph-canvas">
+            <ngx-graph
+              [nodes]="nodes()"
+              [links]="links()"
+              [layout]="'forceDirected'"
+              [enableZoom]="true"
+              [autoZoom]="true"
+              [autoCenter]="true"
+            >
+              <!-- Custom Node Template -->
+              <ng-template #nodeTemplate let-node>
+                <svg:g class="node" (click)="onNodeSelect(node)">
+                  <svg:circle
+                    [attr.r]="node.data.type === 'Circular' ? 24 : 18"
+                    [attr.fill]="getNodeColor(node.data.type)"
+                    stroke="#ffffff"
+                    stroke-width="2"
+                    class="node-circle"
+                  />
+                  <svg:text
+                    alignment-baseline="middle"
+                    text-anchor="middle"
+                    fill="#ffffff"
+                    font-size="10"
+                    font-weight="bold"
+                    y="35"
+                    class="node-text"
+                  >
+                    {{ node.label }}
+                  </svg:text>
+                </svg:g>
+              </ng-template>
+
+              <!-- Custom Link Template -->
+              <ng-template #linkTemplate let-link>
+                <svg:g class="edge">
+                  <svg:path
+                    class="line"
+                    stroke-width="2"
+                    [attr.stroke]="getEdgeColor(link.label)"
+                    marker-end="url(#arrow)"
+                  />
+                  <svg:text class="edge-label" text-anchor="middle" font-size="8" fill="#94a3b8">
+                    <svg:textPath
+                      [attr.href]="'#' + link.id"
+                      startOffset="50%"
+                    >
+                      {{ link.label }}
+                    </svg:textPath>
+                  </svg:text>
+                </svg:g>
+              </ng-template>
+            </ngx-graph>
+          </div>
+        }
+      }
+    }
+  </section>
+
+  <!-- Right Inspect Drawer -->
+  <aside class="details-drawer glass-card" [class.open]="selectedNode() !== null">
+    @if (selectedNode(); as node) {
+      <header class="drawer-header">
+        <h3>Détails du Nœud</h3>
+        <button (click)="closeDetails()" class="action-btn close-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </header>
+
+      <div class="drawer-content">
+        <div class="drawer-title-section">
+          <span 
+            class="badge" 
+            [ngClass]="node.type === 'Circular' ? 'badge-primary' : 'badge-gold'"
+          >
+            {{ node.type === 'Circular' ? 'Circulaire' : 'Entité' }}
+          </span>
+          <h2>{{ node.label }}</h2>
+        </div>
+
+        <div class="properties-list">
+          @if (node.type === 'Circular') {
+            <div class="property-item">
+              <span class="prop-label">Titre</span>
+              <span class="prop-value">{{ node.properties['title'] || 'Sans titre' }}</span>
+            </div>
+            <div class="property-item">
+              <span class="prop-label">Date de Publication</span>
+              <span class="prop-value">{{ node.properties['date'] || 'Inconnue' }}</span>
+            </div>
+            <div class="property-item">
+              <span class="prop-label">Catégorie</span>
+              <span class="prop-value">{{ node.properties['category'] || 'Non classée' }}</span>
+            </div>
+            <div class="property-item">
+              <span class="prop-label">Statut réglementaire</span>
+              <span 
+                class="prop-value status-badge"
+                [ngClass]="{
+                  'status-active': node.properties['status'] === 'ACTIVE',
+                  'status-abrogated': node.properties['status'] === 'ABROGATED',
+                  'status-modified': node.properties['status'] === 'MODIFIED'
+                }"
+              >
+                {{ node.properties['status'] || 'ACTIVE' }}
+              </span>
+            </div>
+            @if (node.properties['url']) {
+              <div class="property-item">
+                <span class="prop-label">Lien Officiel BCT</span>
+                <a [href]="node.properties['url']" target="_blank" class="official-link">
+                  Voir le PDF original
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="link-icon">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                  </svg>
+                </a>
+              </div>
+            }
+          } @else {
+            <div class="property-item">
+              <span class="prop-label">Type d'Entité</span>
+              <span class="prop-value">{{ node.properties['type'] || node.type }}</span>
+            </div>
+            <div class="property-item">
+              <span class="prop-label">Description</span>
+              <span class="prop-value">Cette entité est mentionnée dans les circulaires connectées du graphe.</span>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </aside>
+</div>
