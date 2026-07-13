@@ -50,3 +50,13 @@ Thumbs.db
 
 # Project-specific caches or local DBs
 backend/data/bm25_index.pkl
+backend/data/circulars/
+
+# AI assistant / internal planning docs
+CLAUDE.md
+PROJECT_PLAN.md
+PROJECT_STATE.md
+
+# Install scripts (not project code)
+get-docker.sh
+install_ollama.sh
