@@ -5,7 +5,7 @@ import { environment } from '../../../environments/environment';
 import { Document, PaginatedResponse, UploadResponse, DocumentStatus } from '../models/document.model';
 import { ChatMessage, ChatSession, ChatResponse } from '../models/chat.model';
 import { AdminStats, SyncResult } from '../models/admin.model';
-import { GraphData } from '../models/graph.model';
+import { GraphData, ClusterData, ClusterSubgraphResponse } from '../models/graph.model';
 
 @Injectable({
   providedIn: 'root'
@@ -50,6 +50,15 @@ export class ApiService {
     return this.http.post<{ id: string; number: string; message: string }>(`${environment.apiUrl}/documents/${id}/reindex`, {});
   }
 
+  updateDocument(id: string, file: File): Observable<{ id: string; number: string; message: string; chunks_count: number }> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.put<{ id: string; number: string; message: string; chunks_count: number }>(
+      `${environment.apiUrl}/documents/${id}/update`, formData
+    );
+  }
+
+
   // --- Search ---
   searchHybrid(query: string, top_k: number = 5): Observable<any[]> {
     return this.http.post<any[]>(`${environment.apiUrl}/search/hybrid`, { query, top_k });
@@ -62,6 +71,11 @@ export class ApiService {
   searchGraph(query: string, top_k: number = 5): Observable<any[]> {
     return this.http.post<any[]>(`${environment.apiUrl}/search/graph`, { query, top_k });
   }
+
+  searchClassic(query: string, top_k: number = 5): Observable<any[]> {
+    return this.http.post<any[]>(`${environment.apiUrl}/search/classic`, { query, top_k });
+  }
+
 
   // --- Chat ---
   sendMessage(message: string, sessionId?: string): Observable<ChatResponse> {
@@ -96,5 +110,14 @@ export class ApiService {
       params = params.set('circular', circularNumber);
     }
     return this.http.get<GraphData>(`${environment.apiUrl}/graph/subgraph`, { params });
+  }
+
+  getGraphOverview(): Observable<ClusterData> {
+    return this.http.get<ClusterData>(`${environment.apiUrl}/graph/overview`);
+  }
+
+  getClusterSubgraph(year: string): Observable<ClusterSubgraphResponse> {
+    const params = new HttpParams().set('year', year);
+    return this.http.get<ClusterSubgraphResponse>(`${environment.apiUrl}/graph/cluster`, { params });
   }
 }

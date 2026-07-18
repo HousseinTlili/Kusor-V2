@@ -133,3 +133,63 @@ WHERE toLower(c.title) CONTAINS toLower($query)
 RETURN c
 LIMIT $limit
 """
+
+# --- Hierarchical Graph queries ---
+GET_OVERVIEW_CLUSTERS: str = """
+MATCH (c:Circular)
+WITH c,
+     CASE 
+       WHEN c.date IS NOT NULL AND size(c.date) >= 4 THEN substring(c.date, 0, 4)
+       WHEN c.number =~ '.*(19\\\\d{2}|20\\\\d{2}).*' THEN apoc.text.regexGroups(c.number, '(19\\\\d{2}|20\\\\d{2})')[0][0]
+       WHEN c.number =~ '.*\\\\b(\\\\d{2})-\\\\d+.*' THEN 
+         CASE 
+           WHEN toInteger(apoc.text.regexGroups(c.number, '\\\\b(\\\\d{2})-\\\\d+')[0][1]) > 50 THEN "19" + apoc.text.regexGroups(c.number, '\\\\b(\\\\d{2})-\\\\d+')[0][1]
+           ELSE "20" + apoc.text.regexGroups(c.number, '\\\\b(\\\\d{2})-\\\\d+')[0][1]
+         END
+       ELSE 'Autre'
+     END AS year
+OPTIONAL MATCH (c)-[:MENTIONS]->(e:Entity)
+WITH year, count(DISTINCT c) AS circularCount, count(DISTINCT e) AS entityCount
+RETURN year AS id, year AS label, circularCount, entityCount
+ORDER BY year DESC
+"""
+
+GET_OVERVIEW_EDGES: str = """
+MATCH (c1:Circular)-[r]->(c2:Circular)
+WITH c1, c2, r,
+     CASE 
+       WHEN c1.date IS NOT NULL AND size(c1.date) >= 4 THEN substring(c1.date, 0, 4)
+       WHEN c1.number =~ '.*(19\\\\d{2}|20\\\\d{2}).*' THEN apoc.text.regexGroups(c1.number, '(19\\\\d{2}|20\\\\d{2})')[0][0]
+       WHEN c1.number =~ '.*\\\\b(\\\\d{2})-\\\\d+.*' THEN 
+         CASE 
+           WHEN toInteger(apoc.text.regexGroups(c1.number, '\\\\b(\\\\d{2})-\\\\d+')[0][1]) > 50 THEN "19" + apoc.text.regexGroups(c1.number, '\\\\b(\\\\d{2})-\\\\d+')[0][1]
+           ELSE "20" + apoc.text.regexGroups(c1.number, '\\\\b(\\\\d{2})-\\\\d+')[0][1]
+         END
+       ELSE 'Autre'
+     END AS y1,
+     CASE 
+       WHEN c2.date IS NOT NULL AND size(c2.date) >= 4 THEN substring(c2.date, 0, 4)
+       WHEN c2.number =~ '.*(19\\\\d{2}|20\\\\d{2}).*' THEN apoc.text.regexGroups(c2.number, '(19\\\\d{2}|20\\\\d{2})')[0][0]
+       WHEN c2.number =~ '.*\\\\b(\\\\d{2})-\\\\d+.*' THEN 
+         CASE 
+           WHEN toInteger(apoc.text.regexGroups(c2.number, '\\\\b(\\\\d{2})-\\\\d+')[0][1]) > 50 THEN "19" + apoc.text.regexGroups(c2.number, '\\\\b(\\\\d{2})-\\\\d+')[0][1]
+           ELSE "20" + apoc.text.regexGroups(c2.number, '\\\\b(\\\\d{2})-\\\\d+')[0][1]
+         END
+       ELSE 'Autre'
+     END AS y2
+WHERE y1 <> y2
+RETURN y1 AS source, y2 AS target, type(r) AS type, count(*) AS count
+"""
+
+GET_CLUSTER_SUBGRAPH: str = """
+MATCH (c:Circular)
+WHERE (c.date IS NOT NULL AND size(c.date) >= 4 AND substring(c.date, 0, 4) = $year)
+   OR (c.date IS NULL AND c.number =~ '.*(19\\\\d{2}|20\\\\d{2}).*' AND apoc.text.regexGroups(c.number, '(19\\\\d{2}|20\\\\d{2})')[0][0] = $year)
+   OR (c.date IS NULL AND NOT c.number =~ '.*(19\\\\d{2}|20\\\\d{2}).*' AND c.number =~ '.*\\\\b(\\\\d{2})-\\\\d+.*' AND 
+       ((toInteger(apoc.text.regexGroups(c.number, '\\\\b(\\\\d{2})-\\\\d+')[0][1]) > 50 AND "19" + apoc.text.regexGroups(c.number, '\\\\b(\\\\d{2})-\\\\d+')[0][1] = $year) OR
+        (toInteger(apoc.text.regexGroups(c.number, '\\\\b(\\\\d{2})-\\\\d+')[0][1]) <= 50 AND "20" + apoc.text.regexGroups(c.number, '\\\\b(\\\\d{2})-\\\\d+')[0][1] = $year)))
+   OR ($year = 'Autre' AND c.date IS NULL AND NOT c.number =~ '.*(19\\\\d{2}|20\\\\d{2}).*' AND NOT c.number =~ '.*\\\\b(\\\\d{2})-\\\\d+.*')
+WITH c
+OPTIONAL MATCH (c)-[r]-(related)
+RETURN c, r, related
+"""

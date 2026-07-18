@@ -1,5 +1,6 @@
 import os
 from dotenv import load_dotenv
+import datetime
 
 load_dotenv()
 
@@ -7,6 +8,7 @@ class Config:
     """Base configuration."""
     SECRET_KEY: str = os.getenv("SECRET_KEY", "dev-secret-key")
     JWT_SECRET_KEY: str = os.getenv("JWT_SECRET_KEY", "dev-jwt-secret")
+    JWT_ACCESS_TOKEN_EXPIRES = datetime.timedelta(days=7)  # Prevent early session expiration during use
     SQLALCHEMY_DATABASE_URI: str = os.getenv("DATABASE_URL", "postgresql://kusor_user:kusor_password@localhost:5432/kusor_db")
     SQLALCHEMY_TRACK_MODIFICATIONS: bool = False
     

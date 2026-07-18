@@ -96,3 +96,28 @@ class GraphSearch(Resource):
             return [_chunk_to_dict(c) for c in chunks]
         except Exception as e:
             abort(500, f"Graph search failed: {str(e)}")
+
+@api.route("/classic")
+class ClassicSearch(Resource):
+    @api.doc("classic_search", security="Bearer")
+    @jwt_required()
+    @api.expect(search_request, validate=True)
+    @api.marshal_list_with(chunk_response)
+    def post(self):
+        """POST /api/search/classic — BM25 keyword search only"""
+        data = request.json
+        query = data.get("query")
+        top_k = data.get("top_k", 5)
+        
+        try:
+            chunks = current_app.hybrid_retriever.bm25_searcher.search(
+                query=query,
+                top_k=top_k
+            )
+            
+            # Map retrieved chunks to dict format
+            from backend.agent.tools import _chunk_to_dict
+            return [_chunk_to_dict(c) for c in chunks]
+        except Exception as e:
+            abort(500, f"Classic search failed: {str(e)}")
+

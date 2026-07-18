@@ -80,10 +80,14 @@ export class DocumentsComponent implements OnInit, OnDestroy {
   // File selection handlers
   onFileSelected(event: any): void {
     const file = event.target.files[0];
-    if (file && file.type === 'application/pdf') {
-      this.setFile(file);
-    } else {
-      this.errorMessage.set('Veuillez sélectionner un fichier PDF valide.');
+    if (file) {
+      const filename = file.name.toLowerCase();
+      const isAllowed = filename.endsWith('.pdf') || filename.endsWith('.docx') || filename.endsWith('.txt');
+      if (isAllowed) {
+        this.setFile(file);
+      } else {
+        this.errorMessage.set('Veuillez sélectionner un fichier PDF, DOCX ou TXT valide.');
+      }
     }
   }
 
@@ -104,13 +108,16 @@ export class DocumentsComponent implements OnInit, OnDestroy {
     const files = event.dataTransfer?.files;
     if (files && files.length > 0) {
       const file = files[0];
-      if (file.type === 'application/pdf') {
+      const filename = file.name.toLowerCase();
+      const isAllowed = filename.endsWith('.pdf') || filename.endsWith('.docx') || filename.endsWith('.txt');
+      if (isAllowed) {
         this.setFile(file);
       } else {
-        this.errorMessage.set('Veuillez déposer un fichier PDF uniquement.');
+        this.errorMessage.set('Veuillez déposer un fichier PDF, DOCX ou TXT uniquement.');
       }
     }
   }
+
 
   private setFile(file: File): void {
     this.selectedFile = file;
@@ -188,6 +195,39 @@ export class DocumentsComponent implements OnInit, OnDestroy {
       }
     });
   }
+
+  triggerUpdate(id: string): void {
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = '.pdf,.docx,.txt';
+    fileInput.onchange = (event: any) => {
+      const file = event.target.files?.[0];
+      if (file) {
+        this.updateDocument(id, file);
+      }
+    };
+    fileInput.click();
+  }
+
+  updateDocument(id: string, file: File): void {
+    this.isUploading.set(true);
+    this.successMessage.set(null);
+    this.errorMessage.set(null);
+
+    this.apiService.updateDocument(id, file).subscribe({
+      next: (res) => {
+        this.isUploading.set(false);
+        this.successMessage.set(`La circulaire a été mise à jour avec succès. Nouvelle indexation en cours...`);
+        this.loadDocuments();
+      },
+      error: (err) => {
+        console.error('Error updating document', err);
+        this.isUploading.set(false);
+        this.errorMessage.set(err.error?.message || 'Erreur lors de la mise à jour de la circulaire.');
+      }
+    });
+  }
+
 
   private startStatusPolling(): void {
     // Poll index state of active documents every 5 seconds

@@ -76,6 +76,16 @@
                         </svg>
                       </button>
                       <button 
+                        (click)="triggerUpdate(doc.id)" 
+                        title="Mettre à jour"
+                        [disabled]="doc.indexation_state === 'PROCESSING' || doc.indexation_state === 'PENDING'"
+                        class="action-btn update-btn"
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
+                        </svg>
+                      </button>
+                      <button 
                         (click)="deleteDocument(doc.id)" 
                         title="Supprimer" 
                         class="action-btn delete-btn"
@@ -85,6 +95,7 @@
                         </svg>
                       </button>
                     </td>
+
                   </tr>
                 }
               </tbody>
@@ -132,7 +143,7 @@
           <input 
             #fileInput 
             type="file" 
-            accept="application/pdf" 
+            accept=".pdf,.docx,.txt" 
             (change)="onFileSelected($event)" 
             style="display: none;"
           />
@@ -147,8 +158,8 @@
               <span class="file-size text-secondary">{{ (selectedFile.size / 1024 / 1024) | number:'1.1-2' }} Mo</span>
             </div>
           } @else {
-            <p>Glissez-déposez un fichier PDF ici, ou <span>parcourez</span></p>
-            <span class="file-limit text-muted">Fichiers PDF uniquement (Max 50Mo)</span>
+            <p>Glissez-déposez un fichier PDF, DOCX ou TXT ici, ou <span>parcourez</span></p>
+            <span class="file-limit text-muted">Fichiers PDF, DOCX ou TXT (Max 50Mo)</span>
           }
         </div>
 

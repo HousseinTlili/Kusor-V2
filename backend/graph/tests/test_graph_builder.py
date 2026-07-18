@@ -10,11 +10,15 @@ def neo4j_manager():
         user="neo4j",
         password="kusor_password"
     )
-    # Clean database before test
-    nm.execute_write("MATCH (n) DETACH DELETE n")
+    # Clean test nodes from database before/after test
+    cleanup_query_circ = "MATCH (c:Circular) WHERE c.number IN ['2024-01', '2024-02', '2024-03', '2024-04', '2024-10', '2022-01', '2020-01', '2018-02', '2019-15', '2020-04', '2022-10', '2021-02'] DETACH DELETE c"
+    cleanup_query_ent = "MATCH (e:Entity) WHERE e.name IN ['BCT', 'Ministère des Finances'] DETACH DELETE e"
+    
+    nm.execute_write(cleanup_query_circ)
+    nm.execute_write(cleanup_query_ent)
     yield nm
-    # Clean database after test
-    nm.execute_write("MATCH (n) DETACH DELETE n")
+    nm.execute_write(cleanup_query_circ)
+    nm.execute_write(cleanup_query_ent)
     nm.close()
 
 @pytest.fixture

@@ -1,0 +1,107 @@
+KUSOR — Comprehensive Project Architecture & Achievements Summary
+
+KUSOR (AI-Powered Regulatory Intelligence Assistant) is a state-of-the-art enterprise compliance system designed for the Banque Centrale de Tunisie (BCT). It allows compliance staff to query regulatory circulars using natural language, explore connections between regulatory documents, and audit compliance modifications.
+
+This document details the system architecture, component modules, storage engines, AI pipelines, and achievements made so far.
+
+================================================================================
+1. High-Level Architecture & Tech Stack
+================================================================================
+
+KUSOR is built on a modular, decoupled architecture consisting of an Angular SPA frontend, a Flask REST API, three specialized storage engines, and a local AI execution layer:
+
+- Frontend: Angular 21 (Standalone components, reactive Signals, SCSS, @swimlane/ngx-graph for visualization).
+- Backend API: Flask + Flask-RESTX (OpenAPI/Swagger docs exposed at /api/docs).
+- Metadata Database: PostgreSQL 16 (managed via SQLAlchemy ORM and Alembic migrations).
+- Vector Database: ChromaDB 1.5 (Port 8001, kusor_documents collection).
+- Graph Database: Neo4j 5.18 (Port 7474/7687, APOC procedures enabled).
+- AI Agent Framework: LangGraph (for conversational state machine orchestration).
+- Local AI Execution: Ollama (serving LLM qwen2.5:7b and embedding model nomic-embed-text locally).
+- Reranking Engine: PyTorch-based SentenceTransformers loading cross-encoder/ms-marco-MiniLM-L-6-v2.
+
+================================================================================
+2. Module-by-Module Implementation Details
+================================================================================
+
+Module 1: BCT Circular Collector / Scraper
+------------------------------------------
+- Scraper (bct_scraper.py): Gathers circular numbers, dates, titles, categories, and PDF document URLs from the official BCT portal. Supports incremental updates, duplicate detection, and automated downloading of PDF payloads.
+- Scheduler (scheduler.py): Runs in the background via APScheduler to periodically crawl the BCT site and trigger processing for new regulations.
+
+Module 2: Flask REST API / Routes
+---------------------------------
+- routes/auth.py: Handles user login, password verification (using bcrypt), JWT token generation, and secure logout.
+- routes/documents.py: Manages circular metadata in PostgreSQL, handles raw PDF uploads, and exposes manual re-indexing triggers.
+- routes/search.py: Exposes the hybrid search pipeline to perform semantic and keyword lookups.
+- routes/chat.py: Implements conversational message history, session loading/saving, and streams responses from the LangGraph agent.
+- routes/graph.py: Exposes GraphRAG visualization endpoints including /subgraph, /overview, and /cluster.
+
+Module 3: Document Processing Pipeline
+--------------------------------------
+- Text Extraction: Uses PyMuPDF for fast structural extraction. Triggers Tesseract OCR (using French language pack tesseract-ocr-fra) on image-only scanned pages.
+- Segmentation: Pre-segments circulars into hierarchical units (Titre, Chapitre, Section, Article) based on regular expression header patterns.
+- ChromaDB Ingestion: Embeds chunks using nomic-embed-text and writes them into ChromaDB alongside document IDs, chunk indices, page numbers, and original filenames.
+- Entity Extraction: Uses spaCy's pre-trained French model (fr_core_news_lg) to identify legal entities, organizations (ORG), and laws (LAW) within the text.
+
+Module 4: GraphRAG Knowledge Graph
+----------------------------------
+- Neo4j Manager (neo4j_manager.py): Connects to the database and enforces unique constraints (e.g. Circular.number and Entity(name, type) combinations).
+- Relationship Extractor: Extracts logical links between circulars:
+  * Regex Extraction (confidence 1.0): Matches French patterns like "abroge la circulaire..." or "modifie l'article X de...".
+  * LLM Extraction (confidence 0.8): Uses Instructor + Pydantic schemas with Qwen-7B to identify implicit references.
+- Relationship Types: ABROGATES (sets target status to "ABROGATED"), MODIFIES (with article number metadata), REFERENCES, COMPLEMENTS, CONCERNS, and MENTIONS.
+
+Module 5: Hybrid RAG Search Engine
+----------------------------------
+- Retrievers: Combines three search steps:
+  * Vector Search: Dense embeddings lookup via ChromaDB.
+  * BM25 Search: Exact keyword search on segment texts.
+  * Graph Search: Finds entities associated with the query in Neo4j, retrieves related circulars, and loads their corresponding text chunks from ChromaDB.
+- Reciprocal Rank Fusion (RRF): Combines individual scores from vector, keyword, and graph retrievers using rank-based reciprocal formulas.
+- Cross-Encoder Reranking: Uses ms-marco-MiniLM-L-6-v2 to evaluate query-chunk relevance, returning only the top-K chunks to the LLM context.
+
+Module 6: LangGraph AI Agent
+----------------------------
+- Question Routing: An LLM-based router classifies incoming queries (Factual, Relational, Temporal, Comparative) and selects the optimal tools.
+- Structured Outputs: Uses Instructor to validate responses against AgentResponse schemas, ensuring answers include:
+  * response_text (markdown format).
+  * citations (pointing to specific circular pages and filenames).
+  * follow_up_questions (context-aware recommendations).
+
+Module 7: Angular Frontend Component Pages
+------------------------------------------
+- Authentication: JWT token storage, automatic authorization header injection, and route guards.
+- Dashboard: Displays total ingested document counts, chunk counts, sync history, and active sessions.
+- Chat Assistant: Premium chat panel rendering markdown answers with collapsible citation links.
+- Interactive Graph: Implements the hierarchical navigation schema.
+
+================================================================================
+3. Key Issues & Bugs Resolved
+================================================================================
+
+1. ChromaDB Data Loss on Container Restarts (Fixed)
+---------------------------------------------------
+- Problem: ChromaDB lost all its data whenever the Docker container was restarted.
+- Root Cause: The volume mapping in docker-compose.yml was maps to /chroma/chroma instead of /data (where the official ChromaDB image stores persistence databases).
+- Fix: Remapped the Docker volume to /data and ran a full DB rebuild, ensuring vector embeddings persist indefinitely.
+
+2. Angular ngx-graph Rendering Crash (Fixed)
+--------------------------------------------
+- Problem: The knowledge graph page crashed with the error "Unknown layout type 'forceDirected'".
+- Root Cause: @swimlane/ngx-graph does not have a layout under that name.
+- Fix: Replaced 'forceDirected' in the template with the valid 'colaForceDirected' layout which utilizes the WebCola physics engine.
+
+3. Graph Viewport Rendering Crushes (Fixed)
+-------------------------------------------
+- Problem: With 3,836 nodes and 6,055 relationships, the browser crashed or froze trying to render the entire knowledge graph.
+- Root Cause: ngx-graph is SVG-based and cannot render thousands of interactive DOM elements smoothly.
+- Fix: Implemented a two-level hierarchical graph navigation:
+  * Level 1 (Overview): Displays year-based cluster super-nodes (e.g. 2024, 2020) and edges representing inter-year relationships with counts.
+  * Level 2 (Detail): Clicking a year cluster drills down to show only the circulars, entities, and cross-year relationships connected to that specific year.
+  * Added navigation breadcrumbs (Vue d'ensemble / Année 2024) and back button navigation.
+
+4. Neo4j Relationship Boolean Loop Failure (Fixed)
+--------------------------------------------------
+- Problem: MENTIONS and REFERENCES edges were missing from the drill-down cluster view.
+- Root Cause: In Python's Neo4j driver, empty Relationship objects (with 0 properties) return len(rel) == 0, evaluating to False in implicit boolean checks (if r:).
+- Fix: Replaced all implicit checks in the parser loops with explicit is not None checks.

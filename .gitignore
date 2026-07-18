@@ -51,6 +51,10 @@ Thumbs.db
 # Project-specific caches or local DBs
 backend/data/bm25_index.pkl
 backend/data/circulars/
+backend/backend/data/
+**/data/bm25_index.pkl
+**/data/circulars/
+
 
 # AI assistant / internal planning docs
 CLAUDE.md

@@ -147,13 +147,15 @@ class DocumentUpload(Resource):
     @admin_required
     @audit_action("DOCUMENT_UPLOADED", "Document")
     def post(self):
-        """POST /api/documents/upload — upload a PDF, trigger processing pipeline"""
+        """POST /api/documents/upload — upload a PDF, DOCX, or TXT document, trigger processing pipeline"""
         if "file" not in request.files:
-            abort(400, "Missing PDF file in request")
+            abort(400, "Missing file in request")
             
         file = request.files["file"]
-        if not file.filename.endswith(".pdf"):
-            abort(400, "Uploaded file is not a PDF")
+        filename = file.filename
+        ext = os.path.splitext(filename)[1].lower()
+        if ext not in {".pdf", ".docx", ".txt"}:
+            abort(400, "Uploaded file must be a PDF, DOCX, or TXT file")
             
         # Parse inputs
         number = request.form.get("number")
@@ -190,8 +192,8 @@ class DocumentUpload(Resource):
             
         # Save file to directory
         os.makedirs(current_app.bct_scraper.PDF_DOWNLOAD_DIR, exist_ok=True)
-        pdf_path = os.path.join(current_app.bct_scraper.PDF_DOWNLOAD_DIR, f"{number}.pdf")
-        file.save(pdf_path)
+        file_path = os.path.join(current_app.bct_scraper.PDF_DOWNLOAD_DIR, f"{number}{ext}")
+        file.save(file_path)
         
         # Build Metadata
         circ_meta = CircularMetadata(
@@ -204,7 +206,8 @@ class DocumentUpload(Resource):
         )
         
         # Run Ingestion
-        result = current_app.bct_scraper.ingest_circular(circ_meta, pdf_path)
+        result = current_app.bct_scraper.ingest_circular(circ_meta, file_path)
+
         
         if not result.get("success"):
             # Update database record to FAILED
@@ -249,13 +252,14 @@ class DocumentDetail(Resource):
             
         number = doc.number
         
-        # Remove local file if exists
-        pdf_path = os.path.join(current_app.bct_scraper.PDF_DOWNLOAD_DIR, f"{number}.pdf")
-        if os.path.exists(pdf_path):
-            try:
-                os.remove(pdf_path)
-            except Exception:
-                pass
+        # Remove local file if exists (PDF, DOCX, TXT)
+        for ext in [".pdf", ".docx", ".txt"]:
+            file_path = os.path.join(current_app.bct_scraper.PDF_DOWNLOAD_DIR, f"{number}{ext}")
+            if os.path.exists(file_path):
+                try:
+                    os.remove(file_path)
+                except Exception:
+                    pass
                 
         delete_document_from_all_stores(id, number)
         
@@ -278,15 +282,16 @@ class DocumentReindex(Resource):
             abort(404, "Document not found")
             
         number = doc.number
-        pdf_path = os.path.join(current_app.bct_scraper.PDF_DOWNLOAD_DIR, f"{number}.pdf")
-        
-        if not os.path.exists(pdf_path):
-            # If the PDF does not exist locally, we cannot re-index it
-            abort(400, f"Local PDF source file not found for circular {number}. Re-index not possible.")
+        file_path = None
+        for ext in [".pdf", ".docx", ".txt"]:
+            candidate_path = os.path.join(current_app.bct_scraper.PDF_DOWNLOAD_DIR, f"{number}{ext}")
+            if os.path.exists(candidate_path):
+                file_path = candidate_path
+                break
+                
+        if not file_path:
+            abort(400, f"Local source file not found for circular {number}. Re-index not possible.")
             
-        # Re-run ingestion. Scraper's ingest_circular will automatically call processor
-        # and builder which clean up old elements and overwrite.
-        
         # Build Metadata
         circ_meta = CircularMetadata(
             number=doc.number,
@@ -300,7 +305,7 @@ class DocumentReindex(Resource):
         # Clean up database records first to avoid conflict on re-insert
         delete_document_from_all_stores(id, number)
         
-        result = current_app.bct_scraper.ingest_circular(circ_meta, pdf_path)
+        result = current_app.bct_scraper.ingest_circular(circ_meta, file_path)
         
         if not result.get("success"):
             abort(500, f"Re-indexing failed: {result.get('error')}")
@@ -310,4 +315,65 @@ class DocumentReindex(Resource):
             "number": number,
             "indexation_state": "INDEXED",
             "message": "Document successfully re-indexed"
+        }
+
+@api.route("/<string:id>/update")
+class DocumentUpdate(Resource):
+    @api.doc("update_document", security="Bearer")
+    @jwt_required()
+    @admin_required
+    @audit_action("DOCUMENT_UPDATED", "Document")
+    def put(self, id: str):
+        """PUT /api/documents/:id/update — Replace file for existing document"""
+        doc = Document.query.get(id)
+        if not doc:
+            abort(404, "Document not found")
+            
+        if "file" not in request.files:
+            abort(400, "Missing file in request")
+            
+        file = request.files["file"]
+        filename = file.filename
+        ext = os.path.splitext(filename)[1].lower()
+        if ext not in {".pdf", ".docx", ".txt"}:
+            abort(400, "Uploaded file must be a PDF, DOCX, or TXT file")
+            
+        number = doc.number
+        
+        # Remove old local file(s) if exists
+        for old_ext in [".pdf", ".docx", ".txt"]:
+            old_path = os.path.join(current_app.bct_scraper.PDF_DOWNLOAD_DIR, f"{number}{old_ext}")
+            if os.path.exists(old_path):
+                try:
+                    os.remove(old_path)
+                except Exception:
+                    pass
+                    
+        # Save new file
+        new_path = os.path.join(current_app.bct_scraper.PDF_DOWNLOAD_DIR, f"{number}{ext}")
+        file.save(new_path)
+        
+        # Purge old data from all stores (Chroma, BM25, Neo4j, DB chunks)
+        delete_document_from_all_stores(id, number)
+        
+        # Re-run ingestion
+        circ_meta = CircularMetadata(
+            number=number,
+            title=doc.title,
+            date=doc.date,
+            category=doc.category or "Réglementation",
+            pdf_url="",
+            source_page_url="manual_update"
+        )
+        
+        result = current_app.bct_scraper.ingest_circular(circ_meta, new_path)
+        
+        if not result.get("success"):
+            abort(500, f"Updating document failed: {result.get('error')}")
+            
+        return {
+            "id": id,
+            "number": number,
+            "message": "Document successfully updated and indexed",
+            "chunks_count": result.get("chunks_count", 0)
         }

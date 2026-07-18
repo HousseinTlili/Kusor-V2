@@ -244,7 +244,8 @@ class KusorAgent:
         try:
             resp = AgentResponse.model_validate_json(state.llm_response)
             resp.graph_path_used = state.graph_path_used
-            resp.confidence_score = max(0.0, min(1.0, float(resp.confidence_score)))
+            # Calculate and set dynamic, retrieval-signal based confidence score
+            resp.confidence_score = self._compute_confidence(state)
             return state.model_copy(update={"final_response": resp})
         except Exception as e:
             resp = AgentResponse(
@@ -256,6 +257,60 @@ class KusorAgent:
                 question_type=state.question_type or QuestionType.FACTUAL
             )
             return state.model_copy(update={"final_response": resp, "error": f"Failed to format output: {str(e)}"})
+
+    def _compute_confidence(self, state: AgentState) -> float:
+        """
+        Compute a confidence score from retrieval signals (not LLM self-assessment).
+        
+        Signals:
+        - Top reranker score (weight 0.35)
+        - Source coverage: unique circulars (weight 0.25)
+        - Retrieval method diversity (weight 0.20)
+        - Chunk count sufficiency (weight 0.10)
+        - Graph path used (weight 0.10)
+        """
+        chunks = state.reranked_chunks if state.reranked_chunks else state.retrieved_chunks
+        
+        if not chunks:
+            return 0.0
+            
+        # 1. Top reranker score (already sigmoid-normalized to 0-1)
+        top_score = float(chunks[0].get("score", 0.0)) if chunks else 0.0
+        top_score = max(0.0, min(1.0, top_score))
+        
+        # 2. Source coverage: unique circular numbers
+        unique_sources = set()
+        for c in chunks:
+            cn = c.get("circular_number")
+            if cn:
+                unique_sources.add(cn)
+        source_coverage = min(len(unique_sources) / 3.0, 1.0)
+        
+        # 3. Retrieval method diversity
+        methods = set()
+        for c in chunks:
+            rm = c.get("retrieval_method", "")
+            for m in rm.split("+"):
+                if m.strip():
+                    methods.add(m.strip())
+        diversity = min(len(methods) / 3.0, 1.0)  # max 3 methods: vector, bm25, graph
+        
+        # 4. Chunk count sufficiency
+        chunk_sufficiency = min(len(chunks) / 3.0, 1.0)
+        
+        # 5. Graph path used
+        graph_bonus = 1.0 if state.graph_path_used else 0.0
+        
+        confidence = (
+            0.35 * top_score +
+            0.25 * source_coverage +
+            0.20 * diversity +
+            0.10 * chunk_sufficiency +
+            0.10 * graph_bonus
+        )
+        
+        return round(max(0.0, min(1.0, confidence)), 3)
+
 
 
     def invoke(self, question: str) -> AgentResponse:

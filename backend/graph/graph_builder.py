@@ -25,7 +25,10 @@ from backend.graph.cypher_queries import (
     SEARCH_BY_CIRCULAR_NUMBERS,
     TWO_HOP_TRAVERSAL,
     GET_ALL_CIRCULARS,
-    GET_GRAPH_STATS
+    GET_GRAPH_STATS,
+    GET_OVERVIEW_CLUSTERS,
+    GET_OVERVIEW_EDGES,
+    GET_CLUSTER_SUBGRAPH
 )
 
 @dataclass
@@ -201,6 +204,15 @@ class GraphBuilder:
         Extract implicit relationships using LLM via Instructor + Pydantic.
         Uses Qwen2.5-7B through Ollama.
         """
+        # Filter paragraphs containing candidate circular numbers to prevent CPU overload and timeouts
+        paragraphs = [p.strip() for p in document_text.split("\n") if p.strip()]
+        candidate_paragraphs = [p for p in paragraphs if re.search(r"\b\d{4}-\d{2,3}\b", p)]
+        
+        if not candidate_paragraphs:
+            return []
+            
+        context_text = "\n".join(candidate_paragraphs)
+        
         # Initialize instructor client using OpenAI compatibility layer
         client = instructor.from_openai(
             OpenAI(
@@ -213,13 +225,13 @@ class GraphBuilder:
         prompt = f"""Analyse le texte suivant d'une circulaire BCT et identifie TOUTES les références à d'autres circulaires.
         
         Pour chaque référence trouvée, identifie :
-        1. Le numéro de la circulaire référencée (format YYYY-NN)
+        1. Le numéro de la circulaire référencée (format YYYY-NN ou YYYY-NNN)
         2. Le type de relation : MODIFIES, ABROGATES, REFERENCES, COMPLEMENTS, ou CONCERNS
         3. L'article concerné si applicable
         4. La citation exacte du texte justifiant cette relation
         
         Texte de la circulaire N° {source_number} :
-        {document_text}"""
+        {context_text}"""
         
         try:
             response = client.chat.completions.create(
@@ -489,3 +501,115 @@ class GraphBuilder:
             "nodes": list(nodes_dict.values()),
             "edges": deduped_edges
         }
+
+    def get_overview(self) -> Dict[str, Any]:
+        """
+        Return year cluster nodes and inter-year relationships for overview.
+        """
+        try:
+            cluster_results = self.neo4j_manager.execute_query(GET_OVERVIEW_CLUSTERS)
+            edge_results = self.neo4j_manager.execute_query(GET_OVERVIEW_EDGES)
+            
+            clusters = []
+            for record in cluster_results:
+                year_id = record.get("id")
+                if not year_id or year_id == "Autre":
+                    continue
+                clusters.append({
+                    "id": year_id,
+                    "label": record.get("label"),
+                    "circularCount": record.get("circularCount", 0),
+                    "entityCount": record.get("entityCount", 0)
+                })
+                
+            cluster_edges = []
+            for record in edge_results:
+                source = record.get("source")
+                target = record.get("target")
+                if source == "Autre" or target == "Autre":
+                    continue
+                cluster_edges.append({
+                    "source": source,
+                    "target": target,
+                    "type": record.get("type"),
+                    "count": record.get("count", 0)
+                })
+                
+            return {
+                "clusters": clusters,
+                "clusterEdges": cluster_edges
+            }
+        except Exception as e:
+            raise RuntimeError(f"Failed to fetch overview: {str(e)}")
+
+    def get_cluster_subgraph(self, year: str) -> Dict[str, Any]:
+        """
+        Return all circulars of a given year + connected entities and cross-year links.
+        """
+        try:
+            results = self.neo4j_manager.execute_query(
+                GET_CLUSTER_SUBGRAPH,
+                {"year": year}
+            )
+            
+            nodes_dict = {}
+            edges_list = []
+            
+            def add_node(node, default_type):
+                if node is None:
+                    return None
+                props = dict(node.items())
+                node_id = props.get("number") or props.get("name") or getattr(node, "element_id", str(node.id))
+                node_label = props.get("number") or props.get("name") or node_id
+                node_type = list(node.labels)[0] if getattr(node, "labels", None) else default_type
+                nodes_dict[node_id] = {
+                    "id": node_id,
+                    "label": node_label,
+                    "type": node_type,
+                    "properties": props
+                }
+                return node_id
+
+            for record in results:
+                c = record.get("c")
+                r = record.get("r")
+                related = record.get("related")
+                
+                if c is not None:
+                    add_node(c, "Circular")
+                if related is not None:
+                    default_type = "Entity" if (r is not None and r.type == "MENTIONS") else "Circular"
+                    add_node(related, default_type)
+                    
+                if c is not None and related is not None and r is not None:
+                    start_node = r.start_node
+                    end_node = r.end_node
+                    start_props = dict(start_node.items())
+                    end_props = dict(end_node.items())
+                    start_id = start_props.get("number") or start_props.get("name") or getattr(start_node, "element_id", str(start_node.id))
+                    end_id = end_props.get("number") or end_props.get("name") or getattr(end_node, "element_id", str(end_node.id))
+                    
+                    edge = {
+                        "source": start_id,
+                        "target": end_id,
+                        "type": r.type,
+                        "properties": dict(r.items())
+                    }
+                    edges_list.append(edge)
+
+            # Deduplicate edges
+            seen_edges = set()
+            deduped_edges = []
+            for edge in edges_list:
+                edge_key = f"{edge['source']}->{edge['target']}:{edge['type']}"
+                if edge_key not in seen_edges:
+                    seen_edges.add(edge_key)
+                    deduped_edges.append(edge)
+
+            return {
+                "nodes": list(nodes_dict.values()),
+                "edges": deduped_edges,
+                "clusterLabel": year
+            }
+        except Exception as e:
+            raise RuntimeError(f"Failed to fetch cluster subgraph: {str(e)}")

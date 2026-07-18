@@ -103,36 +103,109 @@
             Aucun élément à afficher. Veuillez relancer l'indexation de circulaires.
           </div>
         } @else {
+          <div class="graph-breadcrumb-bar">
+            <span class="breadcrumb-item" [class.active]="viewLevel() === 'overview'" (click)="loadOverview()">
+              Vue d'ensemble (Clusters Annuels)
+            </span>
+            @if (viewLevel() === 'detail') {
+              <span class="breadcrumb-separator">/</span>
+              <span class="breadcrumb-item active">
+                Année {{ selectedCluster() }}
+              </span>
+              <button class="btn-secondary back-button" (click)="loadOverview()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+                </svg>
+                Retour
+              </button>
+            }
+          </div>
+
           <div class="graph-canvas">
             <ngx-graph
               [nodes]="nodes()"
               [links]="links()"
-              [layout]="'forceDirected'"
+              [layout]="'colaForceDirected'"
               [enableZoom]="true"
               [autoZoom]="true"
               [autoCenter]="true"
             >
+              <!-- Define Arrow Markers -->
+              <ng-template #defsTemplate>
+                <svg:marker
+                  id="arrow"
+                  viewBox="0 -5 10 10"
+                  refX="18"
+                  refY="0"
+                  markerWidth="6"
+                  markerHeight="6"
+                  orient="auto"
+                >
+                  <svg:path d="M0,-5L10,0L0,5" fill="#94a3b8" />
+                </svg:marker>
+              </ng-template>
+
               <!-- Custom Node Template -->
               <ng-template #nodeTemplate let-node>
                 <svg:g class="node" (click)="onNodeSelect(node)">
-                  <svg:circle
-                    [attr.r]="node.data.type === 'Circular' ? 24 : 18"
-                    [attr.fill]="getNodeColor(node.data.type)"
-                    stroke="#ffffff"
-                    stroke-width="2"
-                    class="node-circle"
-                  />
-                  <svg:text
-                    alignment-baseline="middle"
-                    text-anchor="middle"
-                    fill="#ffffff"
-                    font-size="10"
-                    font-weight="bold"
-                    y="35"
-                    class="node-text"
-                  >
-                    {{ node.label }}
-                  </svg:text>
+                  @if (node.data.type === 'Cluster') {
+                    <!-- Year Cluster Super-Node Template -->
+                    <svg:circle
+                      [attr.cx]="node.dimension.width / 2"
+                      [attr.cy]="node.dimension.height / 2"
+                      [attr.r]="node.dimension.width / 2"
+                      [attr.fill]="getNodeColor(node.data.type)"
+                      stroke="#ffffff"
+                      stroke-width="3"
+                      class="node-circle cluster-circle"
+                    />
+                    <svg:text
+                      alignment-baseline="middle"
+                      text-anchor="middle"
+                      fill="#ffffff"
+                      font-size="14"
+                      font-weight="bold"
+                      [attr.x]="node.dimension.width / 2"
+                      [attr.y]="node.dimension.height / 2 - 4"
+                      class="node-text cluster-year"
+                    >
+                      {{ node.label }}
+                    </svg:text>
+                    <svg:text
+                      alignment-baseline="middle"
+                      text-anchor="middle"
+                      fill="#e0e7ff"
+                      font-size="9"
+                      [attr.x]="node.dimension.width / 2"
+                      [attr.y]="node.dimension.height / 2 + 12"
+                      class="node-text cluster-count"
+                    >
+                      {{ node.data.circularCount }} circ.
+                    </svg:text>
+                  } @else {
+                    <!-- Standard Node Template (Circular / Entity) -->
+                    <svg:circle
+                      [attr.cx]="node.dimension.width / 2"
+                      [attr.cy]="node.dimension.height / 2"
+                      [attr.r]="node.data.type === 'Circular' ? 24 : 18"
+                      [attr.fill]="getNodeColor(node.data.type)"
+                      stroke="#ffffff"
+                      stroke-width="2"
+                      class="node-circle"
+                    />
+                    <svg:text
+                      alignment-baseline="middle"
+                      text-anchor="middle"
+                      fill="#ffffff"
+                      font-size="10"
+                      font-weight="bold"
+                      [attr.x]="node.dimension.width / 2"
+                      [attr.y]="node.dimension.height / 2 + (node.data.type === 'Circular' ? 36 : 28)"
+                      class="node-text"
+                    >
+                      {{ node.label }}
+                    </svg:text>
+                  }
                 </svg:g>
               </ng-template>
 
@@ -141,6 +214,7 @@
                 <svg:g class="edge">
                   <svg:path
                     class="line"
+                    [attr.d]="link.line"
                     stroke-width="2"
                     [attr.stroke]="getEdgeColor(link.label)"
                     marker-end="url(#arrow)"

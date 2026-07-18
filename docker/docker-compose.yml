@@ -18,8 +18,12 @@ services:
     container_name: kusor_chroma
     ports:
       - '8001:8000'
+    environment:
+      IS_PERSISTENT: 'TRUE'
+      PERSIST_DIRECTORY: /data
+      ANONYMIZED_TELEMETRY: 'FALSE'
     volumes:
-      - chroma_data:/chroma/chroma
+      - chroma_data:/data
     networks: [kusor_net]
 
   postgres:

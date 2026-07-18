@@ -72,7 +72,7 @@ db_migrate() {
     echo "--> Running Alembic database migrations (Flask DB upgrade)..."
     cd "$PROJECT_ROOT/backend" || exit
     source .venv/bin/activate
-    flask db upgrade
+    flask db upgrade -d ../migrations
 }
 
 db_init_neo4j() {

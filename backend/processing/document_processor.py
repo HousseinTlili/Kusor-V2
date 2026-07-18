@@ -13,6 +13,8 @@ from langchain_experimental.text_splitter import SemanticChunker
 from langchain_ollama import OllamaEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 import spacy
+import docx
+
 
 @dataclass
 class ChunkMetadata:
@@ -88,20 +90,30 @@ class DocumentProcessor:
         document_id: str,
         circular_number: Optional[str] = None,
     ) -> ProcessingResult:
-        """Main entry point. Processes a single PDF end-to-end."""
+        """Main entry point. Processes a PDF, DOCX, or TXT file end-to-end."""
         errors = []
         chroma_updated = False
         bm25_updated = False
         
-        pdf_file = Path(pdf_path)
-        source_filename = pdf_file.name
+        file_obj = Path(pdf_path)
+        source_filename = file_obj.name
+        ext = file_obj.suffix.lower()
         
         try:
-            # 1. Extract text
-            pages = self._extract_text(pdf_path)
+            # 1. Extract text based on file extension
+            if ext == ".pdf":
+                pages = self._extract_text_pdf(pdf_path)
+            elif ext == ".docx":
+                pages = self._extract_text_docx(pdf_path)
+            elif ext == ".txt":
+                pages = self._extract_text_txt(pdf_path)
+            else:
+
+                raise ValueError(f"Unsupported file format: {ext}. Supported: .pdf, .docx, .txt")
+                
             total_pages = len(pages)
             if total_pages == 0:
-                raise ValueError("No text or pages could be extracted from PDF.")
+                raise ValueError("No text or pages could be extracted from file.")
         except Exception as e:
             return ProcessingResult(
                 document_id=document_id,
@@ -202,13 +214,14 @@ class DocumentProcessor:
             errors=errors
         )
 
-    def _extract_text(self, pdf_path: str) -> List[Dict[str, Any]]:
+    def _extract_text_pdf(self, pdf_path: str) -> List[Dict[str, Any]]:
         """
         Extract text from PDF using PyMuPDF.
         Falls back to Tesseract OCR for pages with < 50 chars extracted.
         Returns: [{page_number: int, text: str}]
         """
         doc = fitz.open(pdf_path)
+
         pages = []
         
         for page_idx, page in enumerate(doc):
@@ -229,6 +242,84 @@ class DocumentProcessor:
             
         doc.close()
         return pages
+
+    def _extract_text_docx(self, docx_path: str) -> List[Dict[str, Any]]:
+        """
+        Extract text from DOCX using python-docx.
+        Each paragraph is assigned an incrementing page number (DOCX has no
+        native page concept). We group paragraphs into ~3000-char logical pages.
+        """
+        document = docx.Document(docx_path)
+        pages = []
+        current_text = []
+        current_length = 0
+        page_number = 1
+
+        for para in document.paragraphs:
+            text = para.text.strip()
+            if not text:
+                continue
+            current_text.append(text)
+            current_length += len(text)
+
+            # Group into logical pages of ~3000 chars
+            if current_length >= 3000:
+                pages.append({
+                    "page_number": page_number,
+                    "text": "\n".join(current_text)
+                })
+                current_text = []
+                current_length = 0
+                page_number += 1
+
+        # Flush remaining text
+        if current_text:
+            pages.append({
+                "page_number": page_number,
+                "text": "\n".join(current_text)
+            })
+
+        return pages
+
+    def _extract_text_txt(self, txt_path: str) -> List[Dict[str, Any]]:
+        """
+        Extract text from a plain TXT file.
+        Groups lines into ~3000-char logical pages.
+        """
+        with open(txt_path, "r", encoding="utf-8", errors="replace") as f:
+            content = f.read()
+
+        if not content.strip():
+            return []
+
+        # Split into logical pages of ~3000 chars at line boundaries
+        pages = []
+        lines = content.split("\n")
+        current_text = []
+        current_length = 0
+        page_number = 1
+
+        for line in lines:
+            current_text.append(line)
+            current_length += len(line)
+
+            if current_length >= 3000:
+                pages.append({
+                    "page_number": page_number,
+                    "text": "\n".join(current_text)
+                })
+                current_text = []
+                current_length = 0
+                page_number += 1
+
+        if current_text:
+            pages.append({
+                "page_number": page_number,
+                "text": "\n".join(current_text)
+            })
+
+        return pages
+
 
     def _structural_presegment(self, pages: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """
@@ -326,6 +417,17 @@ class DocumentProcessor:
             content = segment["content"]
             page_number = segment["page_number"]
             
+            # Optimization: Skip semantic splitting for small segments to save Ollama API calls.
+            # 1500 characters is roughly 250-350 tokens, which easily fits within the 512-token chunk limit.
+            if len(content) < 1500:
+                chunks.append({
+                    "content": content,
+                    "page_number": page_number,
+                    "chunk_index": chunk_index
+                })
+                chunk_index += 1
+                continue
+                
             try:
                 sub_chunks = semantic_splitter.split_text(content)
             except Exception:
