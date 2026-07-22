@@ -11,16 +11,12 @@ import { AuthService } from '../../core/services/auth.service';
   template: `
     <div class="min-h-screen flex items-center justify-center p-6 bg-[#03071E] relative overflow-hidden">
       <!-- Ambient Glow Blobs -->
-      <div class="absolute -top-40 -left-40 w-96 h-96 bg-[#E85D04]/20 rounded-full blur-3xl pointer-events-none"></div>
-      <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-[#DC2F02]/15 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -top-40 -left-40 w-96 h-96 bg-[#E85D04]/15 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-[#DC2F02]/10 rounded-full blur-3xl pointer-events-none"></div>
 
-      <div class="w-full max-w-md p-8 glass-card space-y-6 relative z-10">
+      <div class="w-full max-w-md p-8 glass-card space-y-6 relative z-10 bg-[#070A18]">
         <div class="text-center space-y-2">
-          <div class="inline-flex p-3.5 rounded-2xl bg-[#E85D04]/10 border border-[#E85D04]/30 text-[#E85D04] shadow-lg shadow-[#E85D04]/20 mb-2">
-            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-            </svg>
-          </div>
+          <img src="assets/attijari_logo.png" alt="Attijari Bank Logo" class="h-16 w-16 mx-auto object-cover rounded-2xl shadow-lg border border-[#E85D04]/30 mb-3" />
           <h1 class="text-3xl font-black tracking-tight brand-gradient-text">Attijari Bank Tunisia</h1>
           <p class="text-xs text-slate-400 font-medium">KUSOR v3 — Plateforme d'Intelligence Réglementaire</p>
         </div>
@@ -35,13 +31,13 @@ import { AuthService } from '../../core/services/auth.service';
           <div>
             <label class="block text-[11px] font-extrabold text-slate-300 uppercase tracking-wider mb-2">Nom d'utilisateur</label>
             <input type="text" [(ngModel)]="username" name="username" required placeholder="ex: admin"
-              class="w-full px-4 py-3.5 rounded-xl bg-[#090D28] border border-slate-800 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-[#E85D04] transition-all text-sm" />
+              class="w-full px-4 py-3.5 rounded-xl bg-[#03071E] border border-slate-800 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-[#E85D04] transition-all text-sm" />
           </div>
 
           <div>
             <label class="block text-[11px] font-extrabold text-slate-300 uppercase tracking-wider mb-2">Mot de passe</label>
             <input type="password" [(ngModel)]="password" name="password" required placeholder="••••••••"
-              class="w-full px-4 py-3.5 rounded-xl bg-[#090D28] border border-slate-800 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-[#E85D04] transition-all text-sm" />
+              class="w-full px-4 py-3.5 rounded-xl bg-[#03071E] border border-slate-800 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-[#E85D04] transition-all text-sm" />
           </div>
 
           <button type="submit" [disabled]="loading()"

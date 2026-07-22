@@ -1,31 +1,27 @@
-/* KUSOR v3 Strict #03071E Ultra-Dark & #E85D04 Sunset Orange Design System */
+/* KUSOR v3 Pure Pitch Black #03071E & Sunset Fire #E85D04 Design System */
 :root {
   --bg-dark: #03071E;
   --accent-orange: #E85D04;
 }
 
-html, body, app-root, main {
+html, body, app-root, main, aside {
   background-color: #03071E !important;
-  color: #f8fafc;
+  color: #f8fafc !important;
   margin: 0;
   padding: 0;
   min-height: 100vh;
 }
 
-/* Custom Glass Cards with #03071E blend and #E85D04 glowing borders */
+/* Glass Cards with pure pitch black charcoal base (#070A18) - ZERO blueish tone */
 .glass-card {
-  background-color: rgba(9, 13, 36, 0.85) !important;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background-color: #070A18 !important;
   border: 1px solid rgba(232, 93, 4, 0.25) !important;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.9), 0 8px 10px -6px rgba(0, 0, 0, 0.9);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.95), 0 8px 10px -6px rgba(0, 0, 0, 0.95);
   border-radius: 1.25rem;
 }
 
 .glass-card-interactive {
-  background-color: rgba(9, 13, 36, 0.85) !important;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background-color: #070A18 !important;
   border: 1px solid rgba(232, 93, 4, 0.25) !important;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border-radius: 1.25rem;
@@ -34,7 +30,7 @@ html, body, app-root, main {
 .glass-card-interactive:hover {
   border-color: rgba(232, 93, 4, 0.6) !important;
   transform: translateY(-2px);
-  box-shadow: 0 25px 30px -5px rgba(232, 93, 4, 0.2) !important;
+  box-shadow: 0 25px 30px -5px rgba(232, 93, 4, 0.25) !important;
 }
 
 .brand-gradient-text {

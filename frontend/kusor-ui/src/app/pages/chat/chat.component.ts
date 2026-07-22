@@ -16,15 +16,11 @@ interface Message {
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div class="p-8 h-[calc(100vh)] flex flex-col gap-6 max-w-7xl mx-auto">
+    <div class="p-8 h-[calc(100vh)] flex flex-col gap-6 max-w-7xl mx-auto bg-[#03071E]">
       <!-- Top Header Bar -->
-      <div class="glass-card p-5 flex items-center justify-between">
+      <div class="glass-card p-5 flex items-center justify-between bg-[#070A18]">
         <div class="flex items-center gap-3.5">
-          <div class="p-2.5 rounded-2xl bg-[#E85D04]/10 text-[#E85D04] border border-[#E85D04]/30 shadow-lg shadow-[#E85D04]/10">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
-            </svg>
-          </div>
+          <img src="assets/attijari_logo.png" alt="Attijari Logo" class="h-9 w-9 object-cover rounded-xl border border-[#E85D04]/30 shadow-md" />
           <div>
             <h1 class="text-xl font-black brand-gradient-text">Assistant RAG Hybride 4 Canaux</h1>
             <p class="text-xs text-slate-400 font-medium">Vector + BM25 + Graph + Obligation Cypher Search</p>
@@ -33,12 +29,12 @@ interface Message {
       </div>
 
       <!-- Messages Stream Area -->
-      <div class="flex-1 glass-card p-6 overflow-y-auto space-y-6">
+      <div class="flex-1 glass-card p-6 overflow-y-auto space-y-6 bg-[#070A18]">
         @for (msg of messages(); track msg.id) {
           <div [class]="msg.role === 'user' ? 'flex justify-end' : 'flex justify-start'">
             <div [class]="msg.role === 'user' 
               ? 'max-w-2xl bg-gradient-to-r from-[#E85D04] to-[#DC2F02] text-white rounded-3xl rounded-tr-none p-5 shadow-xl shadow-[#E85D04]/20' 
-              : 'max-w-3xl bg-[#090D28]/90 border border-slate-800 text-slate-200 rounded-3xl rounded-tl-none p-6 shadow-2xl backdrop-blur-md space-y-4'">
+              : 'max-w-3xl bg-[#03071E] border border-slate-800 text-slate-200 rounded-3xl rounded-tl-none p-6 shadow-2xl space-y-4'">
               
               <div class="whitespace-pre-wrap leading-relaxed text-sm">
                 {{ msg.content }}
@@ -48,14 +44,14 @@ interface Message {
                 <div class="pt-4 border-t border-slate-800/80 flex flex-wrap items-center justify-between text-xs gap-3">
                   <div class="flex items-center gap-3">
                     <span class="text-slate-400 font-medium">Indice de Confiance:</span>
-                    <div class="w-28 bg-slate-900 rounded-full h-2 overflow-hidden border border-slate-800">
+                    <div class="w-28 bg-[#070A18] rounded-full h-2 overflow-hidden border border-slate-800">
                       <div class="h-full bg-gradient-to-r from-[#E85D04] to-emerald-400 transition-all duration-500" [style.width.%]="(msg.confidence || 0) * 100"></div>
                     </div>
                     <span class="font-black text-[#E85D04]">{{ ((msg.confidence || 0) * 100).toFixed(0) }}%</span>
                   </div>
 
                   @if (msg.sources && msg.sources.length) {
-                    <span class="text-xs text-slate-400 font-medium px-2.5 py-1 rounded-full bg-slate-900 border border-slate-800">
+                    <span class="text-xs text-slate-400 font-medium px-2.5 py-1 rounded-full bg-[#070A18] border border-slate-800">
                       {{ msg.sources.length }} Source(s) Récupérée(s)
                     </span>
                   }
@@ -67,10 +63,10 @@ interface Message {
       </div>
 
       <!-- Input Box -->
-      <div class="glass-card p-4">
+      <div class="glass-card p-4 bg-[#070A18]">
         <form (ngSubmit)="send()" class="flex gap-3">
           <input type="text" [(ngModel)]="promptText" name="prompt" [disabled]="streaming()" placeholder="Posez une question sur la réglementation BCT..."
-            class="flex-1 px-5 py-4 rounded-2xl bg-[#090D28] border border-slate-800 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-[#E85D04] transition-all" />
+            class="flex-1 px-5 py-4 rounded-2xl bg-[#03071E] border border-slate-800 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-[#E85D04] transition-all" />
           <button type="submit" [disabled]="streaming() || !promptText.trim()"
             class="px-7 py-4 rounded-2xl font-bold text-white bg-gradient-to-r from-[#FAA307] via-[#E85D04] to-[#DC2F02] hover:from-[#E85D04] hover:to-[#9D0208] disabled:opacity-50 shadow-xl shadow-[#E85D04]/30 transition-all text-sm">
             {{ streaming() ? 'Génération...' : 'Envoyer' }}

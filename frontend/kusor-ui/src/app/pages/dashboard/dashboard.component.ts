@@ -7,9 +7,9 @@ import { ApiService } from '../../core/services/api.service';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="p-8 space-y-8 max-w-7xl mx-auto">
+    <div class="p-8 space-y-8 max-w-7xl mx-auto bg-[#03071E]">
       <!-- Header Banner -->
-      <div class="glass-card p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden">
+      <div class="glass-card p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden bg-[#070A18]">
         <div class="absolute -right-20 -bottom-20 w-80 h-80 bg-[#E85D04]/10 rounded-full blur-3xl pointer-events-none"></div>
 
         <div>
@@ -24,7 +24,7 @@ import { ApiService } from '../../core/services/api.service';
 
       <!-- Stats Metric Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div class="glass-card-interactive p-6 space-y-3">
+        <div class="glass-card-interactive p-6 space-y-3 bg-[#070A18]">
           <div class="flex items-center justify-between">
             <div class="text-[11px] uppercase font-black text-slate-400 tracking-wider">Circulaires BCT</div>
             <div class="p-2 rounded-xl bg-[#E85D04]/10 text-[#E85D04]">
@@ -37,20 +37,20 @@ import { ApiService } from '../../core/services/api.service';
           <div class="text-[11px] text-slate-500 font-medium">Indexés dans PostgreSQL & ChromaDB</div>
         </div>
 
-        <div class="glass-card-interactive p-6 space-y-3">
+        <div class="glass-card-interactive p-6 space-y-3 bg-[#070A18]">
           <div class="flex items-center justify-between">
             <div class="text-[11px] uppercase font-black text-slate-400 tracking-wider">Vecteurs Embeddings</div>
-            <div class="p-2 rounded-xl bg-indigo-500/10 text-indigo-400">
+            <div class="p-2 rounded-xl bg-[#E85D04]/10 text-[#E85D04]">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
               </svg>
             </div>
           </div>
-          <div class="text-4xl font-black text-indigo-400">{{ stats()?.chromadb_vectors || 0 }}</div>
+          <div class="text-4xl font-black text-amber-400">{{ stats()?.chromadb_vectors || 0 }}</div>
           <div class="text-[11px] text-slate-500 font-medium">Embeddings nomic-embed-text</div>
         </div>
 
-        <div class="glass-card-interactive p-6 space-y-3">
+        <div class="glass-card-interactive p-6 space-y-3 bg-[#070A18]">
           <div class="flex items-center justify-between">
             <div class="text-[11px] uppercase font-black text-slate-400 tracking-wider">Nœuds Neo4j Graph</div>
             <div class="p-2 rounded-xl bg-emerald-500/10 text-emerald-400">
@@ -63,7 +63,7 @@ import { ApiService } from '../../core/services/api.service';
           <div class="text-[11px] text-slate-500 font-medium">{{ stats()?.neo4j_relationships || 0 }} relations temporelles</div>
         </div>
 
-        <div class="glass-card-interactive p-6 space-y-3">
+        <div class="glass-card-interactive p-6 space-y-3 bg-[#070A18]">
           <div class="flex items-center justify-between">
             <div class="text-[11px] uppercase font-black text-slate-400 tracking-wider">Logs d'Audit Systèmes</div>
             <div class="p-2 rounded-xl bg-rose-500/10 text-rose-400">
