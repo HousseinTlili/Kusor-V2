@@ -1,45 +1,52 @@
-/* KUSOR v3 Attijari Bank UI Design System Tokens */
+/* KUSOR v3 Ultra-Dark Sunset Orange UI Design System Tokens */
 @layer utilities {
+  .bg-dark-base {
+    background-color: #03071E;
+  }
+
   .glass-card {
-    background-color: rgba(15, 23, 42, 0.75);
+    background-color: rgba(9, 13, 40, 0.75);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(245, 158, 11, 0.15);
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
-    border-radius: 1rem;
+    border: 1px solid rgba(232, 93, 4, 0.2);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.8), 0 8px 10px -6px rgba(0, 0, 0, 0.8);
+    border-radius: 1.25rem;
   }
+
   .glass-card-interactive {
-    background-color: rgba(15, 23, 42, 0.75);
+    background-color: rgba(9, 13, 40, 0.75);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(245, 158, 11, 0.15);
+    border: 1px solid rgba(232, 93, 4, 0.2);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border-radius: 1rem;
+    border-radius: 1.25rem;
   }
+
   .glass-card-interactive:hover {
-    border-color: rgba(245, 158, 11, 0.4);
+    border-color: rgba(232, 93, 4, 0.5);
     transform: translateY(-2px);
-    box-shadow: 0 25px 30px -5px rgba(245, 158, 11, 0.1);
+    box-shadow: 0 25px 30px -5px rgba(232, 93, 4, 0.15);
   }
-  .gold-gradient-text {
-    background: linear-gradient(135deg, #FBBF24 0%, #F59E0B 50%, #D97706 100%);
+
+  .brand-gradient-text {
+    background: linear-gradient(135deg, #FAA307 0%, #E85D04 50%, #DC2F02 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
 }
 
-/* Custom scrollbars */
+/* Custom Scrollbars */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #020617;
+  background: #03071E;
 }
 ::-webkit-scrollbar-thumb {
   background: #1e293b;
-  border-radius: 4px;
+  border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: #E85D04;
 }

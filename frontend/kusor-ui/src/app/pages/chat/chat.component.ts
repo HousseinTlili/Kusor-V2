@@ -16,46 +16,48 @@ interface Message {
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div class="max-w-7xl mx-auto p-6 h-[calc(100vh-80px)] flex flex-col gap-4">
-      <!-- Top header bar -->
-      <div class="glass-card p-4 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div class="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/30">
+    <div class="p-8 h-[calc(100vh)] flex flex-col gap-6 max-w-7xl mx-auto">
+      <!-- Top Header Bar -->
+      <div class="glass-card p-5 flex items-center justify-between">
+        <div class="flex items-center gap-3.5">
+          <div class="p-2.5 rounded-2xl bg-[#E85D04]/10 text-[#E85D04] border border-[#E85D04]/30 shadow-lg shadow-[#E85D04]/10">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
             </svg>
           </div>
           <div>
-            <h1 class="text-lg font-bold text-amber-400">Assistant RAG Hybride 4 Canaux</h1>
-            <p class="text-xs text-slate-400">Vector + BM25 + Graph + Obligation Cypher</p>
+            <h1 class="text-xl font-black brand-gradient-text">Assistant RAG Hybride 4 Canaux</h1>
+            <p class="text-xs text-slate-400 font-medium">Vector + BM25 + Graph + Obligation Cypher Search</p>
           </div>
         </div>
       </div>
 
-      <!-- Messages container -->
+      <!-- Messages Stream Area -->
       <div class="flex-1 glass-card p-6 overflow-y-auto space-y-6">
         @for (msg of messages(); track msg.id) {
           <div [class]="msg.role === 'user' ? 'flex justify-end' : 'flex justify-start'">
             <div [class]="msg.role === 'user' 
-              ? 'max-w-2xl bg-gradient-to-r from-amber-600 to-amber-700 text-white rounded-2xl rounded-tr-none p-4 shadow-lg' 
-              : 'max-w-3xl bg-slate-900/90 border border-slate-800 text-slate-200 rounded-2xl rounded-tl-none p-5 shadow-xl backdrop-blur-sm space-y-4'">
+              ? 'max-w-2xl bg-gradient-to-r from-[#E85D04] to-[#DC2F02] text-white rounded-3xl rounded-tr-none p-5 shadow-xl shadow-[#E85D04]/20' 
+              : 'max-w-3xl bg-[#090D28]/90 border border-slate-800 text-slate-200 rounded-3xl rounded-tl-none p-6 shadow-2xl backdrop-blur-md space-y-4'">
               
               <div class="whitespace-pre-wrap leading-relaxed text-sm">
                 {{ msg.content }}
               </div>
 
-              @if (msg.role === 'assistant') {
-                <div class="pt-3 border-t border-slate-800 flex flex-wrap items-center justify-between text-xs gap-2">
-                  <div class="flex items-center gap-2">
-                    <span class="text-slate-400">Score de Confiance:</span>
-                    <div class="w-24 bg-slate-800 rounded-full h-2 overflow-hidden border border-slate-700">
-                      <div class="h-full bg-gradient-to-r from-amber-500 to-emerald-400" [style.width.%]="(msg.confidence || 0) * 100"></div>
+              @if (msg.role === 'assistant' && msg.confidence !== undefined) {
+                <div class="pt-4 border-t border-slate-800/80 flex flex-wrap items-center justify-between text-xs gap-3">
+                  <div class="flex items-center gap-3">
+                    <span class="text-slate-400 font-medium">Indice de Confiance:</span>
+                    <div class="w-28 bg-slate-900 rounded-full h-2 overflow-hidden border border-slate-800">
+                      <div class="h-full bg-gradient-to-r from-[#E85D04] to-emerald-400 transition-all duration-500" [style.width.%]="(msg.confidence || 0) * 100"></div>
                     </div>
-                    <span class="font-bold text-amber-400">{{ ((msg.confidence || 0) * 100).toFixed(0) }}%</span>
+                    <span class="font-black text-[#E85D04]">{{ ((msg.confidence || 0) * 100).toFixed(0) }}%</span>
                   </div>
 
                   @if (msg.sources && msg.sources.length) {
-                    <span class="text-slate-400">{{ msg.sources.length }} Source(s) Récupérée(s)</span>
+                    <span class="text-xs text-slate-400 font-medium px-2.5 py-1 rounded-full bg-slate-900 border border-slate-800">
+                      {{ msg.sources.length }} Source(s) Récupérée(s)
+                    </span>
                   }
                 </div>
               }
@@ -64,13 +66,13 @@ interface Message {
         }
       </div>
 
-      <!-- Input box -->
+      <!-- Input Box -->
       <div class="glass-card p-4">
         <form (ngSubmit)="send()" class="flex gap-3">
           <input type="text" [(ngModel)]="promptText" name="prompt" [disabled]="streaming()" placeholder="Posez une question sur la réglementation BCT..."
-            class="flex-1 px-4 py-3.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500 transition-all" />
+            class="flex-1 px-5 py-4 rounded-2xl bg-[#090D28] border border-slate-800 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-[#E85D04] transition-all" />
           <button type="submit" [disabled]="streaming() || !promptText.trim()"
-            class="px-6 py-3.5 rounded-xl font-bold text-slate-950 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 disabled:opacity-50 shadow-lg shadow-amber-500/20 transition-all">
+            class="px-7 py-4 rounded-2xl font-bold text-white bg-gradient-to-r from-[#FAA307] via-[#E85D04] to-[#DC2F02] hover:from-[#E85D04] hover:to-[#9D0208] disabled:opacity-50 shadow-xl shadow-[#E85D04]/30 transition-all text-sm">
             {{ streaming() ? 'Génération...' : 'Envoyer' }}
           </button>
         </form>
