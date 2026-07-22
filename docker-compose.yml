@@ -1,0 +1,106 @@
+# docker-compose.yml
+# KUSOR v3 — Full infrastructure stack
+
+version: "3.9"
+
+services:
+  # ── PostgreSQL 16 ──────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: kusor-postgres
+    environment:
+      POSTGRES_DB: kusor_db
+      POSTGRES_USER: kusor_user
+      POSTGRES_PASSWORD: kusor_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kusor_user -d kusor_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - kusor_net
+    restart: unless-stopped
+
+  # ── Neo4j 5 Community with APOC ────────────────────
+  neo4j:
+    image: neo4j:5-community
+    container_name: kusor-neo4j
+    environment:
+      NEO4J_AUTH: neo4j/kusor_password
+      NEO4J_PLUGINS: '["apoc"]'
+      NEO4J_dbms_memory_heap_initial__size: 512m
+      NEO4J_dbms_memory_heap_max__size: 1G
+      NEO4J_dbms_memory_pagecache_size: 512m
+    ports:
+      - "7474:7474"   # Browser UI
+      - "7687:7687"   # Bolt protocol
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+    healthcheck:
+      test: ["CMD", "neo4j", "status"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    networks:
+      - kusor_net
+    restart: unless-stopped
+
+  # ── ChromaDB ───────────────────────────────────────
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: kusor-chromadb
+    ports:
+      - "8001:8000"
+    volumes:
+      - chroma_data:/data
+    environment:
+      IS_PERSISTENT: "TRUE"
+      PERSIST_DIRECTORY: /data
+      ANONYMIZED_TELEMETRY: "FALSE"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v2/heartbeat"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - kusor_net
+    restart: unless-stopped
+
+  # ── Ollama (LLM serving) ───────────────────────────
+  ollama:
+    image: ollama/ollama:latest
+    container_name: kusor-ollama
+    ports:
+      - "11435:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 15s
+      timeout: 10s
+      retries: 3
+    networks:
+      - kusor_net
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+    name: kusor_pgdata
+  neo4j_data:
+    name: kusor_neo4j_data
+  neo4j_logs:
+    name: kusor_neo4j_logs
+  chroma_data:
+    name: kusor_chroma_data
+  ollama_data:
+    name: kusor_ollama_data
+
+networks:
+  kusor_net:
+    driver: bridge
+    name: kusor_network

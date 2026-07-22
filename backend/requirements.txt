@@ -1,0 +1,71 @@
+# backend/requirements.txt
+# KUSOR v3 — All Python dependencies (pinned versions)
+# ─────────────────────────────────────────────────────
+
+# ── Flask Core ───────────────────────────────────────
+flask==3.1.3
+flask-restx==1.3.2
+flask-cors==6.0.5
+flask-jwt-extended==4.7.4
+flask-sqlalchemy==3.1.1
+flask-migrate==4.1.0
+werkzeug==3.1.8
+gunicorn==23.0.0
+
+# ── Database ─────────────────────────────────────────
+sqlalchemy==2.0.51
+psycopg2-binary==2.9.12
+alembic==1.18.5
+
+# ── Neo4j ────────────────────────────────────────────
+neo4j==6.2.0
+
+# ── ChromaDB ─────────────────────────────────────────
+chromadb==1.5.9
+
+# ── LangChain + LangGraph ───────────────────────────
+langchain==1.3.13
+langchain-community==0.4.2
+langchain-ollama==1.1.0
+langchain-experimental==0.4.2
+langchain-text-splitters==1.1.2
+langgraph==1.2.9
+
+# ── Graphiti (Temporal Knowledge Graph + Memory) ────
+graphiti-core==0.29.2
+
+# ── NLP + ML ─────────────────────────────────────────
+spacy==3.8.14
+rank-bm25==0.2.2
+sentence-transformers==5.6.0
+
+# ── Structured Output ───────────────────────────────
+pydantic==2.13.4
+pydantic-settings==2.14.2
+instructor==1.15.4
+
+# ── Document Processing ─────────────────────────────
+pymupdf==1.28.0
+pytesseract==0.3.13
+python-docx==1.2.0
+pillow==12.3.0
+
+# ── HTTP + Scraping ──────────────────────────────────
+requests==2.34.2
+beautifulsoup4==4.15.0
+
+# ── Authentication ───────────────────────────────────
+bcrypt==5.0.0
+pyjwt==2.13.0
+
+# ── Scheduling ───────────────────────────────────────
+apscheduler==3.11.3
+
+# ── Environment ──────────────────────────────────────
+python-dotenv==1.2.2
+
+# ── OpenAI-compatible client (for Ollama via Instructor) ─
+openai==2.45.0
+
+# ── Testing ──────────────────────────────────────────
+pytest==9.1.1

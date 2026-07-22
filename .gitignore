@@ -1,0 +1,38 @@
+# .gitignore — KUSOR v3
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.venv/
+venv/
+*.env
+!*.env.example
+
+# Node / Angular
+**/node_modules/
+**/dist/
+**/.angular/
+.sass-cache/
+
+# IDEs
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# System
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+
+# Project data (runtime, not committed)
+backend/data/
+training/data/
+
+# Model files
+*.gguf
+*.bin
+*.safetensors
