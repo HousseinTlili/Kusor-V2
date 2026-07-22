@@ -1,41 +1,49 @@
-/* KUSOR v3 Ultra-Dark Sunset Orange UI Design System Tokens */
-@layer utilities {
-  .bg-dark-base {
-    background-color: #03071E;
-  }
-
-  .glass-card {
-    background-color: rgba(9, 13, 40, 0.75);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(232, 93, 4, 0.2);
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.8), 0 8px 10px -6px rgba(0, 0, 0, 0.8);
-    border-radius: 1.25rem;
-  }
-
-  .glass-card-interactive {
-    background-color: rgba(9, 13, 40, 0.75);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(232, 93, 4, 0.2);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border-radius: 1.25rem;
-  }
-
-  .glass-card-interactive:hover {
-    border-color: rgba(232, 93, 4, 0.5);
-    transform: translateY(-2px);
-    box-shadow: 0 25px 30px -5px rgba(232, 93, 4, 0.15);
-  }
-
-  .brand-gradient-text {
-    background: linear-gradient(135deg, #FAA307 0%, #E85D04 50%, #DC2F02 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
+/* KUSOR v3 Strict #03071E Ultra-Dark & #E85D04 Sunset Orange Design System */
+:root {
+  --bg-dark: #03071E;
+  --accent-orange: #E85D04;
 }
 
-/* Custom Scrollbars */
+html, body, app-root, main {
+  background-color: #03071E !important;
+  color: #f8fafc;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+/* Custom Glass Cards with #03071E blend and #E85D04 glowing borders */
+.glass-card {
+  background-color: rgba(9, 13, 36, 0.85) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(232, 93, 4, 0.25) !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.9), 0 8px 10px -6px rgba(0, 0, 0, 0.9);
+  border-radius: 1.25rem;
+}
+
+.glass-card-interactive {
+  background-color: rgba(9, 13, 36, 0.85) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(232, 93, 4, 0.25) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 1.25rem;
+}
+
+.glass-card-interactive:hover {
+  border-color: rgba(232, 93, 4, 0.6) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 25px 30px -5px rgba(232, 93, 4, 0.2) !important;
+}
+
+.brand-gradient-text {
+  background: linear-gradient(135deg, #FAA307 0%, #E85D04 50%, #DC2F02 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
