@@ -1,0 +1,65 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border: 1px solid transparent;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  
+  .indicator-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+
+  .score-label {
+    font-family: monospace;
+    font-size: 0.8rem;
+  }
+
+  .badge-text {
+    opacity: 0.85;
+    font-weight: 500;
+  }
+
+  &.status-high {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border-color: rgba(16, 185, 129, 0.15);
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.05);
+
+    .indicator-dot {
+      background-color: #10b981;
+      box-shadow: 0 0 6px #10b981;
+    }
+  }
+
+  &.status-medium {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+    border-color: rgba(245, 158, 11, 0.15);
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.05);
+
+    .indicator-dot {
+      background-color: #f59e0b;
+      box-shadow: 0 0 6px #f59e0b;
+    }
+  }
+
+  &.status-low {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.15);
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.05);
+
+    .indicator-dot {
+      background-color: #ef4444;
+      box-shadow: 0 0 6px #ef4444;
+    }
+  }
+}

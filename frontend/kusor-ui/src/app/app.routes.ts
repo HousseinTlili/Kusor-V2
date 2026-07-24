@@ -1,0 +1,24 @@
+import { Routes } from '@angular/router';
+import { LoginComponent } from './pages/login/login.component';
+import { DashboardComponent } from './pages/dashboard/dashboard.component';
+import { ChatComponent } from './pages/chat/chat.component';
+import { DocumentsComponent } from './pages/admin/documents.component';
+import { GraphComponent } from './pages/graph/graph.component';
+import { authGuard, adminGuard } from './core/guards/auth.guard';
+
+export const routes: Routes = [
+  { path: 'login', component: LoginComponent },
+  { 
+    path: '', 
+    canActivate: [authGuard], 
+    children: [
+      { path: 'dashboard', component: DashboardComponent },
+      { path: 'chat', component: ChatComponent },
+      { path: 'admin', component: DocumentsComponent, canActivate: [adminGuard] },
+      { path: 'graph', component: GraphComponent },
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
+    ] 
+  },
+  { path: '**', redirectTo: 'login' }
+];
+

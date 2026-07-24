@@ -1,0 +1,33 @@
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="nav-brand" routerLink="/dashboard">
+      <span class="logo-glow"></span>
+      <span class="brand-text">KUSOR</span>
+      <span class="badge-tag">AI</span>
+    </div>
+
+    @if (authService.isAuthenticated()) {
+      <div class="nav-links">
+        <a routerLink="/dashboard" routerLinkActive="active" class="nav-link">
+          Tableau de bord
+        </a>
+        <a routerLink="/chat" routerLinkActive="active" class="nav-link">
+          Assistant Chat
+        </a>
+        <a routerLink="/graph" routerLinkActive="active" class="nav-link">
+          Explorateur Graphe
+        </a>
+        @if (authService.isAdmin()) {
+          <a routerLink="/admin" routerLinkActive="active" class="nav-link nav-admin">
+            Administration
+          </a>
+        }
+      </div>
+
+      <div class="nav-user-section">
+        <span class="username">{{ authService.getCurrentUser()?.username }}</span>
+        <button class="btn-logout" (click)="logout()">Déconnexion</button>
+      </div>
+    }
+  </div>
+</nav>

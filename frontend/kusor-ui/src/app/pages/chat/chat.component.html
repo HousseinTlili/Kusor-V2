@@ -1,0 +1,171 @@
+<div class="chat-page">
+  <!-- Sessions Sidebar -->
+  <aside class="chat-sidebar glass-card">
+    <button (click)="createNewSession()" class="new-chat-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+      </svg>
+      Nouvelle Discussion
+    </button>
+    
+    <div class="sessions-list">
+      <div class="sidebar-section-title">Historique</div>
+      @if (sessions().length === 0) {
+        <div class="empty-sessions text-muted">Aucune discussion</div>
+      }
+      @for (session of sessions(); track session.id) {
+        <button 
+          (click)="selectSession(session.id)" 
+          [class.active]="activeSessionId() === session.id"
+          class="session-item"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="session-icon">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+          </svg>
+          <span class="session-title">{{ session.title || 'Discussion sans titre' }}</span>
+        </button>
+      }
+    </div>
+  </aside>
+
+  <!-- Main Chat Hub -->
+  <section class="chat-hub glass-card">
+    <header class="chat-hub-header">
+      <h2>Assistant KUSOR</h2>
+      <p class="text-secondary">Posez vos questions sur les circulaires de la Banque Centrale de Tunisie.</p>
+    </header>
+
+    <!-- Message Thread -->
+    <div #scrollContainer class="message-thread">
+      @if (isLoadingHistory()) {
+        <div class="loading-overlay">
+          <app-loading-spinner message="Chargement des messages..."></app-loading-spinner>
+        </div>
+      } @else {
+        @if (messages().length === 0) {
+          <div class="welcome-box">
+            <div class="welcome-logo">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 21l8.904-4.452M18 10.5V18M3 10.5h18M3 10.5A2.25 2.25 0 015.25 8.25h13.5A2.25 2.25 0 0121 10.5M3 10.5v7.5A2.25 2.25 0 005.25 20.25h13.5A2.25 2.25 0 0021 18v-7.5" />
+              </svg>
+            </div>
+            <h3>Bienvenue sur KUSOR</h3>
+            <p class="text-secondary">
+              Je suis un assistant réglementaire intelligent. Posez-moi une question telle que :
+            </p>
+            <div class="example-questions">
+              <button (click)="inputMessage = 'Quelles sont les conditions de la réserve obligatoire ?'; sendMessage()" class="example-btn">
+                "Quelles sont les conditions de la réserve obligatoire ?"
+              </button>
+              <button (click)="inputMessage = 'La circulaire 2020-01 a-t-elle été modifiée ?'; sendMessage()" class="example-btn">
+                "La circulaire 2020-01 a-t-elle été modifiée ?"
+              </button>
+            </div>
+          </div>
+        }
+
+        @for (msg of messages(); track msg.id) {
+          <div 
+            [class.user-msg-wrapper]="msg.role === 'user'" 
+            [class.assistant-msg-wrapper]="msg.role === 'assistant'"
+            class="message-wrapper"
+          >
+            <div 
+              [class.user-bubble]="msg.role === 'user'"
+              [class.assistant-bubble]="msg.role === 'assistant'"
+              [class.active-assistant]="selectedMessageId() === msg.id"
+              (click)="showSources(msg)"
+              class="message-bubble"
+            >
+              <div class="message-meta">
+                @if (msg.role === 'assistant') {
+                  <span class="sender-name">KUSOR Assistant</span>
+                  @if (msg.confidence) {
+                    <app-confidence-badge [score]="msg.confidence"></app-confidence-badge>
+                  }
+                } @else {
+                  <span class="sender-name">Vous</span>
+                }
+              </div>
+              <div [innerHTML]="parseMarkdown(msg.content)" class="message-content markdown-body"></div>
+              
+              @if (msg.role === 'assistant' && msg.sources && msg.sources.length > 0) {
+                <div class="msg-footer-cites">
+                  <span class="sources-link-tip">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="cite-icon">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    {{ msg.sources.length }} source(s) citée(s)
+                  </span>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        @if (isSending()) {
+          <div class="assistant-msg-wrapper message-wrapper">
+            <div class="message-bubble assistant-bubble typing-bubble">
+              <div class="typing-indicator">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+          </div>
+        }
+      }
+    </div>
+
+    <!-- Message Input Bar -->
+    <footer class="chat-hub-input-bar">
+      <form (submit)="sendMessage()" class="chat-input-form">
+        <input 
+          [(ngModel)]="inputMessage" 
+          name="message" 
+          placeholder="Posez votre question réglementaire ici..."
+          autocomplete="off"
+          [disabled]="isSending()"
+          class="form-control"
+        />
+        <button type="submit" [disabled]="!inputMessage.trim() || isSending()" class="btn-primary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="send-icon">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+          </svg>
+        </button>
+      </form>
+    </footer>
+  </section>
+
+  <!-- Sources Sidebar Panel -->
+  <aside class="chat-sources glass-card">
+    <header class="sources-header">
+      <h3>Sources et Citations</h3>
+      <p class="text-secondary">Justifications réglementaires extraites de la BCT</p>
+    </header>
+    
+    <div class="sources-list">
+      @if (activeSources().length === 0) {
+        <div class="no-sources text-muted">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="no-sources-icon">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+          </svg>
+          Sélectionnez une réponse pour voir ses sources réglementaires détaillées.
+        </div>
+      }
+      
+      @for (source of activeSources(); track $index) {
+        <div class="source-card">
+          <div class="source-title-row">
+            <span class="source-badge">Circulaire N° {{ source.circular_number }}</span>
+            <span class="source-page">Page {{ source.page }}</span>
+          </div>
+          <h4 class="source-doc-title">{{ source.title }}</h4>
+          <blockquote class="source-excerpt">
+            " {{ source.excerpt }} "
+          </blockquote>
+        </div>
+      }
+    </div>
+  </aside>
+</div>
