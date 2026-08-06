@@ -33,7 +33,14 @@ class GraphSubgraph(Resource):
         limit = int(request.args.get("limit", 50))
         neo4j = get_neo4j_manager()
 
-        query = f"MATCH (n:{label})-[r]-(m) RETURN n, r, m LIMIT {limit}"
+        query = f"""
+        MATCH (n:{label})
+        OPTIONAL MATCH (n)-[r]-(m)
+        RETURN id(n) AS n_id, labels(n) AS n_labels, properties(n) AS n_props,
+               type(r) AS rel_type,
+               id(m) AS m_id, labels(m) AS m_labels, properties(m) AS m_props
+        LIMIT {limit}
+        """
         records = neo4j.run_query(query)
         return {"records": records}, 200
 
@@ -52,7 +59,9 @@ class GraphTemporal(Resource):
         OPTIONAL MATCH (c)-[r]->(m)
         WHERE (r.valid_from IS NULL OR r.valid_from <= date($as_of_date))
           AND (r.valid_until IS NULL OR r.valid_until >= date($as_of_date))
-        RETURN c, r, m
+        RETURN id(c) AS c_id, labels(c) AS c_labels, properties(c) AS c_props,
+               type(r) AS rel_type,
+               id(m) AS m_id, labels(m) AS m_labels, properties(m) AS m_props
         LIMIT 100
         """
         records = neo4j.run_query(query, {"as_of_date": as_of_date}) if as_of_date else []

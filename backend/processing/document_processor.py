@@ -20,9 +20,8 @@ import fitz  # PyMuPDF
 import docx
 from PIL import Image
 import pytesseract
-from werkzeug.datastructures import FileStorage
 
-from backend.extensions import db
+from backend.extensions import db, get_chroma_collection, get_neo4j_manager
 from backend.models.chunk import Chunk
 from backend.models.document import Document
 from backend.processing.obligation_extractor import ObligationExtractor
@@ -68,8 +67,7 @@ class DocumentProcessor:
     2. Structural segmentation (Titre / Chapitre / Section / Article)
     3. Overlapping text chunking
     4. Database persistence (PostgreSQL + ChromaDB with v3 metadata)
-    5. In-memory BM25 index update
-    6. Temporal Knowledge Graph + Obligation Graph construction
+    5. Temporal Knowledge Graph + Obligation Graph construction
     """
 
     def __init__(
@@ -81,8 +79,8 @@ class DocumentProcessor:
         chunk_size: int = 800,
         chunk_overlap: int = 100,
     ):
-        self._chroma = chroma_collection
-        self._neo4j = neo4j_manager
+        self._chroma = chroma_collection or get_chroma_collection()
+        self._neo4j = neo4j_manager or get_neo4j_manager()
         self._ollama_base_url = ollama_base_url
         self._llm_model = llm_model
         self._chunk_size = chunk_size
@@ -91,6 +89,30 @@ class DocumentProcessor:
             ollama_base_url=ollama_base_url,
             llm_model=llm_model,
         )
+
+    def process_document(
+        self,
+        filepath_or_stream: Any,
+        doc_id: Optional[str] = None,
+        circular_ref: Optional[str] = None,
+        title: Optional[str] = None,
+        doc_type: str = "circular",
+    ) -> Document:
+        """Process file path or stream into text and index chunks/graph."""
+        if isinstance(filepath_or_stream, str) and os.path.exists(filepath_or_stream):
+            filename = os.path.basename(filepath_or_stream)
+            if filename.endswith(".pdf"):
+                raw_text = self._extract_pdf(filepath_or_stream)
+            elif filename.endswith(".docx"):
+                raw_text = self._extract_docx(filepath_or_stream)
+            else:
+                raw_text = self._extract_txt(filepath_or_stream)
+            doc_title = title or circular_ref or filename
+        else:
+            raw_text = str(filepath_or_stream)
+            doc_title = title or circular_ref or "Document"
+
+        return self.process_text_content(raw_text, title=doc_title, doc_type=doc_type)
 
     def process_text_content(
         self,
@@ -156,7 +178,7 @@ class DocumentProcessor:
         doc.indexation_state = "INDEXED"
         db.session.commit()
 
-        logger.info("Successfully processed text document %s (%d chunks)", doc.id, len(chunks))
+        logger.info("Successfully processed document %s (%d chunks)", doc.id, len(chunks))
         return doc
 
     # ── Text Extraction Methods ─────────────────────────────────
@@ -188,15 +210,11 @@ class DocumentProcessor:
         with open(filepath, "r", encoding="utf-8", errors="replace") as f:
             return f.read()
 
-    # ── Segmentation and Metadata Parsing ────────────────────────
-
-    @staticmethod
-    def _extract_circular_reference(text: str) -> Optional[str]:
+    def _extract_circular_reference(self, text: str) -> Optional[str]:
         match = _CIRCULAR_REF_RE.search(text)
         return match.group(1) if match else None
 
-    @staticmethod
-    def _extract_date(text: str) -> Optional[date]:
+    def _extract_date(self, text: str) -> Optional[date]:
         match = _DATE_RE.search(text)
         if not match:
             return None
@@ -248,55 +266,85 @@ class DocumentProcessor:
             words = section_content.split()
             start = 0
             while start < len(words):
-                end = start + self._chunk_size
-                chunk_words = words[start:end]
-                chunk_text = " ".join(chunk_words)
+                end = min(start + self._chunk_size, len(words))
+                chunk_text = " ".join(words[start:end])
 
-                chunk = Chunk(
-                    id=f"{doc_id}_chunk_{idx}",
+                c = Chunk(
+                    id=f"{doc_id}_{idx}",
                     document_id=doc_id,
-                    content=chunk_text,
-                    section_title=section_title,
                     chunk_index=idx,
-                    token_count=len(chunk_words),
+                    content=chunk_text,
+                    token_count=len(words[start:end]),
+                    section_title=section_title,
                 )
-                chunks.append(chunk)
+                chunks.append(c)
                 idx += 1
-                start = end - self._chunk_overlap
+                start += self._chunk_size - self._chunk_overlap
+                if start >= len(words):
+                    break
         return chunks
 
     def _store_chromadb(self, chunks: List[Chunk], doc: Document) -> None:
-        if not chunks or not self._chroma:
+        if not self._chroma:
             return
+
         ids = [c.id for c in chunks]
         documents = [c.content for c in chunks]
         metadatas = [
             {
                 "document_id": doc.id,
                 "title": doc.title or "",
+                "circular_reference": doc.circular_reference or "",
+                "doc_type": doc.doc_type,
                 "section_title": c.section_title or "",
                 "chunk_index": c.chunk_index,
-                "circular_number": doc.number or doc.circular_reference or "",
-                "doc_type": doc.doc_type,
             }
             for c in chunks
         ]
-        self._chroma.add(ids=ids, documents=documents, metadatas=metadatas)
+        try:
+            self._chroma.add(ids=ids, documents=documents, metadatas=metadatas)
+        except Exception as e:
+            logger.error("Failed to add vectors to ChromaDB: %s", e)
 
     def _build_graph_and_obligations(
-        self, doc: Document, raw_text: str, sections: List[Tuple[str, str]]
+        self, doc: Document, text: str, sections: List[Tuple[str, str]]
     ) -> None:
         if not self._neo4j:
             return
 
-        from backend.graph.graph_builder import GraphBuilder
-        builder = GraphBuilder(self._neo4j)
+        title = doc.title or f"Circulaire BCT {doc.circular_reference or doc.id}"
+        c_query = """
+        MERGE (c:Circular {id: $id})
+        SET c.title = $title,
+            c.number = $ref,
+            c.date_issued = $date,
+            c.status = 'ACTIVE'
+        """
+        self._neo4j.run_query(
+            c_query,
+            {
+                "id": doc.id,
+                "title": title,
+                "ref": doc.circular_reference,
+                "date": doc.date_issued.isoformat() if doc.date_issued else None,
+            },
+        )
 
-        # 1. Build standard graph (Circular, Sections, Articles, Entities, Themes)
-        builder.build_document_graph(doc, raw_text)
-
-        # 2. Extract Obligations (pass 2)
-        obligations = self._obligation_extractor.extract_obligations(doc, sections)
-
-        # 3. Add Obligations and temporal relationships to Neo4j
-        builder.add_obligations_and_impacts(doc, obligations)
+        obligations = self._obligation_extractor.extract_obligations(doc, sections, use_llm=False)
+        for ob in obligations:
+            ob_query = """
+            MATCH (c:Circular {id: $doc_id})
+            MERGE (o:Obligation {id: $ob_id})
+            SET o.text = $text,
+                o.obligation_type = $type
+            MERGE (c)-[r:INTRODUCES]->(o)
+            """
+            self._neo4j.run_query(
+                ob_query,
+                {
+                    "doc_id": doc.id,
+                    "ob_id": ob.id,
+                    "text": ob.text,
+                    "type": ob.obligation_type,
+                },
+            )

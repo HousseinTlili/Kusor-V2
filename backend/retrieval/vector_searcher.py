@@ -18,7 +18,10 @@ logger = logging.getLogger(__name__)
 class VectorSearcher:
     """Query ChromaDB for semantically similar document chunks."""
 
-    def __init__(self, collection: chromadb.Collection, *, top_k: int = 10):
+    def __init__(self, collection: Optional[chromadb.Collection] = None, *, top_k: int = 10):
+        if collection is None:
+            from backend.extensions import get_chroma_collection
+            collection = get_chroma_collection()
         self._col = collection
         self._top_k = top_k
 
@@ -39,26 +42,25 @@ class VectorSearcher:
             kwargs["where"] = metadata_filter
 
         try:
-            raw = self._col.query(**kwargs)
+            res = self._col.query(**kwargs)
         except Exception as e:
-            logger.error("ChromaDB query failed: %s", e)
+            logger.error("Vector search failed: %s", e)
             return []
 
-        results: List[SearchResult] = []
-        ids = raw.get("ids", [[]])[0]
-        docs = raw.get("documents", [[]])[0]
-        dists = raw.get("distances", [[]])[0]
-        metas = raw.get("metadatas", [[]])[0]
+        ids = (res.get("ids") or [[]])[0]
+        docs = (res.get("documents") or [[]])[0]
+        metas = (res.get("metadatas") or [[]])[0]
+        dists = (res.get("distances") or [[]])[0]
 
-        for cid, doc, dist, meta in zip(ids, docs, dists, metas):
-            # Convert L2 distance to cosine similarity proxy score (0..1)
-            score = 1.0 / (1.0 + dist)
+        results = []
+        for i in range(len(ids)):
+            score = 1.0 - (dists[i] if i < len(dists) else 0.0)
             results.append(
                 SearchResult(
-                    chunk_id=cid,
-                    content=doc,
+                    chunk_id=ids[i],
+                    content=docs[i] if i < len(docs) else "",
                     score=score,
-                    metadata=meta or {},
+                    metadata=metas[i] if i < len(metas) else {},
                     source="vector",
                 )
             )

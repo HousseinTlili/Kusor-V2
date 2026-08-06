@@ -58,100 +58,78 @@ def resolve_point_in_time(state: AgentState) -> AgentState:
             state["as_of_date"] = f"{y}-{int(m):02d}-{int(d):02d}"
         else:
             state["as_of_date"] = raw_date
-        logger.info("Resolved point-in-time date: %s", state["as_of_date"])
-    else:
-        state["as_of_date"] = datetime.now().strftime("%Y-%m-%d")
     return state
 
 
 def recall_past_facts(state: AgentState, memory: Optional[GraphitiMemoryManager] = None) -> AgentState:
-    if memory:
-        facts = memory.retrieve_session_facts(state["question"], limit=3)
-        state["past_facts"] = facts
+    sid = state.get("session_id")
+    if sid and memory:
+        try:
+            facts = memory.search_episodes(sid, state["question"])
+            state["recalled_facts"] = facts
+        except Exception as e:
+            logger.warning("Memory recall failed: %s", e)
+            state["recalled_facts"] = []
     else:
-        state["past_facts"] = []
+        state["recalled_facts"] = []
     return state
 
 
 def parallel_retrieve(state: AgentState, retriever: HybridRetriever) -> AgentState:
-    res = retriever.retrieve(
-        query=state["question"],
-        question_type=state.get("question_type", "factual"),
-        as_of_date=state.get("as_of_date"),
-    )
-    state["retrieval_result"] = res
-    state["reranked_chunks"] = [
-        {
-            "chunk_id": r.chunk_id,
-            "content": r.content,
-            "score": r.score,
-            "source": r.source,
-            "metadata": r.metadata,
-        }
-        for r in res.results
-    ]
+    q = state["question"]
+    qtype = state.get("question_type", "factual")
+    as_of = state.get("as_of_date")
+
+    results = retriever.retrieve(q, question_type=qtype, as_of_date=as_of)
+    state["retrieved_chunks"] = results
+    logger.info("Retrieved %d candidates across channels", len(results))
     return state
 
 
 def generate_answer(state: AgentState, llm: Optional[ChatOllama] = None) -> AgentState:
-    chunks = state.get("reranked_chunks", [])
-    if not chunks:
-        state["answer"] = "Je n'ai pas trouvé d'informations pertinentes dans la réglementation pour répondre."
-        state["sources"] = []
-        return state
+    chunks = state.get("retrieved_chunks", [])
+    context_str = "\n---\n".join([f"[{c.source}] {c.content}" for c in chunks]) if chunks else "Aucun contexte trouvé."
 
-    context_parts = []
-    sources = []
-    for i, c in enumerate(chunks, 1):
-        context_parts.append(f"[Source {i}] {c['content']}")
-        sources.append({
-            "chunk_id": c["chunk_id"],
-            "content": c["content"][:200],
-            "score": round(c["score"], 4),
-            "source": c["source"],
-            "metadata": c["metadata"],
-        })
-
-    facts = state.get("past_facts", [])
-    facts_block = ""
-    if facts:
-        facts_block = "\nFaits connus des sessions précédentes:\n" + "\n".join([f"- {f['fact']}" for f in facts])
-
-    prompt = (
-        f"{SYSTEM_PROMPT}\n\n"
-        f"{facts_block}\n\n"
-        f"Contexte Récupéré (4 canaux):\n" + "\n\n".join(context_parts) + "\n\n"
-        f"Question: {state['question']}"
-    )
+    user_content = f"Contexte réglementaire:\n{context_str}\n\nQuestion: {state['question']}"
 
     if llm:
         try:
-            resp = llm.invoke([HumanMessage(content=prompt)])
+            resp = llm.invoke([
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": user_content},
+            ])
             state["answer"] = resp.content
-            state["sources"] = sources
         except Exception as e:
-            logger.exception("LLM generation error")
-            state["answer"] = "Erreur lors de la génération de la réponse."
-            state["error"] = str(e)
+            logger.error("LLM invoke failed: %s", e)
+            state["answer"] = f"Désolé, une erreur est survenue lors de la génération de la réponse. Chunks trouvés: {len(chunks)}."
     else:
-        state["answer"] = f"Réponse basée sur {len(chunks)} source(s):\n\n" + "\n\n".join([c["content"] for c in chunks[:2]])
-        state["sources"] = sources
+        state["answer"] = f"Réponse basée sur {len(chunks)} circulaires BCT trouvées dans la base de données."
 
+    state["citations"] = [
+        {
+            "chunk_id": c.chunk_id,
+            "source": c.source,
+            "title": c.metadata.get("title", "Circulaire BCT"),
+            "section": c.metadata.get("section_title", ""),
+        }
+        for c in chunks
+    ]
     return state
 
 
 def compute_confidence(state: AgentState) -> AgentState:
-    rr = state.get("retrieval_result")
-    if not rr or not rr.results:
+    chunks = state.get("retrieved_chunks", [])
+    if not chunks:
         state["confidence_score"] = 0.0
         return state
 
-    top_score = max(r.score for r in rr.results) if rr.results else 0.0
+    top_score = chunks[0].score if chunks else 0.0
     top_norm = min(max(top_score, 0.0), 1.0)
-    source_cov = min(rr.unique_sources / 3.0, 1.0)
-    method_div = rr.channels_used / 4.0
-    chunk_suf = min(rr.total_candidates / 10.0, 1.0)
-    graph_bonus = 1.0 if (rr.graph_used or rr.obligation_used) else 0.0
+    sources = {c.source for c in chunks}
+    source_cov = min(len(sources) / 3.0, 1.0)
+    method_div = len(sources) / 4.0
+    chunk_suf = min(len(chunks) / 10.0, 1.0)
+    graph_bonus = 1.0 if ("graph" in sources or "obligation" in sources) else 0.0
 
     confidence = (
         top_norm * 0.35
@@ -167,16 +145,20 @@ def compute_confidence(state: AgentState) -> AgentState:
 def persist_fact_memory(state: AgentState, memory: Optional[GraphitiMemoryManager] = None) -> AgentState:
     sid = state.get("session_id")
     if sid and state.get("answer") and memory:
-        memory.add_conversation_turn(sid, state["question"], state["answer"])
+        try:
+            memory.add_conversation_turn(sid, state["question"], state["answer"])
+        except Exception as e:
+            logger.warning("Failed to persist fact memory: %s", e)
     return state
 
 
 def build_main_agent_graph(
-    retriever: HybridRetriever,
+    retriever: Optional[HybridRetriever] = None,
     memory: Optional[GraphitiMemoryManager] = None,
     config: Optional[Config] = None,
 ):
     cfg = config or Config()
+    ret = retriever or HybridRetriever()
     try:
         llm = ChatOllama(
             model=cfg.LLM_MODEL,
@@ -191,7 +173,7 @@ def build_main_agent_graph(
     graph.add_node("classify_question", lambda s: classify_question(s, llm))
     graph.add_node("resolve_point_in_time", resolve_point_in_time)
     graph.add_node("recall_past_facts", lambda s: recall_past_facts(s, memory))
-    graph.add_node("parallel_retrieve", lambda s: parallel_retrieve(s, retriever))
+    graph.add_node("parallel_retrieve", lambda s: parallel_retrieve(s, ret))
     graph.add_node("generate_answer", lambda s: generate_answer(s, llm))
     graph.add_node("compute_confidence", compute_confidence)
     graph.add_node("persist_fact_memory", lambda s: persist_fact_memory(s, memory))
@@ -214,3 +196,31 @@ def build_main_agent_graph(
     graph.add_edge("persist_fact_memory", END)
 
     return graph.compile()
+
+
+class KusorAgent:
+    """Wrapper class providing run() interface for main compliance RAG graph."""
+
+    def __init__(self, retriever: Optional[HybridRetriever] = None, memory: Optional[GraphitiMemoryManager] = None):
+        self._compiled_graph = build_main_agent_graph(retriever=retriever, memory=memory)
+
+    def run(self, question: str, session_id: Optional[str] = None, as_of_date: Optional[str] = None) -> Dict[str, Any]:
+        initial_state: AgentState = {
+            "question": question,
+            "session_id": session_id,
+            "as_of_date": as_of_date,
+            "question_type": "factual",
+            "recalled_facts": [],
+            "retrieved_chunks": [],
+            "answer": "",
+            "citations": [],
+            "confidence_score": 0.0,
+        }
+        res = self._compiled_graph.invoke(initial_state)
+        return {
+            "response_text": res.get("answer", ""),
+            "confidence_score": res.get("confidence_score", 0.0),
+            "citations": res.get("citations", []),
+            "session_id": session_id,
+            "question_type": res.get("question_type"),
+        }

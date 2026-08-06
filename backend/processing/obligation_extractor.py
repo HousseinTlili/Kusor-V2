@@ -104,7 +104,7 @@ class ObligationExtractor:
         self._llm_model = llm_model
 
     def extract_obligations(
-        self, doc: Document, sections: List[tuple[str, str]]
+        self, doc: Document, sections: List[tuple[str, str]], use_llm: bool = False
     ) -> List[ExtractedObligation]:
         obligations: List[ExtractedObligation] = []
 
@@ -113,8 +113,8 @@ class ObligationExtractor:
             regex_obs = self._extract_via_regex(doc, section_title, section_content)
             obligations.extend(regex_obs)
 
-            # 2. LLM Pass for complex sections without regex hits
-            if not regex_obs and len(section_content.split()) > 50:
+            # 2. LLM Pass for complex sections if enabled
+            if use_llm and not regex_obs and len(section_content.split()) > 50:
                 llm_obs = self._extract_via_llm(doc, section_title, section_content)
                 obligations.extend(llm_obs)
 

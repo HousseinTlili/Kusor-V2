@@ -18,7 +18,10 @@ logger = logging.getLogger(__name__)
 class ObligationSearcher:
     """Direct Cypher search over extracted regulatory obligation nodes."""
 
-    def __init__(self, neo4j: Neo4jManager, *, top_k: int = 10):
+    def __init__(self, neo4j: Optional[Neo4jManager] = None, *, top_k: int = 10):
+        if neo4j is None:
+            from backend.extensions import get_neo4j_manager
+            neo4j = get_neo4j_manager()
         self._neo4j = neo4j
         self._top_k = top_k
 
@@ -34,64 +37,41 @@ class ObligationSearcher:
             cypher = """
             MATCH (c:Circular)-[:INTRODUCES]->(o:Obligation)
             WHERE o.obligation_type = $ob_type
-              AND (toLower(o.text) CONTAINS toLower($query) OR toLower(c.title) CONTAINS toLower($query))
+              AND toLower(o.text) CONTAINS toLower($query)
             OPTIONAL MATCH (o)-[:AFFECTS]->(p:Process)
-            OPTIONAL MATCH (o)-[:CONSTRAINS]->(ct:ContractTemplate)
-            RETURN o.id AS ob_id,
-                   o.text AS ob_text,
-                   o.obligation_type AS ob_type,
-                   c.reference AS circular_ref,
-                   p.name AS process_name,
-                   ct.name AS contract_name
-            LIMIT $limit
+            RETURN c, o, p LIMIT $limit
             """
-            params = {"query": query, "ob_type": obligation_type, "limit": k}
+            params = {"ob_type": obligation_type, "query": query, "limit": k}
         else:
             cypher = """
             MATCH (c:Circular)-[:INTRODUCES]->(o:Obligation)
-            WHERE toLower(o.text) CONTAINS toLower($query)
-               OR toLower(c.reference) CONTAINS toLower($query)
+            WHERE any(term IN split(toLower($query), ' ') WHERE size(term) > 3 AND toLower(o.text) CONTAINS term)
             OPTIONAL MATCH (o)-[:AFFECTS]->(p:Process)
-            OPTIONAL MATCH (o)-[:CONSTRAINS]->(ct:ContractTemplate)
-            RETURN o.id AS ob_id,
-                   o.text AS ob_text,
-                   o.obligation_type AS ob_type,
-                   c.reference AS circular_ref,
-                   p.name AS process_name,
-                   ct.name AS contract_name
-            LIMIT $limit
+            RETURN c, o, p LIMIT $limit
             """
             params = {"query": query, "limit": k}
 
-        records = self._neo4j.run_query(cypher, params)
-        results: List[SearchResult] = []
+        try:
+            records = self._neo4j.run_query(cypher, params)
+        except Exception as e:
+            logger.error("ObligationSearcher query failed: %s", e)
+            return []
 
-        for rec in records:
-            circ = rec.get("circular_ref", "Inconnu")
-            ob_type = rec.get("ob_type", "REQUIREMENT")
-            ob_text = rec.get("ob_text", "")
-            proc = rec.get("process_name")
-            contract = rec.get("contract_name")
-
-            content = f"[{ob_type}] (Circulaire N° {circ}): {ob_text}"
-            if proc:
-                content += f" | Impacte le processus: {proc}"
-            if contract:
-                content += f" | Requis pour le contrat: {contract}"
+        results = []
+        for i, rec in enumerate(records):
+            o = rec.get("o", {})
+            o_props = o.get("properties", o) if isinstance(o, dict) else {}
+            content = o_props.get("text", "")
+            ob_type = o_props.get("obligation_type", "OBLIGATION")
+            ob_id = o_props.get("id", f"ob_{i}")
 
             results.append(
                 SearchResult(
-                    chunk_id=f"ob-{rec['ob_id']}",
+                    chunk_id=str(ob_id),
                     content=content,
-                    score=0.6,
-                    metadata={
-                        "circular_reference": circ,
-                        "obligation_type": ob_type,
-                        "process_name": proc,
-                        "contract_name": contract,
-                    },
+                    score=1.0 / (i + 1),
+                    metadata={"obligation_type": ob_type},
                     source="obligation",
                 )
             )
-
         return results

@@ -25,7 +25,10 @@ except OSError:
 class GraphSearcher:
     """Traverses Neo4j nodes and temporal relationships matching extracted query entities."""
 
-    def __init__(self, neo4j: Neo4jManager, *, top_k: int = 10):
+    def __init__(self, neo4j: Optional[Neo4jManager] = None, *, top_k: int = 10):
+        if neo4j is None:
+            from backend.extensions import get_neo4j_manager
+            neo4j = get_neo4j_manager()
         self._neo4j = neo4j
         self._top_k = top_k
 
@@ -38,110 +41,56 @@ class GraphSearcher:
         k = top_k or self._top_k
         entities = self._extract_entities(query)
         if not entities:
-            # Fallback to query words if spaCy produces no entities
-            words = [w for w in query.split() if len(w) > 3]
-            entities = [(w, "KEYWORD") for w in words[:3]]
-
-        if not entities:
             return []
 
-        results: List[SearchResult] = []
-        seen: set[str] = set()
-
-        for ent_text, ent_label in entities:
-            hits = self._query_graph(ent_text, ent_label, as_of_date)
-            for hit in hits:
-                if hit.chunk_id in seen:
-                    continue
-                seen.add(hit.chunk_id)
-                results.append(hit)
-                if len(results) >= k:
-                    return results
-
-        return results
-
-    @staticmethod
-    def _extract_entities(text: str) -> List[Tuple[str, str]]:
-        if _nlp is None:
-            return []
-        doc = _nlp(text)
-        return [(ent.text, ent.label_) for ent in doc.ents]
-
-    def _query_graph(
-        self, entity: str, label: str, as_of_date: Optional[str] = None
-    ) -> List[SearchResult]:
-        """
-        Query Neo4j for 1-hop subgraphs around matching entities,
-        filtering relationships temporally if as_of_date is provided.
+        cypher = """
+        MATCH (n)-[r]-(m)
+        WHERE any(term IN $entities WHERE toLower(coalesce(n.name, n.title, n.text, '')) CONTAINS toLower(term))
         """
         if as_of_date:
-            cypher = """
-            MATCH (n)
-            WHERE toLower(n.name) CONTAINS toLower($entity)
-               OR toLower(n.title) CONTAINS toLower($entity)
-               OR toLower(n.reference) CONTAINS toLower($entity)
-            OPTIONAL MATCH (n)-[r]-(m)
-            WHERE (r.valid_from IS NULL OR r.valid_from <= date($as_of_date))
-              AND (r.valid_until IS NULL OR r.valid_until >= date($as_of_date))
-            RETURN
-                n.name AS source_name,
-                labels(n) AS source_labels,
-                type(r) AS rel_type,
-                r.valid_from AS valid_from,
-                r.valid_until AS valid_until,
-                m.name AS target_name,
-                m.title AS target_title,
-                labels(m) AS target_labels,
-                n.content AS content,
-                n.reference AS reference
-            LIMIT 50
+            cypher += """
+            AND (r.valid_from IS NULL OR r.valid_from <= date($as_of_date))
+            AND (r.valid_until IS NULL OR r.valid_until >= date($as_of_date))
             """
-            params = {"entity": entity, "as_of_date": as_of_date}
-        else:
-            cypher = """
-            MATCH (n)
-            WHERE toLower(n.name) CONTAINS toLower($entity)
-               OR toLower(n.title) CONTAINS toLower($entity)
-               OR toLower(n.reference) CONTAINS toLower($entity)
-            OPTIONAL MATCH (n)-[r]-(m)
-            RETURN
-                n.name AS source_name,
-                labels(n) AS source_labels,
-                type(r) AS rel_type,
-                m.name AS target_name,
-                m.title AS target_title,
-                labels(m) AS target_labels,
-                n.content AS content,
-                n.reference AS reference
-            LIMIT 50
-            """
-            params = {"entity": entity}
+        cypher += " RETURN n, r, m LIMIT $limit"
 
-        records = self._neo4j.run_query(cypher, params)
-        results: List[SearchResult] = []
+        try:
+            records = self._neo4j.run_query(
+                cypher, {"entities": entities, "as_of_date": as_of_date, "limit": k}
+            )
+        except Exception as e:
+            logger.error("GraphSearcher Cypher query failed: %s", e)
+            return []
 
-        for rec in records:
-            src = rec.get("source_name") or rec.get("reference") or "Inconnu"
-            parts = [f"[{','.join(rec.get('source_labels', []))}] {src}"]
-
-            if rec.get("rel_type"):
-                tgt = rec.get("target_name") or rec.get("target_title") or ""
-                parts.append(f" --{rec['rel_type']}--> [{','.join(rec.get('target_labels', []))}] {tgt}")
-
-            content = rec.get("content") or " | ".join(parts)
-            chunk_id = f"graph-{src}-{rec.get('rel_type', 'self')}"
-
+        results = []
+        for i, rec in enumerate(records):
+            n = rec.get("n", {})
+            node_props = n.get("properties", n) if isinstance(n, dict) else {}
+            content = (
+                node_props.get("text")
+                or node_props.get("title")
+                or node_props.get("name")
+                or str(node_props)
+            )
+            node_id = str(n.get("id", i))
             results.append(
                 SearchResult(
-                    chunk_id=chunk_id,
+                    chunk_id=f"graph_{node_id}",
                     content=content,
-                    score=0.5,
-                    metadata={
-                        "source_labels": rec.get("source_labels", []),
-                        "entity_matched": entity,
-                        "temporal_date": as_of_date,
-                    },
+                    score=1.0 / (i + 1),
+                    metadata={"entity_type": labels_str if (labels_str := str(n.get("labels", ""))) else "GraphNode"},
                     source="graph",
                 )
             )
         return results
+
+    def _extract_entities(self, query: str) -> List[str]:
+        if _nlp:
+            doc = _nlp(query)
+            ents = [ent.text for ent in doc.ents]
+            if ents:
+                return ents
+
+        stop_words = {"le", "la", "les", "du", "de", "des", "un", "une", "est", "sont", "quelles", "quels", "quel", "sur", "pour"}
+        words = [w.strip() for w in query.split() if len(w.strip()) > 3 and w.lower() not in stop_words]
+        return words

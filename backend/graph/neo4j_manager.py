@@ -5,10 +5,28 @@ COPY from v2 with thread pool cleanup & session context safety.
 """
 
 import logging
+from datetime import date, datetime, time
 from typing import Any, Dict, List, Optional
 from neo4j import GraphDatabase, Driver
 
 logger = logging.getLogger(__name__)
+
+
+def _sanitize_value(val: Any) -> Any:
+    """Helper to convert Neo4j/Python date/time/tuple types into JSON-serializable types."""
+    if isinstance(val, (date, datetime, time)):
+        return val.isoformat()
+    if hasattr(val, "iso_format"):
+        return val.iso_format()
+    if hasattr(val, "isoformat"):
+        return val.isoformat()
+    if isinstance(val, dict):
+        return {k: _sanitize_value(v) for k, v in val.items()}
+    if isinstance(val, (list, tuple)):
+        return [_sanitize_value(v) for v in val]
+    if hasattr(val, "__dict__"):
+        return _sanitize_value(val.__dict__)
+    return val
 
 
 class Neo4jManager:
@@ -49,7 +67,8 @@ class Neo4jManager:
         try:
             with self._driver.session() as session:
                 result = session.run(query, parameters or {})
-                return [record.data() for record in result]
+                records = [record.data() for record in result]
+                return _sanitize_value(records)
         except Exception as e:
             logger.error("Cypher execution failed: %s | Query: %s", e, query[:100])
             raise e

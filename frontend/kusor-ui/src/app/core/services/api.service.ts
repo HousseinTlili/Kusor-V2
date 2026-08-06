@@ -28,6 +28,10 @@ export class ApiService {
 
   // Graph
   getGraphOverview(): Observable<any> { return this.http.get(`${this.baseUrl}/graph/overview`); }
+  getGraphSubgraph(label: string = 'Circular', limit: number = 50): Observable<any> {
+    const params = new HttpParams().set('label', label).set('limit', limit.toString());
+    return this.http.get(`${this.baseUrl}/graph/subgraph`, { params });
+  }
   getTemporalGraph(asOfDate?: string): Observable<any> {
     let params = new HttpParams();
     if (asOfDate) params = params.set('as_of_date', asOfDate);

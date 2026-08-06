@@ -1,36 +1,36 @@
-/* KUSOR v3 Pure Pitch Black #03071E & Sunset Fire #E85D04 Design System */
+/* KUSOR v3 Pure Pitch Black (#000000) & Sunset Fire (#E85D04) Design System */
 :root {
-  --bg-dark: #03071E;
+  --bg-dark: #000000;
   --accent-orange: #E85D04;
 }
 
 html, body, app-root, main, aside {
-  background-color: #03071E !important;
+  background-color: #000000 !important;
   color: #f8fafc !important;
   margin: 0;
   padding: 0;
   min-height: 100vh;
 }
 
-/* Glass Cards with pure pitch black charcoal base (#070A18) - ZERO blueish tone */
+/* Glass Cards with pure pitch black base (#0A0A0A) - ZERO blueish tone */
 .glass-card {
-  background-color: #070A18 !important;
-  border: 1px solid rgba(232, 93, 4, 0.25) !important;
+  background-color: #0A0A0A !important;
+  border: 1px solid rgba(232, 93, 4, 0.3) !important;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.95), 0 8px 10px -6px rgba(0, 0, 0, 0.95);
   border-radius: 1.25rem;
 }
 
 .glass-card-interactive {
-  background-color: #070A18 !important;
-  border: 1px solid rgba(232, 93, 4, 0.25) !important;
+  background-color: #0A0A0A !important;
+  border: 1px solid rgba(232, 93, 4, 0.3) !important;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border-radius: 1.25rem;
 }
 
 .glass-card-interactive:hover {
-  border-color: rgba(232, 93, 4, 0.6) !important;
+  border-color: rgba(232, 93, 4, 0.7) !important;
   transform: translateY(-2px);
-  box-shadow: 0 25px 30px -5px rgba(232, 93, 4, 0.25) !important;
+  box-shadow: 0 25px 30px -5px rgba(232, 93, 4, 0.3) !important;
 }
 
 .brand-gradient-text {
@@ -45,10 +45,10 @@ html, body, app-root, main, aside {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #03071E;
+  background: #000000;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: #262626;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {

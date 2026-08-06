@@ -80,18 +80,18 @@ class HybridRetriever:
 
     def __init__(
         self,
-        vector_searcher: VectorSearcher,
-        bm25_searcher: BM25Searcher,
-        graph_searcher: GraphSearcher,
-        obligation_searcher: ObligationSearcher,
+        vector_searcher: Optional[VectorSearcher] = None,
+        bm25_searcher: Optional[BM25Searcher] = None,
+        graph_searcher: Optional[GraphSearcher] = None,
+        obligation_searcher: Optional[ObligationSearcher] = None,
         reranker: Optional[Reranker] = None,
         top_k_fuse: int = 20,
         top_k_final: int = 5,
     ):
-        self.vector = vector_searcher
-        self.bm25 = bm25_searcher
-        self.graph = graph_searcher
-        self.obligation = obligation_searcher
+        self.vector = vector_searcher or VectorSearcher()
+        self.bm25 = bm25_searcher or BM25Searcher()
+        self.graph = graph_searcher or GraphSearcher()
+        self.obligation = obligation_searcher or ObligationSearcher()
         self.reranker = reranker
         self.top_k_fuse = top_k_fuse
         self.top_k_final = top_k_final
@@ -99,59 +99,30 @@ class HybridRetriever:
     def retrieve(
         self,
         query: str,
-        top_k: Optional[int] = None,
         question_type: str = "factual",
         as_of_date: Optional[str] = None,
-        metadata_filter: Optional[Dict[str, Any]] = None,
-    ) -> RetrievalResult:
-        final_k = top_k or self.top_k_final
-        weights_dict = self.QUESTION_TYPE_WEIGHTS.get(question_type, self.DEFAULT_WEIGHTS)
-
-        # 1. Execute all 4 channels
-        vec_results = self._safe_search("vector", self.vector.search, query, metadata_filter=metadata_filter)
-        bm25_results = self._safe_search("bm25", self.bm25.search, query)
-        graph_results = self._safe_search("graph", self.graph.search, query, as_of_date=as_of_date)
-        ob_results = self._safe_search("obligation", self.obligation.search, query)
-
-        # 2. 4-Way RRF Fusion
-        fused = _rrf_fuse(
-            [vec_results, bm25_results, graph_results, ob_results],
-            weights=[
-                weights_dict["vector"],
-                weights_dict["bm25"],
-                weights_dict["graph"],
-                weights_dict["obligation"],
-            ],
-        )
-        candidates = fused[: self.top_k_fuse]
-
-        # 3. Cross-encoder Reranking if available
-        if self.reranker and candidates:
-            reranked = self.reranker.rerank(query, candidates, top_k=final_k)
-        else:
-            reranked = candidates[:final_k]
-
-        active_channels = sum(1 for ch in [vec_results, bm25_results, graph_results, ob_results] if ch)
-        all_results = vec_results + bm25_results + graph_results + ob_results
-        unique_sources = {
-            r.metadata.get("document_id") or r.metadata.get("circular_reference")
-            for r in all_results
-            if r.metadata.get("document_id") or r.metadata.get("circular_reference")
-        }
-
-        return RetrievalResult(
-            results=reranked,
-            total_candidates=len(fused),
-            channels_used=active_channels,
-            unique_sources=len(unique_sources),
-            graph_used=bool(graph_results),
-            obligation_used=bool(ob_results),
+    ) -> List[SearchResult]:
+        weights_dict = self.QUESTION_TYPE_WEIGHTS.get(
+            question_type, self.DEFAULT_WEIGHTS
         )
 
-    @staticmethod
-    def _safe_search(name: str, fn, *args, **kwargs) -> List[SearchResult]:
-        try:
-            return fn(*args, **kwargs) or []
-        except Exception:
-            logger.exception("Retrieval channel '%s' failed", name)
-            return []
+        vec_res = self.vector.search(query, top_k=self.top_k_fuse)
+        bm25_res = self.bm25.search(query, top_k=self.top_k_fuse)
+        graph_res = self.graph.search(query, as_of_date=as_of_date, top_k=self.top_k_fuse)
+        ob_res = self.obligation.search(query, top_k=self.top_k_fuse)
+
+        ranked_lists = [vec_res, bm25_res, graph_res, ob_res]
+        weights = [
+            weights_dict["vector"],
+            weights_dict["bm25"],
+            weights_dict["graph"],
+            weights_dict["obligation"],
+        ]
+
+        fused = _rrf_fuse(ranked_lists, weights=weights, k=60)
+        top_fused = fused[: self.top_k_fuse]
+
+        if self.reranker and top_fused:
+            return self.reranker.rerank(query, top_fused, top_k=self.top_k_final)
+
+        return top_fused[: self.top_k_final]
