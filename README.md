@@ -8,7 +8,7 @@
 ![Ollama Fine-Tuned](https://img.shields.io/badge/Model-kusor--qwen%3Av1%20(Fine--Tuned)-10B981?style=for-the-badge)
 ![n8n Automation](https://img.shields.io/badge/Automation-n8n%20Workflows-EA4B71?style=for-the-badge&logo=n8n)
 
-**KUSOR v3** is an enterprise-grade AI Compliance & Regulatory Intelligence platform tailored for **Attijari Bank Tunisia**. It continuously ingests Central Bank of Tunisia (**BCT**) circulars, extracts legal obligations with French NLP (`spaCy fr_core_news_lg`), models temporal graph relationships in **Neo4j**, executes 4-channel hybrid retrieval, and runs fine-tuned BCT reasoning via `kusor-qwen:v1` inside a pitch-black (`#000000`) glassmorphic UI built with **Angular 17+**.
+**KUSOR v3** is an enterprise-grade AI Compliance & Regulatory Intelligence platform tailored for **Attijari Bank Tunisia**. It continuously ingests Central Bank of Tunisia (**BCT**) circulars, extracts legal obligations with French NLP (`spaCy fr_core_news_lg`), models temporal graph relationships in **Neo4j**, executes 4-channel hybrid retrieval, and runs fine-tuned BCT reasoning via `kusor-qwen:v1` inside a corporate Light & Dark themed UI with dynamic theme switching built with **Angular 17+**.
 
 ---
 

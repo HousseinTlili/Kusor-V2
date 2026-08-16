@@ -110,16 +110,26 @@ class MultiSourceScraper:
 
         for filename in pdf_files:
             filepath = os.path.join(self._upload_folder, filename)
-            ref_guess = filename.replace(".pdf", "")
+            ref_match = re.match(r"^(\d{4}-\d{1,2})", filename)
+            ref_guess = ref_match.group(1) if ref_match else filename.replace(".pdf", "")
+            
             existing = Document.query.filter(
-                (Document.title == filename) | (Document.circular_reference == ref_guess) | (Document.number == ref_guess)
+                (Document.filename == filename) | (Document.circular_reference == ref_guess) | (Document.number == ref_guess)
             ).first()
 
             if not existing:
                 try:
-                    doc = dp.process_document(filepath, doc_id=str(uuid.uuid4()), circular_ref=ref_guess)
+                    doc = dp.process_document(
+                        filepath,
+                        doc_id=str(uuid.uuid4()),
+                        circular_ref=ref_guess,
+                        title=f"Circulaire BCT N° {ref_guess}",
+                        doc_type="circular",
+                        filename=filename
+                    )
                     if doc:
                         doc.source = "BCT Portal"
+                        doc.filename = filename
                         db.session.commit()
                         added_items += 1
                 except Exception as e:

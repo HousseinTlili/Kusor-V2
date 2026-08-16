@@ -1,56 +1,149 @@
-/* KUSOR v3 Pure Pitch Black (#000000) & Sunset Fire (#E85D04) Design System */
-:root {
-  --bg-dark: #000000;
+/* KUSOR v3 — Attijari Bank Corporate Design System (Light & Dark Theme) */
+
+:root, html.light {
+  --bg-page: #F8FAFC;
+  --bg-page-subtle: #F1F5F9;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #F8FAFC;
+  --bg-sidebar: #FFFFFF;
+  --bg-header: #FFFFFF;
+  --bg-input: #FFFFFF;
+  --bg-modal: #FFFFFF;
+  --bg-badge: #F1F5F9;
+
+  --border-card: #E2E8F0;
+  --border-card-hover: #CBD5E1;
+  --border-input: #CBD5E1;
+  --border-sidebar: #E2E8F0;
+  --border-subtle: #F1F5F9;
+
+  --text-primary: #0F172A;
+  --text-secondary: #334155;
+  --text-muted: #64748B;
+  --text-faint: #94A3B8;
+
   --accent-orange: #E85D04;
+  --accent-orange-hover: #D95000;
+  --accent-orange-light: #FFF7ED;
+  --accent-orange-border: rgba(232, 93, 4, 0.25);
+
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+  --shadow-card-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.06), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+  --shadow-card-orange: 0 10px 25px -5px rgba(232, 93, 4, 0.15);
+  --shadow-dropdown: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
 }
 
-html, body, app-root, main, aside {
-  background-color: #000000 !important;
-  color: #f8fafc !important;
+html.dark {
+  --bg-page: #05070E;
+  --bg-page-subtle: #0B0F19;
+  --bg-card: #0D121F;
+  --bg-card-hover: #131B2E;
+  --bg-sidebar: #090D17;
+  --bg-header: #090D17;
+  --bg-input: #0B0F19;
+  --bg-modal: #0D121F;
+  --bg-badge: #1A2234;
+
+  --border-card: #1E293B;
+  --border-card-hover: #334155;
+  --border-input: #1E293B;
+  --border-sidebar: #1E293B;
+  --border-subtle: #131B2E;
+
+  --text-primary: #F8FAFC;
+  --text-secondary: #CBD5E1;
+  --text-muted: #94A3B8;
+  --text-faint: #64748B;
+
+  --accent-orange: #E85D04;
+  --accent-orange-hover: #F48C06;
+  --accent-orange-light: rgba(232, 93, 4, 0.12);
+  --accent-orange-border: rgba(232, 93, 4, 0.4);
+
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+  --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -2px rgba(0, 0, 0, 0.5);
+  --shadow-card-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.6);
+  --shadow-card-orange: 0 15px 30px -5px rgba(232, 93, 4, 0.25);
+  --shadow-dropdown: 0 25px 35px -5px rgba(0, 0, 0, 0.8);
+}
+
+html, body {
+  background-color: var(--bg-page);
+  color: var(--text-primary);
   margin: 0;
   padding: 0;
   min-height: 100vh;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* Glass Cards with pure pitch black base (#0A0A0A) - ZERO blueish tone */
+/* Glass & Card Design System */
 .glass-card {
-  background-color: #0A0A0A !important;
-  border: 1px solid rgba(232, 93, 4, 0.3) !important;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.95), 0 8px 10px -6px rgba(0, 0, 0, 0.95);
-  border-radius: 1.25rem;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-card);
+  box-shadow: var(--shadow-card);
+  border-radius: 1rem;
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .glass-card-interactive {
-  background-color: #0A0A0A !important;
-  border: 1px solid rgba(232, 93, 4, 0.3) !important;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border-radius: 1.25rem;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-card);
+  box-shadow: var(--shadow-card);
+  border-radius: 1rem;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .glass-card-interactive:hover {
-  border-color: rgba(232, 93, 4, 0.7) !important;
+  background-color: var(--bg-card-hover);
+  border-color: var(--accent-orange);
   transform: translateY(-2px);
-  box-shadow: 0 25px 30px -5px rgba(232, 93, 4, 0.3) !important;
+  box-shadow: var(--shadow-card-orange);
 }
 
 .brand-gradient-text {
-  background: linear-gradient(135deg, #FAA307 0%, #E85D04 50%, #DC2F02 100%);
+  background: linear-gradient(135deg, #D95000 0%, #E85D04 50%, #F48C06 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-/* Scrollbars */
+.brand-btn-primary {
+  background: linear-gradient(135deg, #E85D04 0%, #D95000 100%);
+  color: #FFFFFF;
+  font-weight: 700;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 12px rgba(232, 93, 4, 0.25);
+  transition: all 0.2s ease;
+}
+
+.brand-btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #F48C06 0%, #E85D04 100%);
+  box-shadow: 0 6px 16px rgba(232, 93, 4, 0.35);
+  transform: translateY(-1px);
+}
+
+.brand-btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.brand-btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Custom Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #000000;
+  background: var(--bg-page-subtle);
 }
 ::-webkit-scrollbar-thumb {
-  background: #262626;
+  background: var(--border-card-hover);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #E85D04;
+  background: var(--accent-orange);
 }

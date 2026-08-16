@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, AfterViewInit, signal, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../../core/services/api.service';
+import { ThemeService } from '../../core/services/theme.service';
 
 declare var vis: any;
 
@@ -9,47 +10,58 @@ declare var vis: any;
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="p-8 max-w-7xl mx-auto space-y-8 bg-[#000000]">
+    <div class="p-6 md:p-8 max-w-7xl mx-auto space-y-8">
+      
       <!-- Title Banner -->
-      <div class="glass-card p-8 relative overflow-hidden bg-[#0A0A0A]">
-        <div class="absolute -right-20 -top-20 w-80 h-80 bg-[#E85D04]/10 rounded-full blur-3xl pointer-events-none"></div>
-        <h1 class="text-3xl font-black brand-gradient-text">Graphe de Connaissances Réglementaires Neo4j</h1>
-        <p class="text-sm text-slate-400 mt-1">Exploration visuelle et interactive du réseau des circulaires, obligations, et processus bancaires</p>
+      <div class="glass-card p-6 md:p-8 relative overflow-hidden">
+        <div class="space-y-1 z-10 relative">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E85D04]/10 text-[#E85D04] text-xs font-bold uppercase tracking-wider">
+            <span>🌐 Base de Données Graphe Neo4j</span>
+          </div>
+          <h1 class="text-2xl md:text-3xl font-black text-[var(--text-primary)]">Graphe de Connaissances Réglementaires BCT</h1>
+          <p class="text-sm text-[var(--text-muted)] max-w-2xl">
+            Exploration visuelle et interactive du réseau des circulaires, obligations, articles et processus bancaires Attijari Bank.
+          </p>
+        </div>
       </div>
 
       <!-- Node Type Selection Filter Bar -->
-      <div class="glass-card p-4 flex flex-wrap items-center justify-between gap-4 bg-[#0A0A0A]">
+      <div class="glass-card p-4 flex flex-wrap items-center justify-between gap-4 shadow-sm">
         <div class="flex items-center gap-2">
-          <span class="text-xs font-black text-slate-400 uppercase tracking-wider mr-2">Filtrer par type:</span>
+          <span class="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mr-2">Filtrer par type :</span>
           @for (lbl of ['Circular', 'Obligation', 'Process', 'ContractTemplate']; track lbl) {
             <button (click)="selectLabel(lbl)"
               [class]="selectedLabel() === lbl 
-                ? 'px-4 py-2 rounded-xl bg-[#E85D04] text-white font-bold text-xs shadow-lg shadow-[#E85D04]/30' 
-                : 'px-4 py-2 rounded-xl bg-[#000000] text-slate-300 hover:text-white font-semibold text-xs border border-slate-800'">
+                ? 'px-4 py-2 rounded-xl brand-btn-primary text-xs shadow-sm font-bold' 
+                : 'px-4 py-2 rounded-xl bg-[var(--bg-page-subtle)] text-[var(--text-secondary)] hover:text-[#E85D04] font-semibold text-xs border border-[var(--border-card)] transition-all'">
               {{ lbl }}
             </button>
           }
         </div>
 
-        <div class="flex items-center gap-4 text-xs font-semibold text-slate-400">
+        <div class="flex items-center gap-4 text-xs font-semibold text-[var(--text-muted)]">
           <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-[#E85D04]"></span> Circulaire</span>
           <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-[#DC2F02]"></span> Obligation</span>
           <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-[#10B981]"></span> Processus</span>
-          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-[#818CF8]"></span> Modèle Contrat</span>
+          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-[#6366F1]"></span> Modèle Contrat</span>
         </div>
       </div>
 
       <!-- Interactive 2D Visual Network Canvas -->
-      <div class="glass-card p-6 bg-[#0A0A0A] space-y-4">
-        <div class="flex justify-between items-center pb-2 border-b border-slate-800">
-          <h2 class="text-base font-black text-white">Visualisation du Réseau Graphique 2D</h2>
-          <span class="text-xs text-slate-500 font-medium">Glissez pour déplacer les nœuds • Molette pour zoomer</span>
+      <div class="glass-card p-6 space-y-4 shadow-sm">
+        <div class="flex justify-between items-center pb-2 border-b border-[var(--border-card)]">
+          <h2 class="text-base font-bold text-[var(--text-primary)]">Visualisation du Réseau Graphique 2D</h2>
+          <span class="text-xs text-[var(--text-muted)] font-medium">Glissez pour déplacer les nœuds • Molette pour zoomer • Cliquez pour inspecter</span>
         </div>
 
-        <div #networkContainer class="w-full h-[520px] rounded-2xl bg-[#000000] border border-slate-800/80 relative">
+        <div #networkContainer class="w-full h-[520px] rounded-2xl bg-[var(--bg-page-subtle)] border border-[var(--border-card)] relative">
           @if (loadingGraph()) {
-            <div class="absolute inset-0 flex items-center justify-center text-slate-400 text-sm font-semibold bg-[#000000]/80 z-10">
-              Génération du réseau graphique Neo4j...
+            <div class="absolute inset-0 flex items-center justify-center text-[var(--text-muted)] text-sm font-semibold bg-[var(--bg-card)]/80 backdrop-blur-sm z-10">
+              <svg class="animate-spin h-5 w-5 text-[#E85D04] mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span>Chargement du sous-graphe Neo4j...</span>
             </div>
           }
         </div>
@@ -57,13 +69,13 @@ declare var vis: any;
 
       <!-- Selected Node Properties Drawer -->
       @if (selectedNode()) {
-        <div class="glass-card p-6 bg-[#0A0A0A] space-y-3 border-l-4 border-[#E85D04]">
-          <h3 class="text-sm font-black text-[#E85D04] uppercase tracking-wider">Propriétés du Nœud Sélectionné</h3>
+        <div class="glass-card p-6 space-y-3 border-l-4 border-[#E85D04] shadow-sm">
+          <h3 class="text-sm font-bold text-[#E85D04] uppercase tracking-wider">Propriétés du Nœud Sélectionné</h3>
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
             @for (prop of getNodeProperties(); track prop.key) {
-              <div class="p-3 rounded-xl bg-[#000000] border border-slate-800">
-                <div class="text-[10px] text-slate-500 font-bold uppercase">{{ prop.key }}</div>
-                <div class="text-slate-200 font-semibold mt-1 break-words">{{ prop.value }}</div>
+              <div class="p-3.5 rounded-xl bg-[var(--bg-page-subtle)] border border-[var(--border-card)]">
+                <div class="text-[10px] text-[var(--text-muted)] font-bold uppercase">{{ prop.key }}</div>
+                <div class="text-[var(--text-primary)] font-semibold mt-1 break-words">{{ prop.value }}</div>
               </div>
             }
           </div>
@@ -72,41 +84,41 @@ declare var vis: any;
 
       <!-- Numerical Summary Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="glass-card p-6 space-y-4 bg-[#0A0A0A]">
-          <div class="flex items-center gap-3 pb-3 border-b border-slate-800">
-            <div class="p-2 rounded-xl bg-[#E85D04]/10 text-[#E85D04]">
+        <div class="glass-card p-6 space-y-4 shadow-sm">
+          <div class="flex items-center gap-3 pb-3 border-b border-[var(--border-card)]">
+            <div class="p-2 rounded-xl bg-orange-50 dark:bg-orange-950/30 text-[#E85D04]">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
               </svg>
             </div>
-            <h2 class="text-lg font-black text-white">Répartition des Nœuds</h2>
+            <h2 class="text-base font-bold text-[var(--text-primary)]">Répartition des Nœuds</h2>
           </div>
 
           <div class="space-y-2">
             @for (item of nodeStats(); track item.key) {
-              <div class="flex justify-between p-3.5 rounded-xl bg-[#000000] border border-slate-800 text-xs">
-                <span class="font-semibold text-slate-300">{{ item.key }}</span>
-                <span class="font-black text-[#E85D04]">{{ item.value }}</span>
+              <div class="flex justify-between p-3.5 rounded-xl bg-[var(--bg-page-subtle)] border border-[var(--border-card)] text-xs">
+                <span class="font-semibold text-[var(--text-secondary)]">{{ item.key }}</span>
+                <span class="font-bold text-[#E85D04]">{{ item.value }}</span>
               </div>
             }
           </div>
         </div>
 
-        <div class="glass-card p-6 space-y-4 bg-[#0A0A0A]">
-          <div class="flex items-center gap-3 pb-3 border-b border-slate-800">
-            <div class="p-2 rounded-xl bg-indigo-500/10 text-indigo-400">
+        <div class="glass-card p-6 space-y-4 shadow-sm">
+          <div class="flex items-center gap-3 pb-3 border-b border-[var(--border-card)]">
+            <div class="p-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
               </svg>
             </div>
-            <h2 class="text-lg font-black text-white">Répartition des Relations</h2>
+            <h2 class="text-base font-bold text-[var(--text-primary)]">Répartition des Relations</h2>
           </div>
 
           <div class="space-y-2">
             @for (item of relStats(); track item.key) {
-              <div class="flex justify-between p-3.5 rounded-xl bg-[#000000] border border-slate-800 text-xs">
-                <span class="font-semibold text-slate-300">{{ item.key }}</span>
-                <span class="font-black text-indigo-400">{{ item.value }}</span>
+              <div class="flex justify-between p-3.5 rounded-xl bg-[var(--bg-page-subtle)] border border-[var(--border-card)] text-xs">
+                <span class="font-semibold text-[var(--text-secondary)]">{{ item.key }}</span>
+                <span class="font-bold text-indigo-600 dark:text-indigo-400">{{ item.value }}</span>
               </div>
             }
           </div>
@@ -117,6 +129,7 @@ declare var vis: any;
 })
 export class GraphComponent implements OnInit, AfterViewInit {
   api = inject(ApiService);
+  theme = inject(ThemeService);
 
   @ViewChild('networkContainer') networkContainer!: ElementRef;
 
@@ -169,16 +182,20 @@ export class GraphComponent implements OnInit, AfterViewInit {
   buildVisNetwork(records: any[]) {
     if (!this.networkContainer || typeof vis === 'undefined') return;
 
+    const isDark = this.theme.isDark();
+    const labelColor = isDark ? '#F8FAFC' : '#0F172A';
+    const edgeColor = isDark ? '#94A3B8' : '#64748B';
+
     const nodesMap = new Map<string, any>();
     const edgesArray: any[] = [];
 
     const getColor = (labels: string[] = []) => {
       const main = labels[0] || '';
-      if (main === 'Circular') return { background: '#E85D04', border: '#FAA307' };
-      if (main === 'Obligation') return { background: '#DC2F02', border: '#F48C06' };
-      if (main === 'Process') return { background: '#10B981', border: '#34D399' };
-      if (main === 'ContractTemplate') return { background: '#818CF8', border: '#A5B4FC' };
-      return { background: '#F48C06', border: '#FBBF24' };
+      if (main === 'Circular') return { background: '#E85D04', border: '#D95000' };
+      if (main === 'Obligation') return { background: '#DC2F02', border: '#9D0208' };
+      if (main === 'Process') return { background: '#10B981', border: '#059669' };
+      if (main === 'ContractTemplate') return { background: '#6366F1', border: '#4F46E5' };
+      return { background: '#F48C06', border: '#D95000' };
     };
 
     records.forEach((rec: any, idx: number) => {
@@ -194,7 +211,7 @@ export class GraphComponent implements OnInit, AfterViewInit {
           color: getColor(nLabels),
           shape: 'dot',
           size: 20,
-          font: { color: '#ffffff', size: 12, face: 'Inter' },
+          font: { color: labelColor, size: 12, face: 'Inter' },
           properties: nProps,
         });
       }
@@ -212,7 +229,7 @@ export class GraphComponent implements OnInit, AfterViewInit {
             color: getColor(mLabels),
             shape: 'dot',
             size: 16,
-            font: { color: '#e2e8f0', size: 11, face: 'Inter' },
+            font: { color: labelColor, size: 11, face: 'Inter' },
             properties: mProps,
           });
         }
@@ -222,7 +239,7 @@ export class GraphComponent implements OnInit, AfterViewInit {
           to: mId,
           label: rec.rel_type || '',
           color: { color: '#E85D04', opacity: 0.6 },
-          font: { color: '#94a3b8', size: 9, align: 'middle' },
+          font: { color: edgeColor, size: 9, align: 'middle' },
           arrows: 'to',
         });
       }

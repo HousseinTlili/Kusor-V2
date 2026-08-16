@@ -9,46 +9,54 @@ import { SeverityBadgeComponent } from '../../shared/components/severity-badge/s
   standalone: true,
   imports: [CommonModule, FormsModule, SeverityBadgeComponent],
   template: `
-    <div class="p-8 max-w-7xl mx-auto space-y-8">
+    <div class="p-6 md:p-8 max-w-7xl mx-auto space-y-8">
+      
       <!-- Header Banner -->
-      <div class="glass-card p-8 relative overflow-hidden">
-        <div class="absolute -right-20 -top-20 w-80 h-80 bg-[#E85D04]/10 rounded-full blur-3xl pointer-events-none"></div>
-        <h1 class="text-3xl font-black brand-gradient-text">Module 3: Analyse de Risque de Contrat Bancaire</h1>
-        <p class="text-sm text-slate-400 mt-1">Segmentation automatique des clauses et vérification de validité temporelle des références BCT</p>
+      <div class="glass-card p-6 md:p-8 relative overflow-hidden">
+        <div class="space-y-1 z-10 relative">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-400 text-xs font-bold uppercase tracking-wider border border-indigo-200 dark:border-indigo-800">
+            <span>⚖️ Affaires Juridiques & Réglementaires</span>
+          </div>
+          <h1 class="text-2xl md:text-3xl font-black text-[var(--text-primary)]">Analyse de Risque de Contrat Bancaire</h1>
+          <p class="text-sm text-[var(--text-muted)] max-w-2xl">
+            Segmentation automatique des clauses et vérification de conformité temporelle par rapport aux circulaires BCT en vigueur.
+          </p>
+        </div>
       </div>
 
       <!-- Quick Demo Presets Bar -->
-      <div class="glass-card p-4 flex flex-wrap items-center gap-3 bg-[#070A18] text-xs">
-        <span class="font-black text-slate-400 uppercase tracking-wider text-[10px] mr-2">Modèles Types de Contrats :</span>
-        <button (click)="loadPreset('pret_immo')" class="px-3.5 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-semibold transition-all">
+      <div class="glass-card p-4 flex flex-wrap items-center gap-3 text-xs shadow-sm">
+        <span class="font-bold text-[var(--text-muted)] uppercase tracking-wider text-[10px] mr-2">Modèles Types de Contrats :</span>
+        <button (click)="loadPreset('pret_immo')" class="px-3.5 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 font-semibold transition-all shadow-sm">
           ✓ Prêt Immobilier Standard
         </button>
-        <button (click)="loadPreset('taux_usure')" class="px-3.5 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 font-semibold transition-all">
+        <button (click)="loadPreset('taux_usure')" class="px-3.5 py-1.5 rounded-xl bg-rose-50 dark:bg-rose-950/30 hover:bg-rose-100 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-800 font-semibold transition-all shadow-sm">
           ⚠️ Clause Risquée (Pénalité Usuraire)
         </button>
-        <button (click)="loadPreset('compte_courant')" class="px-3.5 py-1.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 font-semibold transition-all">
+        <button (click)="loadPreset('compte_courant')" class="px-3.5 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/30 hover:bg-indigo-100 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 font-semibold transition-all shadow-sm">
           📄 Convention de Compte Bancaire
         </button>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
         <!-- Input Form -->
-        <div class="glass-card p-6 space-y-5">
+        <div class="glass-card p-6 space-y-5 shadow-sm">
           <div>
-            <label class="block text-[11px] font-extrabold text-slate-300 uppercase tracking-wider mb-2">Titre du Modèle de Contrat</label>
+            <label class="block text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">Titre du Modèle de Contrat</label>
             <input type="text" [(ngModel)]="title" placeholder="ex: Convention de Prêt Immobilier 2026"
-              class="w-full px-4 py-3 rounded-xl bg-[#090D28] border border-slate-800 text-slate-100 text-sm focus:outline-none focus:border-[#E85D04] transition-all" />
+              class="w-full px-4 py-3 rounded-xl bg-[var(--bg-input)] border border-[var(--border-input)] text-[var(--text-primary)] text-sm focus:outline-none focus:border-[#E85D04] focus:ring-2 focus:ring-[#E85D04]/20 transition-all" />
           </div>
 
           <!-- File Upload Option -->
           <div>
-            <label class="block text-[11px] font-extrabold text-slate-300 uppercase tracking-wider mb-2">Téléverser un Fichier Contrat (PDF / DOCX / TXT)</label>
-            <div class="border-2 border-dashed border-slate-800 hover:border-[#E85D04]/50 rounded-2xl p-4 text-center bg-[#090D28]/60 transition-all cursor-pointer relative">
+            <label class="block text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">Téléverser un Contrat (PDF / DOCX / TXT)</label>
+            <div class="border-2 border-dashed border-[var(--border-card-hover)] hover:border-[#E85D04] rounded-2xl p-4 text-center bg-[var(--bg-page-subtle)] transition-all cursor-pointer relative">
               <input type="file" (change)="onFileSelected($event)" accept=".pdf,.docx,.txt" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" />
-              <svg class="w-7 h-7 text-slate-500 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              <svg class="w-7 h-7 text-[var(--text-muted)] mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
               </svg>
-              <div class="text-xs text-slate-300 font-bold">Sélectionner un contrat PDF / DOCX</div>
+              <div class="text-xs text-[var(--text-primary)] font-bold">Sélectionner un contrat PDF / DOCX</div>
               @if (selectedFileName) {
                 <div class="text-[11px] text-[#E85D04] font-semibold mt-1">✓ {{ selectedFileName }}</div>
               }
@@ -56,13 +64,13 @@ import { SeverityBadgeComponent } from '../../shared/components/severity-badge/s
           </div>
 
           <div>
-            <label class="block text-[11px] font-extrabold text-slate-300 uppercase tracking-wider mb-2">Ou Texte des Clauses à Analyser</label>
+            <label class="block text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">Ou Texte des Clauses à Analyser</label>
             <textarea [(ngModel)]="text" rows="7" placeholder="Collez ici les articles et clauses du contrat..."
-              class="w-full px-4 py-3 rounded-xl bg-[#090D28] border border-slate-800 text-slate-100 text-xs font-mono focus:outline-none focus:border-[#E85D04] transition-all leading-relaxed"></textarea>
+              class="w-full px-4 py-3 rounded-xl bg-[var(--bg-input)] border border-[var(--border-input)] text-[var(--text-primary)] text-xs font-mono focus:outline-none focus:border-[#E85D04] transition-all leading-relaxed"></textarea>
           </div>
 
           <button (click)="analyze()" [disabled]="loading() || (!text && !selectedFile)"
-            class="w-full py-3.5 rounded-xl font-bold text-white bg-gradient-to-r from-[#FAA307] via-[#E85D04] to-[#DC2F02] hover:from-[#E85D04] hover:to-[#9D0208] disabled:opacity-50 shadow-xl shadow-[#E85D04]/30 transition-all text-sm flex items-center justify-center gap-2">
+            class="w-full py-3.5 rounded-xl font-bold brand-btn-primary disabled:opacity-50 transition-all text-xs flex items-center justify-center gap-2 shadow-sm">
             @if (loading()) {
               <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -79,51 +87,51 @@ import { SeverityBadgeComponent } from '../../shared/components/severity-badge/s
         </div>
 
         <!-- Output Report -->
-        <div class="lg:col-span-2 glass-card p-8 space-y-6">
+        <div class="lg:col-span-2 glass-card p-6 md:p-8 space-y-6 shadow-sm">
           @if (!report()) {
-            <div class="flex flex-col items-center justify-center h-80 text-slate-500 italic font-medium space-y-3">
-              <svg class="w-12 h-12 text-slate-600 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="flex flex-col items-center justify-center h-80 text-[var(--text-muted)] italic font-medium space-y-3">
+              <svg class="w-12 h-12 text-[var(--text-faint)] opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
               </svg>
               <span>Sélectionnez un modèle type ou collez des clauses pour vérifier la conformité BCT.</span>
             </div>
           } @else {
-            <div class="flex items-center justify-between border-b border-slate-800 pb-5">
+            <div class="flex items-center justify-between border-b border-[var(--border-card)] pb-5">
               <div>
-                <h2 class="text-xl font-black text-white">{{ report().contract_title }}</h2>
-                <div class="text-xs text-slate-400 font-medium mt-0.5">Total Clauses Analysées: <strong>{{ report().total_clauses }}</strong> | Non-Conformités: <strong class="text-rose-400">{{ report().non_conformity_count }}</strong></div>
+                <h2 class="text-xl font-black text-[var(--text-primary)]">{{ report().contract_title }}</h2>
+                <div class="text-xs text-[var(--text-muted)] font-medium mt-0.5">Total Clauses Analysées : <strong>{{ report().total_clauses }}</strong> | Non-Conformités : <strong class="text-rose-600 dark:text-rose-400">{{ report().non_conformity_count }}</strong></div>
               </div>
               <app-severity-badge [severity]="report().overall_risk"></app-severity-badge>
             </div>
 
             <!-- Metric Cards -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div class="p-4 rounded-2xl bg-[#090D28] border border-slate-800 text-center space-y-1">
-                <div class="text-[10px] text-slate-400 uppercase font-black tracking-wider">Risque Global</div>
-                <div class="text-2xl font-black text-white">{{ report().overall_risk }}</div>
+              <div class="p-4 rounded-2xl bg-[var(--bg-page-subtle)] border border-[var(--border-card)] text-center space-y-1">
+                <div class="text-[10px] text-[var(--text-muted)] uppercase font-bold tracking-wider">Risque Global</div>
+                <div class="text-2xl font-black text-[var(--text-primary)]">{{ report().overall_risk }}</div>
               </div>
-              <div class="p-4 rounded-2xl bg-[#090D28] border border-slate-800 text-center space-y-1">
-                <div class="text-[10px] text-slate-400 uppercase font-black tracking-wider">Anomalies Critiques</div>
-                <div class="text-2xl font-black text-rose-400">{{ report().critical_issues || 0 }}</div>
+              <div class="p-4 rounded-2xl bg-[var(--bg-page-subtle)] border border-[var(--border-card)] text-center space-y-1">
+                <div class="text-[10px] text-[var(--text-muted)] uppercase font-bold tracking-wider">Anomalies Critiques</div>
+                <div class="text-2xl font-black text-rose-600 dark:text-rose-400">{{ report().critical_issues || 0 }}</div>
               </div>
-              <div class="p-4 rounded-2xl bg-[#090D28] border border-slate-800 text-center space-y-1">
-                <div class="text-[10px] text-slate-400 uppercase font-black tracking-wider">Validité Temporelle</div>
-                <div class="text-2xl font-black text-emerald-400">100% Vérifiée</div>
+              <div class="p-4 rounded-2xl bg-[var(--bg-page-subtle)] border border-[var(--border-card)] text-center space-y-1">
+                <div class="text-[10px] text-[var(--text-muted)] uppercase font-bold tracking-wider">Validité Temporelle</div>
+                <div class="text-2xl font-black text-emerald-600 dark:text-emerald-400">100% Vérifiée</div>
               </div>
             </div>
 
             <div class="space-y-4">
-              <h3 class="text-xs font-black text-slate-300 uppercase tracking-wider">Détail des Clauses Analysées (Taxonomie BCT)</h3>
+              <h3 class="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider">Détail des Clauses Analysées (Taxonomie BCT)</h3>
               @for (c of report().clauses; track c.clause_number) {
-                <div class="p-5 rounded-2xl bg-[#090D28] border border-slate-800 space-y-3 text-xs">
+                <div class="p-5 rounded-2xl bg-[var(--bg-page-subtle)] border border-[var(--border-card)] space-y-3 text-xs">
                   <div class="flex justify-between items-center">
-                    <span class="font-bold text-[#E85D04] text-sm">Clause N° {{ c.clause_number }} (Type: {{ c.clause_type }})</span>
+                    <span class="font-bold text-[#E85D04] text-sm">Clause N° {{ c.clause_number }} (Type : {{ c.clause_type }})</span>
                     <app-severity-badge [severity]="c.conformity_status"></app-severity-badge>
                   </div>
-                  <p class="text-slate-300 leading-relaxed font-mono text-[11px] bg-slate-900/60 p-3 rounded-xl border border-slate-800/60">{{ c.clause_text }}</p>
+                  <p class="text-[var(--text-secondary)] leading-relaxed font-mono text-[11px] bg-[var(--bg-card)] p-3.5 rounded-xl border border-[var(--border-card)]">{{ c.clause_text }}</p>
                   @if (c.regulatory_basis_ref) {
-                    <div class="text-[11px] text-slate-400">
-                      Base Réglementaire: <strong class="text-amber-400">{{ c.regulatory_basis_ref }}</strong> (Statut BCT: <span class="text-emerald-400 font-bold">En vigueur</span>)
+                    <div class="text-[11px] text-[var(--text-muted)]">
+                      Base Réglementaire : <strong class="text-amber-600 dark:text-amber-400">{{ c.regulatory_basis_ref }}</strong> (Statut BCT : <span class="text-emerald-600 dark:text-emerald-400 font-bold">En vigueur</span>)
                     </div>
                   }
                 </div>
@@ -132,9 +140,9 @@ import { SeverityBadgeComponent } from '../../shared/components/severity-badge/s
 
             @if (report().recommendations?.length) {
               <div class="space-y-2">
-                <h3 class="text-xs font-black text-slate-300 uppercase tracking-wider">Recommandations Juridiques</h3>
+                <h3 class="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider">Recommandations Juridiques</h3>
                 @for (rec of report().recommendations; track $index) {
-                  <div class="p-3.5 rounded-xl bg-[#E85D04]/10 border border-[#E85D04]/20 text-[#E85D04] text-xs font-semibold">
+                  <div class="p-3.5 rounded-xl bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-900/40 text-orange-900 dark:text-orange-200 text-xs font-medium">
                     • {{ rec }}
                   </div>
                 }

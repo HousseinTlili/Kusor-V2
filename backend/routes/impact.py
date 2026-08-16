@@ -15,7 +15,6 @@ ns = Namespace("impact", description="Regulation Change Impact operations")
 @ns.route("/<string:circular_id>")
 class CircularImpact(Resource):
     @jwt_required()
-    @role_required("compliance", "admin")
     @audit_action("CIRCULAR_IMPACT_ANALYZED", "impact")
     def get(self, circular_id):
         """Get downstream regulatory change propagation for a circular."""

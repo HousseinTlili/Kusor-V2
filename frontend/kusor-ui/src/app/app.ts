@@ -4,17 +4,18 @@ import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
 import { SidebarComponent } from './shared/components/sidebar/sidebar.component';
 import { AuthService } from './core/services/auth.service';
+import { ThemeService } from './core/services/theme.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [CommonModule, RouterOutlet, SidebarComponent],
   template: `
-    <div class="min-h-screen bg-[#000000] text-slate-100 flex font-sans">
+    <div class="min-h-screen bg-[var(--bg-page)] text-[var(--text-primary)] flex font-sans transition-colors duration-200">
       @if (showSidebar()) {
         <app-sidebar></app-sidebar>
       }
-      <main [class]="showSidebar() ? 'flex-1 pl-64 min-h-screen' : 'w-full min-h-screen'">
+      <main [class]="showSidebar() ? 'flex-1 lg:pl-64 min-h-screen transition-all duration-200' : 'w-full min-h-screen'">
         <router-outlet></router-outlet>
       </main>
     </div>
@@ -22,6 +23,7 @@ import { AuthService } from './core/services/auth.service';
 })
 export class App {
   auth = inject(AuthService);
+  theme = inject(ThemeService);
   router = inject(Router);
 
   isLoginRoute = signal<boolean>(false);

@@ -97,22 +97,45 @@ class DocumentProcessor:
         circular_ref: Optional[str] = None,
         title: Optional[str] = None,
         doc_type: str = "circular",
+        filename: Optional[str] = None,
     ) -> Document:
         """Process file path or stream into text and index chunks/graph."""
+        actual_filename = filename
         if isinstance(filepath_or_stream, str) and os.path.exists(filepath_or_stream):
-            filename = os.path.basename(filepath_or_stream)
-            if filename.endswith(".pdf"):
+            actual_filename = os.path.basename(filepath_or_stream)
+            if actual_filename.endswith(".pdf"):
                 raw_text = self._extract_pdf(filepath_or_stream)
-            elif filename.endswith(".docx"):
+            elif actual_filename.endswith(".docx"):
                 raw_text = self._extract_docx(filepath_or_stream)
             else:
                 raw_text = self._extract_txt(filepath_or_stream)
-            doc_title = title or circular_ref or filename
         else:
             raw_text = str(filepath_or_stream)
-            doc_title = title or circular_ref or "Document"
 
-        return self.process_text_content(raw_text, title=doc_title, doc_type=doc_type)
+        # Detect circular reference from filename if like 2018-12.pdf
+        effective_ref = circular_ref
+        if not effective_ref and actual_filename:
+            ref_match = re.match(r"^(\d{4}-\d{1,2})", actual_filename)
+            if ref_match:
+                effective_ref = ref_match.group(1)
+
+        doc_title = title
+        if not doc_title:
+            if effective_ref:
+                doc_title = f"Circulaire BCT N° {effective_ref}"
+            elif actual_filename:
+                doc_title = actual_filename
+            else:
+                doc_title = "Document"
+
+        return self.process_text_content(
+            raw_text,
+            title=doc_title,
+            doc_type=doc_type,
+            circular_ref=effective_ref,
+            filename=actual_filename,
+            doc_id=doc_id,
+        )
 
     def process_text_content(
         self,
@@ -120,23 +143,33 @@ class DocumentProcessor:
         title: str,
         doc_type: str = "circular",
         existing_doc: Optional[Document] = None,
+        circular_ref: Optional[str] = None,
+        filename: Optional[str] = None,
+        doc_id: Optional[str] = None,
     ) -> Document:
         """Process raw text directly without file upload."""
         if not raw_text.strip():
             raise ValueError("No text provided")
 
-        circular_ref = self._extract_circular_reference(raw_text)
+        if not circular_ref:
+            circular_ref = self._extract_circular_reference(raw_text)
         date_issued = self._extract_date(raw_text)
         content_hash = hashlib.sha256(raw_text.encode("utf-8")).hexdigest()
 
-        if not existing_doc and circular_ref:
-            existing_doc = Document.query.filter(
-                (Document.content_hash == content_hash) | (Document.number == circular_ref)
-            ).first()
+        if not existing_doc:
+            if doc_id:
+                existing_doc = Document.query.get(doc_id)
+            if not existing_doc and circular_ref:
+                existing_doc = Document.query.filter(
+                    (Document.number == circular_ref) | (Document.circular_reference == circular_ref)
+                ).first()
+            if not existing_doc and filename:
+                existing_doc = Document.query.filter(Document.filename == filename).first()
 
         if existing_doc:
             doc = existing_doc
             doc.title = title
+            doc.filename = filename or doc.filename
             doc.doc_type = doc_type
             doc.number = circular_ref or doc.number
             doc.circular_reference = circular_ref or doc.circular_reference
@@ -149,8 +182,9 @@ class DocumentProcessor:
             Chunk.query.filter_by(document_id=doc.id).delete()
         else:
             doc = Document(
-                id=str(uuid.uuid4()),
+                id=doc_id or str(uuid.uuid4()),
                 title=title,
+                filename=filename,
                 doc_type=doc_type,
                 number=circular_ref,
                 circular_reference=circular_ref,
@@ -158,6 +192,7 @@ class DocumentProcessor:
                 content_hash=content_hash,
                 raw_text=raw_text,
                 indexation_state="PROCESSING",
+                source="BCT Portal",
             )
             db.session.add(doc)
 

@@ -27,7 +27,7 @@ class ChangePropagationAgent:
     def analyze_impact(self, circular_ref: str, document_id: Optional[str] = None) -> ImpactPropagationReport:
         cypher = """
         MATCH (c:Circular)
-        WHERE c.reference = $ref OR c.number = $ref
+        WHERE c.reference = $ref OR c.number = $ref OR c.id = $ref OR c.title CONTAINS $ref
         OPTIONAL MATCH (c)-[:INTRODUCES]->(o:Obligation)
         OPTIONAL MATCH (o)-[:AFFECTS]->(p:Process)
         OPTIONAL MATCH (o)-[:CONSTRAINS]->(ct:ContractTemplate)

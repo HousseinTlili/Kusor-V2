@@ -16,24 +16,27 @@ export class SeverityBadgeComponent {
 
   getClasses(): string {
     const s = (this.severity || 'LOW').toUpperCase();
-    const base = 'px-3 py-1 rounded-full text-xs font-bold tracking-wider border ';
+    const base = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-bold tracking-wider border ';
     switch (s) {
       case 'LOW':
       case 'APPROVE':
       case 'CONFORMING':
-        return base + 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
+      case 'CONFORME':
+        return base + 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800';
       case 'MEDIUM':
       case 'REVIEW':
       case 'AMBIGUOUS':
-        return base + 'bg-amber-500/10 text-amber-400 border-amber-500/30';
+      case 'VIGILANCE':
+        return base + 'bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800';
       case 'HIGH':
       case 'CRITICAL':
       case 'REJECT':
       case 'NON_CONFORMING':
+      case 'NON-CONFORME':
       case 'PROHIBITION':
-        return base + 'bg-rose-500/10 text-rose-400 border-rose-500/30';
+        return base + 'bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-800';
       default:
-        return base + 'bg-slate-800 text-slate-300 border-slate-700';
+        return base + 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700';
     }
   }
 }

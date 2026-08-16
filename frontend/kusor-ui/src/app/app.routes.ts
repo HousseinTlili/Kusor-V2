@@ -42,8 +42,13 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/credit/credit.component').then(m => m.CreditComponent)
   },
   {
+    path: 'impact-viewer',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/impact-viewer/impact-viewer.component').then(m => m.ImpactViewerComponent)
+  },
+  {
     path: 'impact-viewer/:circularId',
-    canActivate: [authGuard, roleGuard(['compliance'])],
+    canActivate: [authGuard],
     loadComponent: () => import('./pages/impact-viewer/impact-viewer.component').then(m => m.ImpactViewerComponent)
   },
   {
