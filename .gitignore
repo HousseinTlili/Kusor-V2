@@ -20,6 +20,11 @@ ENV/
 backend.log
 /tmp/
 
+# Documentation & Internal Reports
+PROJECT_STATUS.md
+TECHNICAL_HANDOFF.md
+.agents/
+
 # Node / Angular Frontend
 **/node_modules/
 **/dist/
