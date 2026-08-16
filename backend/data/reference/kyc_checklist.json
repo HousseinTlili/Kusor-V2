@@ -1,0 +1,36 @@
+{
+  "version": "1.0",
+  "source": "Attijari Bank — Réponse Besoins Données KUSOR v3",
+  "last_updated": "2026-08-07",
+  "checklists": {
+    "individuel": {
+      "label": "Client Individuel",
+      "documents": [
+        {"id": "IND-01", "name": "Carte d'identité nationale (CIN) en cours de validité", "status": "obligatoire", "validity_months": null, "code": "cin_valide"},
+        {"id": "IND-02", "name": "Justificatif de domicile de moins de 3 mois", "status": "obligatoire", "validity_months": 3, "code": "justificatif_domicile"},
+        {"id": "IND-03", "name": "Justificatif de revenus / bulletin de salaire", "status": "obligatoire", "validity_months": null, "code": "bulletin_salaire"},
+        {"id": "IND-04", "name": "Déclaration d'origine des fonds", "status": "conditionnel", "validity_months": null, "code": "declaration_origine_fonds", "condition": "Dépôt supérieur à 50 000 TND"},
+        {"id": "IND-05", "name": "Spécimen de signature", "status": "obligatoire", "validity_months": null, "code": "specimen_signature"}
+      ]
+    },
+    "corporate": {
+      "label": "Client Corporate",
+      "documents": [
+        {"id": "CORP-01", "name": "Registre de commerce (RNE)", "status": "obligatoire", "validity_months": null, "code": "rne"},
+        {"id": "CORP-02", "name": "Statuts de la société", "status": "obligatoire", "validity_months": null, "code": "statuts_societe"},
+        {"id": "CORP-03", "name": "Liste des bénéficiaires effectifs", "status": "obligatoire", "validity_months": null, "code": "liste_beneficiaires_effectifs"},
+        {"id": "CORP-04", "name": "États financiers des 2 derniers exercices", "status": "conditionnel", "validity_months": null, "code": "etats_financiers_2ans", "condition": "Selon type de compte"},
+        {"id": "CORP-05", "name": "Procès-verbal de nomination des signataires", "status": "obligatoire", "validity_months": null, "code": "pv_nomination_signataires"}
+      ]
+    },
+    "ppe": {
+      "label": "Client PPE (Personne Politiquement Exposée)",
+      "documents": [
+        {"id": "PPE-01", "name": "Déclaration de statut PPE", "status": "obligatoire", "validity_months": null, "code": "declaration_statut_ppe"},
+        {"id": "PPE-02", "name": "Justificatif de la fonction exercée", "status": "obligatoire", "validity_months": null, "code": "justificatif_fonction"},
+        {"id": "PPE-03", "name": "Déclaration détaillée d'origine des fonds", "status": "obligatoire", "validity_months": null, "code": "declaration_detaillee_origine_fonds"},
+        {"id": "PPE-04", "name": "Validation renforcée hiérarchie / conformité", "status": "obligatoire", "validity_months": null, "code": "validation_renforcee_hierarchie"}
+      ]
+    }
+  }
+}

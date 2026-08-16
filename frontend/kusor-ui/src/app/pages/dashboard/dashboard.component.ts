@@ -17,8 +17,19 @@ import { ApiService } from '../../core/services/api.service';
           <p class="text-slate-400 mt-1 text-sm">Plateforme d'intelligence et de surveillance réglementaire Banque Centrale de Tunisie</p>
         </div>
 
-        <button (click)="loadStats()" class="px-5 py-3 rounded-xl bg-[#E85D04]/15 hover:bg-[#E85D04]/25 text-[#E85D04] border border-[#E85D04]/40 text-xs font-bold transition-all shadow-lg shadow-[#E85D04]/10">
-          Actualiser les Données
+        <button (click)="loadStats()" [disabled]="loading()" class="px-5 py-3 rounded-xl bg-[#E85D04]/15 hover:bg-[#E85D04]/25 text-[#E85D04] border border-[#E85D04]/40 text-xs font-bold transition-all shadow-lg shadow-[#E85D04]/10 flex items-center gap-2">
+          @if (loading()) {
+            <svg class="animate-spin h-4 w-4 text-[#E85D04]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span>Mise à jour...</span>
+          } @else {
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg>
+            <span>Actualiser les Données</span>
+          }
         </button>
       </div>
 
@@ -26,7 +37,7 @@ import { ApiService } from '../../core/services/api.service';
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div class="glass-card-interactive p-6 space-y-3 bg-[#070A18]">
           <div class="flex items-center justify-between">
-            <div class="text-[11px] uppercase font-black text-slate-400 tracking-wider">Circulaires BCT</div>
+            <div class="text-[11px] uppercase font-black text-slate-400 tracking-wider">Circulaires & Documents</div>
             <div class="p-2 rounded-xl bg-[#E85D04]/10 text-[#E85D04]">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -34,13 +45,13 @@ import { ApiService } from '../../core/services/api.service';
             </div>
           </div>
           <div class="text-4xl font-black text-white">{{ stats()?.documents_total || 0 }}</div>
-          <div class="text-[11px] text-slate-500 font-medium">Indexés dans PostgreSQL & ChromaDB</div>
+          <div class="text-[11px] text-slate-500 font-medium">Circulaires BCT et documents réglementaires</div>
         </div>
 
         <div class="glass-card-interactive p-6 space-y-3 bg-[#070A18]">
           <div class="flex items-center justify-between">
             <div class="text-[11px] uppercase font-black text-slate-400 tracking-wider">Vecteurs Embeddings</div>
-            <div class="p-2 rounded-xl bg-[#E85D04]/10 text-[#E85D04]">
+            <div class="p-2 rounded-xl bg-amber-500/10 text-amber-400">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
               </svg>
@@ -82,15 +93,23 @@ import { ApiService } from '../../core/services/api.service';
 export class DashboardComponent implements OnInit {
   api = inject(ApiService);
   stats = signal<any>(null);
+  loading = signal(false);
 
   ngOnInit() {
     this.loadStats();
   }
 
   loadStats() {
+    this.loading.set(true);
     this.api.getStats().subscribe({
-      next: (res) => this.stats.set(res),
-      error: (err) => console.error('Failed to load stats', err)
+      next: (res) => {
+        this.stats.set(res);
+        this.loading.set(false);
+      },
+      error: (err) => {
+        console.error('Failed to load stats', err);
+        this.loading.set(false);
+      }
     });
   }
 }

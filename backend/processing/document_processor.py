@@ -178,8 +178,17 @@ class DocumentProcessor:
         doc.indexation_state = "INDEXED"
         db.session.commit()
 
+        try:
+            if self._neo4j and (doc.circular_reference or doc.number):
+                from backend.agent.propagation_agent import ChangePropagationAgent
+                prop_agent = ChangePropagationAgent(self._neo4j)
+                prop_agent.analyze_impact(doc.circular_reference or doc.number, document_id=doc.id)
+        except Exception as e:
+            logger.warning("Auto change propagation trigger failed: %s", e)
+
         logger.info("Successfully processed document %s (%d chunks)", doc.id, len(chunks))
         return doc
+
 
     # ── Text Extraction Methods ─────────────────────────────────
 

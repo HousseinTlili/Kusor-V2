@@ -10,9 +10,19 @@ export class ApiService {
   constructor(private http: HttpClient) {}
 
   // Documents
-  getDocuments(): Observable<any> { return this.http.get(`${this.baseUrl}/documents/`); }
+  getDocuments(filterParams?: any): Observable<any> {
+    let params = new HttpParams();
+    if (filterParams) {
+      Object.keys(filterParams).forEach(key => {
+        if (filterParams[key]) params = params.set(key, filterParams[key]);
+      });
+    }
+    return this.http.get(`${this.baseUrl}/documents/`, { params });
+  }
+  updateDocument(id: string, data: any): Observable<any> { return this.http.put(`${this.baseUrl}/documents/${id}`, data); }
   deleteDocument(id: string): Observable<any> { return this.http.delete(`${this.baseUrl}/documents/${id}`); }
   uploadDocument(formData: FormData): Observable<any> { return this.http.post(`${this.baseUrl}/documents/`, formData); }
+
 
   // Admin & Stats
   getStats(): Observable<any> { return this.http.get(`${this.baseUrl}/admin/stats`); }

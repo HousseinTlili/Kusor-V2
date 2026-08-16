@@ -88,6 +88,65 @@ services:
       - kusor_net
     restart: unless-stopped
 
+  # ── Backend Flask API ──────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: kusor-backend
+    ports:
+      - "5000:5000"
+    environment:
+      FLASK_ENV: production
+      DATABASE_URL: postgresql://kusor_user:kusor_password@postgres:5432/kusor_db
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USER: neo4j
+      NEO4J_PASSWORD: kusor_password
+      CHROMADB_HOST: chromadb
+      CHROMADB_PORT: 8000
+      OLLAMA_BASE_URL: http://ollama:11434
+    depends_on:
+      postgres:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+    networks:
+      - kusor_net
+    restart: unless-stopped
+
+  # ── Frontend Angular Web UI ────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: kusor-frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend
+    networks:
+      - kusor_net
+    restart: unless-stopped
+
+  # ── n8n Workflow Automation ────────────────────────
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:latest
+    container_name: kusor-n8n
+    ports:
+      - "5678:5678"
+    environment:
+      N8N_PORT: 5678
+      N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: "true"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+      - "kusor-backend:host-gateway"
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./n8n/workflows:/n8n/workflows
+    networks:
+      - kusor_net
+    restart: unless-stopped
+
 volumes:
   pgdata:
     name: kusor_pgdata
@@ -99,8 +158,11 @@ volumes:
     name: kusor_chroma_data
   ollama_data:
     name: kusor_ollama_data
+  n8n_data:
+    name: kusor_n8n_data
 
 networks:
   kusor_net:
     driver: bridge
     name: kusor_network
+

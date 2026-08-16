@@ -7,10 +7,13 @@ and contract template affected, classifies severity, and generates an ImpactProp
 
 from __future__ import annotations
 
+import json
 import logging
 from typing import List, Optional
 from backend.agent.schemas import ImpactPropagationReport, ImpactItem
 from backend.graph.neo4j_manager import Neo4jManager
+from backend.models.impact_record import ImpactRecord
+from backend.extensions import db
 
 logger = logging.getLogger(__name__)
 
@@ -21,9 +24,10 @@ class ChangePropagationAgent:
     def __init__(self, neo4j: Neo4jManager):
         self._neo4j = neo4j
 
-    def analyze_impact(self, circular_ref: str) -> ImpactPropagationReport:
+    def analyze_impact(self, circular_ref: str, document_id: Optional[str] = None) -> ImpactPropagationReport:
         cypher = """
-        MATCH (c:Circular {reference: $ref})
+        MATCH (c:Circular)
+        WHERE c.reference = $ref OR c.number = $ref
         OPTIONAL MATCH (c)-[:INTRODUCES]->(o:Obligation)
         OPTIONAL MATCH (o)-[:AFFECTS]->(p:Process)
         OPTIONAL MATCH (o)-[:CONSTRAINS]->(ct:ContractTemplate)
@@ -39,45 +43,136 @@ class ChangePropagationAgent:
         items: List[ImpactItem] = []
         crit_count = 0
         high_count = 0
+        med_count = 0
+        low_count = 0
+
+        seen_entities = set()
 
         for rec in records:
-            if rec.get("ob_id"):
+            ob_id = rec.get("ob_id")
+            if ob_id and ob_id not in seen_entities:
+                seen_entities.add(ob_id)
                 ob_type = rec.get("ob_type", "REQUIREMENT")
-                sev = "HIGH" if ob_type == "PROHIBITION" else "MEDIUM"
-                if sev == "HIGH":
+                
+                if ob_type == "PROHIBITION":
+                    sev = "CRITICAL"
+                    crit_count += 1
+                elif ob_type == "THRESHOLD":
+                    sev = "HIGH"
                     high_count += 1
+                elif ob_type == "DEADLINE":
+                    sev = "LOW"
+                    low_count += 1
+                else:
+                    sev = "MEDIUM"
+                    med_count += 1
 
                 items.append(
                     ImpactItem(
                         entity_type="obligation",
-                        entity_id=rec["ob_id"],
+                        entity_id=ob_id,
                         entity_name=rec.get("ob_text", "")[:100],
                         severity=sev,
-                        impact_description=f"Nouvelle obligation de type {ob_type}",
+                        impact_description=f"Nouvelle obligation réglementaire de type {ob_type}",
                         relationship_path=["INTRODUCES"],
                     )
                 )
 
-            if rec.get("proc_name"):
+            proc_name = rec.get("proc_name")
+            if proc_name and f"proc_{proc_name}" not in seen_entities:
+                seen_entities.add(f"proc_{proc_name}")
                 items.append(
                     ImpactItem(
                         entity_type="process",
-                        entity_id=f"proc_{rec['proc_name']}",
-                        entity_name=rec["proc_name"],
+                        entity_id=f"proc_{proc_name}",
+                        entity_name=proc_name,
                         severity="HIGH",
-                        impact_description=f"Processus bancaire impacté: {rec['proc_name']}",
+                        impact_description=f"Processus bancaire impacté: {proc_name}",
                         relationship_path=["INTRODUCES", "AFFECTS"],
                     )
                 )
+                high_count += 1
 
-        return ImpactPropagationReport(
+            tmpl_name = rec.get("tmpl_name")
+            if tmpl_name and f"tmpl_{tmpl_name}" not in seen_entities:
+                seen_entities.add(f"tmpl_{tmpl_name}")
+                items.append(
+                    ImpactItem(
+                        entity_type="contract_template",
+                        entity_id=f"tmpl_{tmpl_name}",
+                        entity_name=tmpl_name,
+                        severity="HIGH",
+                        impact_description=f"Modèle de contrat impacté: {tmpl_name}",
+                        relationship_path=["INTRODUCES", "CONSTRAINS"],
+                    )
+                )
+                high_count += 1
+
+        report = ImpactPropagationReport(
             source_circular_ref=circular_ref,
             source_circular_title=f"Circulaire N° {circular_ref}",
             total_affected=len(items),
             critical_count=crit_count,
             high_count=high_count,
-            medium_count=len(items) - (crit_count + high_count),
-            low_count=0,
+            medium_count=med_count,
+            low_count=low_count,
             affected_items=items,
             summary=f"L'analyse de propagation pour la circulaire {circular_ref} identifie {len(items)} élément(s) impacté(s).",
         )
+
+        if document_id:
+            self.persist_impact_records(document_id, report)
+
+        if report.critical_count > 0 or report.high_count > 0:
+            self._notify_n8n(report)
+
+        return report
+
+    def _notify_n8n(self, report: ImpactPropagationReport) -> None:
+        """Send webhook notification to n8n if active."""
+        import requests
+        for url in ["http://localhost:5678/webhook/impact-alert", "http://localhost:5678/webhook-test/impact-alert"]:
+            try:
+                requests.post(
+                    url,
+                    json={
+                        "circular_number": report.source_circular_ref,
+                        "circular_ref": report.source_circular_ref,
+                        "severity": "CRITICAL" if report.critical_count > 0 else "HIGH",
+                        "affected_count": report.total_affected,
+                        "total_affected": report.total_affected,
+                        "summary": report.summary,
+                        "source": "Portail BCT"
+                    },
+                    timeout=2
+                )
+                break
+            except Exception:
+                pass
+
+    def persist_impact_records(self, document_id: str, report: ImpactPropagationReport) -> int:
+        """Persist impact records into PostgreSQL database for audit and compliance dashboard."""
+        try:
+            persisted = 0
+            for item in report.affected_items:
+                record = ImpactRecord(
+                    source_circular_id=document_id,
+                    source_circular_ref=report.source_circular_ref,
+                    affected_entity_type=item.entity_type,
+                    affected_entity_id=item.entity_id,
+                    affected_entity_name=item.entity_name,
+                    severity=item.severity,
+                    impact_description=item.impact_description,
+                    relationship_path=json.dumps(item.relationship_path),
+                )
+                db.session.add(record)
+                persisted += 1
+            db.session.commit()
+            logger.info("Persisted %d ImpactRecord entries for document %s", persisted, document_id)
+            return persisted
+        except Exception as e:
+            db.session.rollback()
+            logger.error("Failed to persist ImpactRecord entries: %s", e)
+            return 0
+
+

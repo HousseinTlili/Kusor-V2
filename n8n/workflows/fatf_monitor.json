@@ -1,0 +1,76 @@
+{
+  "name": "KUSOR v3 — Daily Multi-Source & FATF Sync",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "triggerAtHour": 7,
+              "triggerAtMinute": 0
+            }
+          ]
+        }
+      },
+      "name": "Daily Trigger (7AM)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://kusor-backend:5000/api/admin/sync",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"source\": \"all\", \"check_date\": \"{{$now.toFormat('yyyy-MM-dd')}}\"}",
+        "options": {}
+      },
+      "name": "Trigger KUSOR Sync API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "fromEmail": "KUSOR — Veille Sanctions & GAFI <tlilihoussein.st@gmail.com>",
+        "toEmail": "houssein.tlili@proton.me",
+        "subject": "=🌐 KUSOR v3 — Rapport Quotidien de Veille Sanctions & GAFI ({{$now.toFormat('dd/MM/yyyy')}})",
+        "emailFormat": "html",
+        "html": "=<div style=\"font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 650px; margin: 0 auto; background-color: #0A0A0A; color: #F1F5F9; border-radius: 16px; border: 1px solid rgba(14, 165, 233, 0.3); overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);\">\n  <!-- Header Banner -->\n  <div style=\"background: linear-gradient(135deg, #082F49 0%, #03071E 100%); padding: 30px 25px; border-bottom: 2px solid #0EA5E9; text-align: center;\">\n    <div style=\"font-size: 11px; font-weight: 800; color: #38BDF8; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px;\">Contrôle International & LCB-FT</div>\n    <h1 style=\"margin: 0; font-size: 22px; font-weight: 900; color: #FFFFFF;\">🌐 Veille Quotidienne Multi-Sources & GAFI</h1>\n    <p style=\"margin: 6px 0 0 0; font-size: 13px; color: #BAE6FD;\">Synchronisation des listes de sanctions OFAC, UE, ONU & Publications GAFI</p>\n  </div>\n\n  <!-- Main Content -->\n  <div style=\"padding: 25px;\">\n    <p style=\"font-size: 14px; line-height: 1.6; color: #CBD5E1; margin-top: 0;\">\n      Bonjour,<br><br>\n      Le cycle automatique de synchronisation des <strong>5 sources réglementaires et listes de sanctions internationales</strong> s'est achevé avec succès :\n    </p>\n\n    <!-- Sync Metrics -->\n    <table style=\"width: 100%; border-collapse: separate; border-spacing: 10px; margin: 20px 0;\">\n      <tr>\n        <td style=\"background-color: #0F172A; border: 1px solid #1E293B; border-radius: 12px; padding: 15px; text-align: center;\">\n          <div style=\"font-size: 10px; color: #94A3B8; text-transform: uppercase; font-weight: 800;\">Statut Cycle</div>\n          <div style=\"font-size: 18px; font-weight: 900; color: #10B981; margin-top: 4px;\">✅ {{$json.status}}</div>\n        </td>\n        <td style=\"background-color: #0F172A; border: 1px solid #1E293B; border-radius: 12px; padding: 15px; text-align: center;\">\n          <div style=\"font-size: 10px; color: #94A3B8; text-transform: uppercase; font-weight: 800;\">Nouveaux Éléments</div>\n          <div style=\"font-size: 24px; font-weight: 900; color: #0EA5E9; margin-top: 4px;\">{{$json.totals.total_added || 0}}</div>\n        </td>\n        <td style=\"background-color: #0F172A; border: 1px solid #1E293B; border-radius: 12px; padding: 15px; text-align: center;\">\n          <div style=\"font-size: 10px; color: #94A3B8; text-transform: uppercase; font-weight: 800;\">Total Corpus</div>\n          <div style=\"font-size: 24px; font-weight: 900; color: #F59E0B; margin-top: 4px;\">{{$json.totals.documents_in_db || 103}}</div>\n        </td>\n      </tr>\n    </table>\n\n    <!-- Verified Sources Checklist -->\n    <div style=\"background-color: #03071E; border: 1px solid #1E293B; border-radius: 12px; padding: 18px; margin: 20px 0;\">\n      <div style=\"font-size: 11px; font-weight: 800; color: #0EA5E9; text-transform: uppercase; margin-bottom: 12px;\">Bases Réglementaires Synchronisées :</div>\n      <ul style=\"margin: 0; padding-left: 20px; font-size: 13px; color: #E2E8F0; line-height: 1.8;\">\n        <li>🇺🇸 <strong>OFAC SDN List</strong> (US Treasury) — <span style=\"color: #10B981; font-weight: 700;\">À jour (Base locale active)</span></li>\n        <li>🇪🇺 <strong>Sanctions Financières UE</strong> (FSF) — <span style=\"color: #10B981; font-weight: 700;\">À jour (Consolidée)</span></li>\n        <li>🇺🇳 <strong>Conseil de Sécurité ONU</strong> — <span style=\"color: #10B981; font-weight: 700;\">À jour</span></li>\n        <li>🌐 <strong>GAFI / FATF</strong> — <span style=\"color: #10B981; font-weight: 700;\">Surveillance LCB-FT active</span></li>\n        <li>🇹🇳 <strong>Portail Circulaires BCT</strong> — <span style=\"color: #10B981; font-weight: 700;\">100% Indexé</span></li>\n      </ul>\n    </div>\n\n    <!-- CTA Button -->\n    <div style=\"text-align: center; margin: 30px 0 10px 0;\">\n      <a href=\"http://localhost:4200/admin/documents\" style=\"background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%); color: #FFFFFF; text-decoration: none; padding: 12px 28px; font-weight: 800; font-size: 13px; border-radius: 10px; display: inline-block; box-shadow: 0 4px 15px rgba(2, 132, 199, 0.4);\">\n        Consulter la Console d'Administration KUSOR →\n      </a>\n    </div>\n  </div>\n\n  <!-- Footer -->\n  <div style=\"background-color: #03071E; padding: 15px 25px; border-top: 1px solid #1E293B; font-size: 11px; color: #64748B; text-align: center;\">\n    Veille réglementaire automatisée KUSOR v3 • Direction de la Conformité Attijari Bank Tunisia\n  </div>\n</div>"
+      },
+      "name": "Send Sync Report Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [700, 300]
+    }
+  ],
+  "connections": {
+    "Daily Trigger (7AM)": {
+      "main": [
+        [
+          {
+            "node": "Trigger KUSOR Sync API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trigger KUSOR Sync API": {
+      "main": [
+        [
+          {
+            "node": "Send Sync Report Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

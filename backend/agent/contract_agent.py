@@ -9,13 +9,18 @@ from __future__ import annotations
 import logging
 import re
 from datetime import date
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from backend.agent.schemas import ContractReport, ClauseAnalysis
 from backend.config import Config
 from backend.graph.neo4j_manager import Neo4jManager
 
 logger = logging.getLogger(__name__)
+
+_CIRCULAR_REF_RE = re.compile(
+    r"(?:Circulaire|circulaire)\s+(?:BCT\s+)?(?:N°?\s*)?(\d{4}-\d{1,2})|(?:\b(\d{4}-\d{2})\b)",
+    re.IGNORECASE,
+)
 
 
 class ContractAgent:
@@ -50,7 +55,7 @@ class ContractAgent:
             if not analysis.regulatory_basis_still_valid:
                 temporal_issues_count += 1
 
-        overall_risk = "CRITICAL" if critical_count > 0 else ("HIGH" if high_count > 0 else "LOW")
+        overall_risk = "CRITICAL" if critical_count > 0 else ("HIGH" if high_count > 0 or non_conform_count > 0 else "LOW")
 
         return ContractReport(
             contract_title=contract_title,
@@ -63,45 +68,74 @@ class ContractAgent:
             overall_risk=overall_risk,
             temporal_issues=temporal_issues_count,
             recommendations=self._generate_recommendations(clause_analyses),
+            note="Comparaison contre texte BCT standard — modèles de contrats banque en attente",
         )
 
     def _segment_clauses(self, text: str) -> List[str]:
         parts = re.split(r"(?i)\n(?=\s*(?:clause|article)\s+\d+)", text)
-        return [p.strip() for p in parts if len(p.strip()) > 20]
+        result = [p.strip() for p in parts if len(p.strip()) > 20]
+        return result or [text[:1000]]
 
     def _analyze_clause(
         self, num: int, text: str, contract_date: Optional[date]
     ) -> ClauseAnalysis:
-        c_type = "general"
-        if "intérêt" in text.lower() or "taux" in text.lower():
-            c_type = "interest_rate"
-        elif "pénalité" in text.lower() or "retard" in text.lower():
-            c_type = "penalty"
+        c_type = self._classify_clause(text)
+        reg_ref = self._extract_regulatory_ref(text)
 
-        reg_ref = "2020-05"
-        still_valid, superseding = self._check_temporal_validity(reg_ref, contract_date)
+        still_valid = True
+        superseding = None
+
+        if reg_ref:
+            still_valid, superseding = self._check_temporal_validity(reg_ref, contract_date)
+
+        conformity = "CONFORMING" if still_valid else "NON_CONFORMING"
+        severity = "HIGH" if not still_valid else "LOW"
 
         return ClauseAnalysis(
             clause_number=num,
             clause_text=text[:300],
             clause_type=c_type,
-            conformity_status="CONFORMING" if still_valid else "NON_CONFORMING",
-            severity="MEDIUM" if not still_valid else "LOW",
-            regulatory_basis_ref=reg_ref,
+            conformity_status=conformity,
+            severity=severity,
+            regulatory_basis_ref=reg_ref or "Normes BCT",
             regulatory_basis_still_valid=still_valid,
             superseding_circular=superseding,
         )
 
+    def _classify_clause(self, text: str) -> str:
+        t = text.lower()
+        if any(kw in t for kw in ["intérêt", "taux", "teg", "marge", "indexation"]):
+            return "interest_rate"
+        elif any(kw in t for kw in ["pénalité", "retard", "défaut", "majoration", "sanction"]):
+            return "penalty"
+        elif any(kw in t for kw in ["remboursement", "échéance", "amortissement", "mensualité"]):
+            return "repayment"
+        elif any(kw in t for kw in ["garantie", "hypothèque", "caution", "nantissement", "privilège"]):
+            return "guarantee"
+        elif any(kw in t for kw in ["tribunal", "juridiction", "droit applicable", "litige", "arbitrage"]):
+            return "jurisdiction"
+        elif any(kw in t for kw in ["engagement", "ratio", "obligation d'information"]):
+            return "covenant"
+        return "general"
+
+    def _extract_regulatory_ref(self, text: str) -> Optional[str]:
+        match = _CIRCULAR_REF_RE.search(text)
+        if match:
+            return match.group(1) or match.group(2)
+        return None
+
     def _check_temporal_validity(
         self, reg_ref: str, contract_date: Optional[date]
-    ) -> tuple[bool, Optional[str]]:
+    ) -> Tuple[bool, Optional[str]]:
         if not contract_date or not self._neo4j:
             return True, None
 
         cypher = """
-        MATCH (c:Circular {reference: $ref})<-[r:REPLACES|AMENDS]-(newer:Circular)
+        MATCH (c:Circular)
+        WHERE c.reference = $ref OR c.number = $ref
+        MATCH (c)<-[r:REPLACES|AMENDS]-(newer:Circular)
         WHERE r.valid_from > date($c_date)
-        RETURN newer.reference AS superseding_ref
+        RETURN newer.reference AS superseding_ref, newer.number AS superseding_num
         LIMIT 1
         """
         try:
@@ -109,7 +143,8 @@ class ContractAgent:
                 cypher, {"ref": reg_ref, "c_date": contract_date.isoformat()}
             )
             if records:
-                return False, records[0]["superseding_ref"]
+                rec = records[0]
+                return False, rec.get("superseding_ref") or rec.get("superseding_num")
         except Exception as e:
             logger.warning("Temporal validity check failed: %s", e)
 
@@ -121,6 +156,7 @@ class ContractAgent:
             if not a.regulatory_basis_still_valid:
                 recs.append(
                     f"Mettre à jour la clause {a.clause_number}: la base réglementaire {a.regulatory_basis_ref} "
-                    f"a été modifiée par la circulaire {a.superseding_circular}."
+                    f"a été modifiée ou abrogée par la circulaire {a.superseding_circular}."
                 )
         return recs
+

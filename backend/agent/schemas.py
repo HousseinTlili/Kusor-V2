@@ -50,6 +50,7 @@ class KYCReport(BaseModel):
     client_name: str
     client_type: str
     dossier_id: str
+    verdict: str = "Conforme"  # Conforme | Non conforme | Escaladé
     overall_risk: str  # LOW | MEDIUM | HIGH | CRITICAL
     document_checks: List[DocumentCheckResult]
     completeness_score: float
@@ -58,6 +59,7 @@ class KYCReport(BaseModel):
     regulatory_references: List[str]
     recommendations: List[str]
     agent_confidence: float = 0.95
+
 
 
 # ── Module 3: Contract Risk Models ─────────────────────────────────
@@ -84,6 +86,8 @@ class ContractReport(BaseModel):
     overall_risk: str
     temporal_issues: int
     recommendations: List[str]
+    note: str = "Comparaison contre texte BCT standard — modèles de contrats banque en attente"
+
 
 
 # ── Module 4: Credit Pre-Screening Models ──────────────────────────

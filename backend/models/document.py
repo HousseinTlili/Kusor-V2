@@ -36,7 +36,9 @@ class Document(db.Model):
     )
     date_issued = db.Column(db.Date, nullable=True)
     category = db.Column(db.String(100), nullable=True)
+    source = db.Column(db.String(100), default="BCT Portal", comment="BCT Portal | OFAC | EU Commission | UN Security Council | GAFI / FATF")
     source_url = db.Column(db.String(500))
+
     content_hash = db.Column(db.String(64), comment="SHA-256 for deduplication")
     status = db.Column(
         db.String(50),

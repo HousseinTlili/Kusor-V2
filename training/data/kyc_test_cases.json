@@ -1,0 +1,1215 @@
+{
+  "version": "1.0",
+  "description": "Cas de test synthétiques pour le module KYC/AML de KUSOR v3",
+  "generated_date": "2026-08-07",
+  "statistics": {
+    "total": 30,
+    "conforme": 10,
+    "non_conforme": 12,
+    "escalade": 8,
+    "expired_docs": 2,
+    "sanctions_matches": 3
+  },
+  "cases": [
+    {
+      "dossier_id": "KYC-2026-001",
+      "client_type": "Individuel",
+      "client_name": "Ben Salah Mohamed",
+      "deposit_amount_tnd": 10000,
+      "documents_provided": [
+        {
+          "code": "cin_valide",
+          "name": "Carte d'Identité Nationale",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "justificatif_domicile",
+          "name": "Justificatif de domicile",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "bulletin_salaire",
+          "name": "Bulletin de salaire",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "specimen_signature",
+          "name": "Spécimen de signature",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        }
+      ],
+      "sanctions_match": false,
+      "sanctions_matched_list": null,
+      "expected_result": "Conforme",
+      "justification": "Tous les documents obligatoires sont présents et valides."
+    },
+    {
+      "dossier_id": "KYC-2026-002",
+      "client_type": "Individuel",
+      "client_name": "Trabelsi Fatma",
+      "deposit_amount_tnd": 10000,
+      "documents_provided": [
+        {
+          "code": "cin_valide",
+          "name": "Carte d'Identité Nationale",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "justificatif_domicile",
+          "name": "Justificatif de domicile",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "bulletin_salaire",
+          "name": "Bulletin de salaire",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "specimen_signature",
+          "name": "Spécimen de signature",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        }
+      ],
+      "sanctions_match": false,
+      "sanctions_matched_list": null,
+      "expected_result": "Conforme",
+      "justification": "Tous les documents obligatoires sont présents et valides."
+    },
+    {
+      "dossier_id": "KYC-2026-003",
+      "client_type": "Individuel",
+      "client_name": "Chtioui Karim",
+      "deposit_amount_tnd": 10000,
+      "documents_provided": [
+        {
+          "code": "cin_valide",
+          "name": "Carte d'Identité Nationale",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "justificatif_domicile",
+          "name": "Justificatif de domicile",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "bulletin_salaire",
+          "name": "Bulletin de salaire",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "specimen_signature",
+          "name": "Spécimen de signature",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        }
+      ],
+      "sanctions_match": false,
+      "sanctions_matched_list": null,
+      "expected_result": "Conforme",
+      "justification": "Tous les documents obligatoires sont présents et valides."
+    },
+    {
+      "dossier_id": "KYC-2026-004",
+      "client_type": "Individuel",
+      "client_name": "Belhaj Sonia",
+      "deposit_amount_tnd": 10000,
+      "documents_provided": [
+        {
+          "code": "cin_valide",
+          "name": "Carte d'Identité Nationale",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "justificatif_domicile",
+          "name": "Justificatif de domicile",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "bulletin_salaire",
+          "name": "Bulletin de salaire",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "specimen_signature",
+          "name": "Spécimen de signature",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        }
+      ],
+      "sanctions_match": false,
+      "sanctions_matched_list": null,
+      "expected_result": "Conforme",
+      "justification": "Tous les documents obligatoires sont présents et valides."
+    },
+    {
+      "dossier_id": "KYC-2026-005",
+      "client_type": "Corporate",
+      "client_name": "Gharbi Ahmed",
+      "deposit_amount_tnd": 20000,
+      "documents_provided": [
+        {
+          "code": "rne",
+          "name": "Extrait RNE",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "statuts_societe",
+          "name": "Statuts de la société",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "liste_beneficiaires_effectifs",
+          "name": "Liste des bénéficiaires effectifs",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "pv_nomination_signataires",
+          "name": "PV de nomination des signataires",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        }
+      ],
+      "sanctions_match": false,
+      "sanctions_matched_list": null,
+      "expected_result": "Conforme",
+      "justification": "Dossier entreprise complet et conforme."
+    },
+    {
+      "dossier_id": "KYC-2026-006",
+      "client_type": "Corporate",
+      "client_name": "Mansouri Leila",
+      "deposit_amount_tnd": 20000,
+      "documents_provided": [
+        {
+          "code": "rne",
+          "name": "Extrait RNE",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "statuts_societe",
+          "name": "Statuts de la société",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "liste_beneficiaires_effectifs",
+          "name": "Liste des bénéficiaires effectifs",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "pv_nomination_signataires",
+          "name": "PV de nomination des signataires",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        }
+      ],
+      "sanctions_match": false,
+      "sanctions_matched_list": null,
+      "expected_result": "Conforme",
+      "justification": "Dossier entreprise complet et conforme."
+    },
+    {
+      "dossier_id": "KYC-2026-007",
+      "client_type": "Corporate",
+      "client_name": "Hammami Riadh",
+      "deposit_amount_tnd": 20000,
+      "documents_provided": [
+        {
+          "code": "rne",
+          "name": "Extrait RNE",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "statuts_societe",
+          "name": "Statuts de la société",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "liste_beneficiaires_effectifs",
+          "name": "Liste des bénéficiaires effectifs",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "pv_nomination_signataires",
+          "name": "PV de nomination des signataires",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        }
+      ],
+      "sanctions_match": false,
+      "sanctions_matched_list": null,
+      "expected_result": "Conforme",
+      "justification": "Dossier entreprise complet et conforme."
+    },
+    {
+      "dossier_id": "KYC-2026-008",
+      "client_type": "Corporate",
+      "client_name": "Jebali Amira",
+      "deposit_amount_tnd": 20000,
+      "documents_provided": [
+        {
+          "code": "rne",
+          "name": "Extrait RNE",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "statuts_societe",
+          "name": "Statuts de la société",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "liste_beneficiaires_effectifs",
+          "name": "Liste des bénéficiaires effectifs",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "pv_nomination_signataires",
+          "name": "PV de nomination des signataires",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        }
+      ],
+      "sanctions_match": false,
+      "sanctions_matched_list": null,
+      "expected_result": "Conforme",
+      "justification": "Dossier entreprise complet et conforme."
+    },
+    {
+      "dossier_id": "KYC-2026-009",
+      "client_type": "PPE",
+      "client_name": "Bouazizi Taoufik",
+      "deposit_amount_tnd": 30000,
+      "documents_provided": [
+        {
+          "code": "declaration_statut_ppe",
+          "name": "Déclaration de statut PPE",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "justificatif_fonction",
+          "name": "Justificatif de fonction",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "declaration_detaillee_origine_fonds",
+          "name": "Déclaration détaillée d'origine des fonds",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "validation_renforcee_hierarchie",
+          "name": "Validation renforcée par la hiérarchie",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        }
+      ],
+      "sanctions_match": false,
+      "sanctions_matched_list": null,
+      "expected_result": "Conforme",
+      "justification": "Dossier PPE complet avec validation renforcée."
+    },
+    {
+      "dossier_id": "KYC-2026-010",
+      "client_type": "PPE",
+      "client_name": "Mahjoub Nadia",
+      "deposit_amount_tnd": 30000,
+      "documents_provided": [
+        {
+          "code": "declaration_statut_ppe",
+          "name": "Déclaration de statut PPE",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "justificatif_fonction",
+          "name": "Justificatif de fonction",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "declaration_detaillee_origine_fonds",
+          "name": "Déclaration détaillée d'origine des fonds",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "validation_renforcee_hierarchie",
+          "name": "Validation renforcée par la hiérarchie",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        }
+      ],
+      "sanctions_match": false,
+      "sanctions_matched_list": null,
+      "expected_result": "Conforme",
+      "justification": "Dossier PPE complet avec validation renforcée."
+    },
+    {
+      "dossier_id": "KYC-2026-011",
+      "client_type": "Individuel",
+      "client_name": "Karray Youssef",
+      "deposit_amount_tnd": 15000,
+      "documents_provided": [
+        {
+          "code": "cin_valide",
+          "name": "Carte d'Identité Nationale",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "justificatif_domicile",
+          "name": "Justificatif de domicile",
+          "present": false,
+          "expired": false,
+          "expiry_date": null
+        },
+        {
+          "code": "bulletin_salaire",
+          "name": "Bulletin de salaire",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "specimen_signature",
+          "name": "Spécimen de signature",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        }
+      ],
+      "sanctions_match": false,
+      "sanctions_matched_list": null,
+      "expected_result": "Non conforme",
+      "justification": "Document manquant ou expiré."
+    },
+    {
+      "dossier_id": "KYC-2026-012",
+      "client_type": "Individuel",
+      "client_name": "Miled Salma",
+      "deposit_amount_tnd": 15000,
+      "documents_provided": [
+        {
+          "code": "cin_valide",
+          "name": "Carte d'Identité Nationale",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "justificatif_domicile",
+          "name": "Justificatif de domicile",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "bulletin_salaire",
+          "name": "Bulletin de salaire",
+          "present": false,
+          "expired": false,
+          "expiry_date": null
+        },
+        {
+          "code": "specimen_signature",
+          "name": "Spécimen de signature",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        }
+      ],
+      "sanctions_match": false,
+      "sanctions_matched_list": null,
+      "expected_result": "Non conforme",
+      "justification": "Document manquant ou expiré."
+    },
+    {
+      "dossier_id": "KYC-2026-013",
+      "client_type": "Individuel",
+      "client_name": "Rekik Amina",
+      "deposit_amount_tnd": 15000,
+      "documents_provided": [
+        {
+          "code": "cin_valide",
+          "name": "Carte d'Identité Nationale",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "justificatif_domicile",
+          "name": "Justificatif de domicile",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "bulletin_salaire",
+          "name": "Bulletin de salaire",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "specimen_signature",
+          "name": "Spécimen de signature",
+          "present": false,
+          "expired": false,
+          "expiry_date": null
+        }
+      ],
+      "sanctions_match": false,
+      "sanctions_matched_list": null,
+      "expected_result": "Non conforme",
+      "justification": "Document manquant ou expiré."
+    },
+    {
+      "dossier_id": "KYC-2026-014",
+      "client_type": "Individuel",
+      "client_name": "Sassi Walid",
+      "deposit_amount_tnd": 15000,
+      "documents_provided": [
+        {
+          "code": "cin_valide",
+          "name": "Carte d'Identité Nationale",
+          "present": true,
+          "expired": true,
+          "expiry_date": "2023-01-01"
+        },
+        {
+          "code": "justificatif_domicile",
+          "name": "Justificatif de domicile",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "bulletin_salaire",
+          "name": "Bulletin de salaire",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "specimen_signature",
+          "name": "Spécimen de signature",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        }
+      ],
+      "sanctions_match": false,
+      "sanctions_matched_list": null,
+      "expected_result": "Non conforme",
+      "justification": "Document manquant ou expiré."
+    },
+    {
+      "dossier_id": "KYC-2026-015",
+      "client_type": "Individuel",
+      "client_name": "Frikha Hedi",
+      "deposit_amount_tnd": 15000,
+      "documents_provided": [
+        {
+          "code": "cin_valide",
+          "name": "Carte d'Identité Nationale",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "justificatif_domicile",
+          "name": "Justificatif de domicile",
+          "present": true,
+          "expired": true,
+          "expiry_date": "2023-01-01"
+        },
+        {
+          "code": "bulletin_salaire",
+          "name": "Bulletin de salaire",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "specimen_signature",
+          "name": "Spécimen de signature",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        }
+      ],
+      "sanctions_match": false,
+      "sanctions_matched_list": null,
+      "expected_result": "Non conforme",
+      "justification": "Document manquant ou expiré."
+    },
+    {
+      "dossier_id": "KYC-2026-016",
+      "client_type": "Corporate",
+      "client_name": "Gargouri Imen",
+      "deposit_amount_tnd": 15000,
+      "documents_provided": [
+        {
+          "code": "rne",
+          "name": "Extrait RNE",
+          "present": false,
+          "expired": false,
+          "expiry_date": null
+        },
+        {
+          "code": "statuts_societe",
+          "name": "Statuts de la société",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "liste_beneficiaires_effectifs",
+          "name": "Liste des bénéficiaires effectifs",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "pv_nomination_signataires",
+          "name": "PV de nomination des signataires",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        }
+      ],
+      "sanctions_match": false,
+      "sanctions_matched_list": null,
+      "expected_result": "Non conforme",
+      "justification": "Document d'entreprise obligatoire manquant."
+    },
+    {
+      "dossier_id": "KYC-2026-017",
+      "client_type": "Corporate",
+      "client_name": "Zouari Nizar",
+      "deposit_amount_tnd": 15000,
+      "documents_provided": [
+        {
+          "code": "rne",
+          "name": "Extrait RNE",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "statuts_societe",
+          "name": "Statuts de la société",
+          "present": false,
+          "expired": false,
+          "expiry_date": null
+        },
+        {
+          "code": "liste_beneficiaires_effectifs",
+          "name": "Liste des bénéficiaires effectifs",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "pv_nomination_signataires",
+          "name": "PV de nomination des signataires",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        }
+      ],
+      "sanctions_match": false,
+      "sanctions_matched_list": null,
+      "expected_result": "Non conforme",
+      "justification": "Document d'entreprise obligatoire manquant."
+    },
+    {
+      "dossier_id": "KYC-2026-018",
+      "client_type": "Corporate",
+      "client_name": "Chaabane Rym",
+      "deposit_amount_tnd": 15000,
+      "documents_provided": [
+        {
+          "code": "rne",
+          "name": "Extrait RNE",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "statuts_societe",
+          "name": "Statuts de la société",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "liste_beneficiaires_effectifs",
+          "name": "Liste des bénéficiaires effectifs",
+          "present": false,
+          "expired": false,
+          "expiry_date": null
+        },
+        {
+          "code": "pv_nomination_signataires",
+          "name": "PV de nomination des signataires",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        }
+      ],
+      "sanctions_match": false,
+      "sanctions_matched_list": null,
+      "expected_result": "Non conforme",
+      "justification": "Document d'entreprise obligatoire manquant."
+    },
+    {
+      "dossier_id": "KYC-2026-019",
+      "client_type": "Corporate",
+      "client_name": "Ellouze Omar",
+      "deposit_amount_tnd": 15000,
+      "documents_provided": [
+        {
+          "code": "rne",
+          "name": "Extrait RNE",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "statuts_societe",
+          "name": "Statuts de la société",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "liste_beneficiaires_effectifs",
+          "name": "Liste des bénéficiaires effectifs",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "pv_nomination_signataires",
+          "name": "PV de nomination des signataires",
+          "present": false,
+          "expired": false,
+          "expiry_date": null
+        }
+      ],
+      "sanctions_match": false,
+      "sanctions_matched_list": null,
+      "expected_result": "Non conforme",
+      "justification": "Document d'entreprise obligatoire manquant."
+    },
+    {
+      "dossier_id": "KYC-2026-020",
+      "client_type": "PPE",
+      "client_name": "Khemiri Asma",
+      "deposit_amount_tnd": 15000,
+      "documents_provided": [
+        {
+          "code": "declaration_statut_ppe",
+          "name": "Déclaration de statut PPE",
+          "present": false,
+          "expired": false,
+          "expiry_date": null
+        },
+        {
+          "code": "justificatif_fonction",
+          "name": "Justificatif de fonction",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "declaration_detaillee_origine_fonds",
+          "name": "Déclaration détaillée d'origine des fonds",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "validation_renforcee_hierarchie",
+          "name": "Validation renforcée par la hiérarchie",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        }
+      ],
+      "sanctions_match": false,
+      "sanctions_matched_list": null,
+      "expected_result": "Non conforme",
+      "justification": "Document PPE obligatoire manquant."
+    },
+    {
+      "dossier_id": "KYC-2026-021",
+      "client_type": "PPE",
+      "client_name": "Ayari Sami",
+      "deposit_amount_tnd": 15000,
+      "documents_provided": [
+        {
+          "code": "declaration_statut_ppe",
+          "name": "Déclaration de statut PPE",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "justificatif_fonction",
+          "name": "Justificatif de fonction",
+          "present": false,
+          "expired": false,
+          "expiry_date": null
+        },
+        {
+          "code": "declaration_detaillee_origine_fonds",
+          "name": "Déclaration détaillée d'origine des fonds",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "validation_renforcee_hierarchie",
+          "name": "Validation renforcée par la hiérarchie",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        }
+      ],
+      "sanctions_match": false,
+      "sanctions_matched_list": null,
+      "expected_result": "Non conforme",
+      "justification": "Document PPE obligatoire manquant."
+    },
+    {
+      "dossier_id": "KYC-2026-022",
+      "client_type": "PPE",
+      "client_name": "Boussetta Hela",
+      "deposit_amount_tnd": 15000,
+      "documents_provided": [
+        {
+          "code": "declaration_statut_ppe",
+          "name": "Déclaration de statut PPE",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "justificatif_fonction",
+          "name": "Justificatif de fonction",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "declaration_detaillee_origine_fonds",
+          "name": "Déclaration détaillée d'origine des fonds",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "validation_renforcee_hierarchie",
+          "name": "Validation renforcée par la hiérarchie",
+          "present": false,
+          "expired": false,
+          "expiry_date": null
+        }
+      ],
+      "sanctions_match": false,
+      "sanctions_matched_list": null,
+      "expected_result": "Non conforme",
+      "justification": "Document PPE obligatoire manquant."
+    },
+    {
+      "dossier_id": "KYC-2026-023",
+      "client_type": "PPE",
+      "client_name": "Daoud Skander",
+      "deposit_amount_tnd": 15000,
+      "documents_provided": [
+        {
+          "code": "declaration_statut_ppe",
+          "name": "Déclaration de statut PPE",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "justificatif_fonction",
+          "name": "Justificatif de fonction",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "declaration_detaillee_origine_fonds",
+          "name": "Déclaration détaillée d'origine des fonds",
+          "present": false,
+          "expired": false,
+          "expiry_date": null
+        },
+        {
+          "code": "validation_renforcee_hierarchie",
+          "name": "Validation renforcée par la hiérarchie",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        }
+      ],
+      "sanctions_match": false,
+      "sanctions_matched_list": null,
+      "expected_result": "Escaladé",
+      "justification": "Dossier PPE incomplet nécessitant une escalade."
+    },
+    {
+      "dossier_id": "KYC-2026-024",
+      "client_type": "Individuel",
+      "client_name": "Jendoubi Yassine",
+      "deposit_amount_tnd": 60000,
+      "documents_provided": [
+        {
+          "code": "cin_valide",
+          "name": "Carte d'Identité Nationale",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "justificatif_domicile",
+          "name": "Justificatif de domicile",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "bulletin_salaire",
+          "name": "Bulletin de salaire",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "specimen_signature",
+          "name": "Spécimen de signature",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        }
+      ],
+      "sanctions_match": false,
+      "sanctions_matched_list": null,
+      "expected_result": "Escaladé",
+      "justification": "Dépôt > 50K sans déclaration d'origine des fonds."
+    },
+    {
+      "dossier_id": "KYC-2026-025",
+      "client_type": "Individuel",
+      "client_name": "Ghazouani Wafa",
+      "deposit_amount_tnd": 60000,
+      "documents_provided": [
+        {
+          "code": "cin_valide",
+          "name": "Carte d'Identité Nationale",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "justificatif_domicile",
+          "name": "Justificatif de domicile",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "bulletin_salaire",
+          "name": "Bulletin de salaire",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "specimen_signature",
+          "name": "Spécimen de signature",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        }
+      ],
+      "sanctions_match": false,
+      "sanctions_matched_list": null,
+      "expected_result": "Escaladé",
+      "justification": "Dépôt > 50K sans déclaration d'origine des fonds."
+    },
+    {
+      "dossier_id": "KYC-2026-026",
+      "client_type": "Individuel",
+      "client_name": "Mabrouk anis",
+      "deposit_amount_tnd": 60000,
+      "documents_provided": [
+        {
+          "code": "cin_valide",
+          "name": "Carte d'Identité Nationale",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "justificatif_domicile",
+          "name": "Justificatif de domicile",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "bulletin_salaire",
+          "name": "Bulletin de salaire",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "specimen_signature",
+          "name": "Spécimen de signature",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        }
+      ],
+      "sanctions_match": false,
+      "sanctions_matched_list": null,
+      "expected_result": "Escaladé",
+      "justification": "Dépôt > 50K sans déclaration d'origine des fonds."
+    },
+    {
+      "dossier_id": "KYC-2026-027",
+      "client_type": "Individuel",
+      "client_name": "Cherif Ines",
+      "deposit_amount_tnd": 60000,
+      "documents_provided": [
+        {
+          "code": "cin_valide",
+          "name": "Carte d'Identité Nationale",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "justificatif_domicile",
+          "name": "Justificatif de domicile",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "bulletin_salaire",
+          "name": "Bulletin de salaire",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "specimen_signature",
+          "name": "Spécimen de signature",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        }
+      ],
+      "sanctions_match": false,
+      "sanctions_matched_list": null,
+      "expected_result": "Escaladé",
+      "justification": "Dépôt > 50K sans déclaration d'origine des fonds."
+    },
+    {
+      "dossier_id": "KYC-2026-028",
+      "client_type": "Individuel",
+      "client_name": "Ghannouchi Tarek",
+      "deposit_amount_tnd": 10000,
+      "documents_provided": [
+        {
+          "code": "cin_valide",
+          "name": "Carte d'Identité Nationale",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "justificatif_domicile",
+          "name": "Justificatif de domicile",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "bulletin_salaire",
+          "name": "Bulletin de salaire",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "specimen_signature",
+          "name": "Spécimen de signature",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        }
+      ],
+      "sanctions_match": true,
+      "sanctions_matched_list": "OFAC",
+      "expected_result": "Escaladé",
+      "justification": "Correspondance trouvée sur la liste de sanctions OFAC."
+    },
+    {
+      "dossier_id": "KYC-2026-029",
+      "client_type": "Individuel",
+      "client_name": "Haddad Safa",
+      "deposit_amount_tnd": 10000,
+      "documents_provided": [
+        {
+          "code": "cin_valide",
+          "name": "Carte d'Identité Nationale",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "justificatif_domicile",
+          "name": "Justificatif de domicile",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "bulletin_salaire",
+          "name": "Bulletin de salaire",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "specimen_signature",
+          "name": "Spécimen de signature",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        }
+      ],
+      "sanctions_match": true,
+      "sanctions_matched_list": "EU",
+      "expected_result": "Escaladé",
+      "justification": "Correspondance trouvée sur la liste de sanctions EU."
+    },
+    {
+      "dossier_id": "KYC-2026-030",
+      "client_type": "Individuel",
+      "client_name": "Kacem Zied",
+      "deposit_amount_tnd": 10000,
+      "documents_provided": [
+        {
+          "code": "cin_valide",
+          "name": "Carte d'Identité Nationale",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "justificatif_domicile",
+          "name": "Justificatif de domicile",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "bulletin_salaire",
+          "name": "Bulletin de salaire",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        },
+        {
+          "code": "specimen_signature",
+          "name": "Spécimen de signature",
+          "present": true,
+          "expired": false,
+          "expiry_date": "2028-01-01"
+        }
+      ],
+      "sanctions_match": true,
+      "sanctions_matched_list": "UN",
+      "expected_result": "Escaladé",
+      "justification": "Correspondance trouvée sur la liste de sanctions UN."
+    }
+  ]
+}

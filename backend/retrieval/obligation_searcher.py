@@ -37,7 +37,7 @@ class ObligationSearcher:
             cypher = """
             MATCH (c:Circular)-[:INTRODUCES]->(o:Obligation)
             WHERE o.obligation_type = $ob_type
-              AND toLower(o.text) CONTAINS toLower($query)
+              AND (toLower(o.text) CONTAINS toLower($query) OR any(term IN split(toLower($query), ' ') WHERE size(term) >= 3 AND toLower(o.text) CONTAINS term))
             OPTIONAL MATCH (o)-[:AFFECTS]->(p:Process)
             RETURN c, o, p LIMIT $limit
             """
@@ -45,7 +45,8 @@ class ObligationSearcher:
         else:
             cypher = """
             MATCH (c:Circular)-[:INTRODUCES]->(o:Obligation)
-            WHERE any(term IN split(toLower($query), ' ') WHERE size(term) > 3 AND toLower(o.text) CONTAINS term)
+            WHERE toLower(o.text) CONTAINS toLower($query) 
+               OR any(term IN split(toLower($query), ' ') WHERE size(term) >= 3 AND toLower(o.text) CONTAINS term)
             OPTIONAL MATCH (o)-[:AFFECTS]->(p:Process)
             RETURN c, o, p LIMIT $limit
             """
@@ -59,19 +60,26 @@ class ObligationSearcher:
 
         results = []
         for i, rec in enumerate(records):
+            c = rec.get("c", {})
+            c_props = c.get("properties", c) if isinstance(c, dict) else {}
+            c_ref = c_props.get("reference", c_props.get("number", ""))
+
             o = rec.get("o", {})
             o_props = o.get("properties", o) if isinstance(o, dict) else {}
-            content = o_props.get("text", "")
+            text = o_props.get("text", "")
             ob_type = o_props.get("obligation_type", "OBLIGATION")
             ob_id = o_props.get("id", f"ob_{i}")
+
+            content = f"[Circulaire {c_ref}] {text}" if c_ref else text
 
             results.append(
                 SearchResult(
                     chunk_id=str(ob_id),
                     content=content,
                     score=1.0 / (i + 1),
-                    metadata={"obligation_type": ob_type},
+                    metadata={"obligation_type": ob_type, "circular_reference": c_ref},
                     source="obligation",
                 )
             )
         return results
+

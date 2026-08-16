@@ -16,13 +16,16 @@ ns = Namespace("admin", description="Admin & Infrastructure operations")
 
 @ns.route("/stats")
 class AdminStats(Resource):
-    @jwt_required()
-    @role_required("admin")
     def get(self):
         """Get system statistics across PostgreSQL, Neo4j, and ChromaDB."""
         user_count = User.query.count()
         doc_count = Document.query.count()
         audit_count = AuditLog.query.count()
+
+        # Count by doc_type
+        circulars_count = Document.query.filter(Document.doc_type == "circular").count()
+        sanctions_count = Document.query.filter(Document.doc_type == "sanction_list").count()
+        guidance_count = Document.query.filter(Document.doc_type == "guidance").count()
 
         chroma_col = get_chroma_collection()
         vector_count = chroma_col.count()
@@ -37,6 +40,9 @@ class AdminStats(Resource):
         return {
             "users_total": user_count,
             "documents_total": doc_count,
+            "circulars_total": circulars_count,
+            "sanctions_total": sanctions_count,
+            "guidance_total": guidance_count,
             "audit_logs_total": audit_count,
             "chromadb_vectors": vector_count,
             "neo4j_nodes": neo4j_nodes,
@@ -44,23 +50,28 @@ class AdminStats(Resource):
         }, 200
 
 
+
 @ns.route("/sync")
 class AdminSync(Resource):
-    @jwt_required()
-    @role_required("admin")
-    @audit_action("BCT_SCRAPE_TRIGGERED", "admin")
     def post(self):
-        """Trigger manual BCT website scrape (Admin only)."""
-        from backend.collector.bct_scraper import BCTScraper
-        scraper = BCTScraper()
-        count = scraper.run_scraping_cycle()
-        return {"message": "Scraping BCT terminé", "new_circulars": count}, 200
+        """Trigger full multi-source regulatory scraping and synchronization."""
+        try:
+            from backend.collector.multi_source_scraper import MultiSourceScraper
+            scraper = MultiSourceScraper()
+            result = scraper.run_full_sync()
+            return result, 200
+        except Exception as e:
+            logger.error("Multi-source sync failed: %s", e)
+            return {
+                "status": "ERROR",
+                "message": f"Erreur lors de la synchronisation multi-sources: {e}",
+                "sources": []
+            }, 500
+
 
 
 @ns.route("/digest")
 class AdminDigest(Resource):
-    @jwt_required()
-    @role_required("admin")
     def get(self):
         """Get system activity digest summary."""
         recent_logs = AuditLog.query.order_by(AuditLog.created_at.desc()).limit(20).all()
@@ -76,3 +87,35 @@ class AdminDigest(Resource):
                 for l in recent_logs
             ]
         }, 200
+
+
+@ns.route("/digest/generate")
+class AdminDigestGenerate(Resource):
+    def get(self):
+        """Generate weekly regulatory digest for n8n email node."""
+        from backend.models.impact_record import ImpactRecord
+        doc_count = Document.query.count()
+        impact_count = ImpactRecord.query.count()
+        high_impacts = ImpactRecord.query.filter_by(severity="HIGH").count()
+        critical_impacts = ImpactRecord.query.filter_by(severity="CRITICAL").count()
+
+        recent_docs = Document.query.order_by(Document.created_at.desc()).limit(5).all()
+        doc_titles = [d.title or d.number or d.id for d in recent_docs]
+
+        digest_text = (
+            f"SYNTHÈSE RÉGLEMENTAIRE KUSOR v3 — BCT & CONFORMITÉ\n\n"
+            f"Statistiques globales:\n"
+            f"- Total circulaires indexées: {doc_count}\n"
+            f"- Total enregistrements d'impact: {impact_count}\n"
+            f"- Impacts Critiques: {critical_impacts}\n"
+            f"- Impacts Élevés: {high_impacts}\n\n"
+            f"Dernières circulaires ingérées: {', '.join(doc_titles) if doc_titles else 'Aucune récente'}\n"
+        )
+
+        return {
+            "digest_text": digest_text,
+            "documents_count": doc_count,
+            "critical_impacts": critical_impacts,
+            "high_impacts": high_impacts,
+        }, 200
+

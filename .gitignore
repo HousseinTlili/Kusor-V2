@@ -12,6 +12,14 @@ ENV/
 *.env
 !*.env.example
 
+# Process IDs & Local Logs
+*.pid
+.backend.pid
+.frontend.pid
+*.log
+backend.log
+/tmp/
+
 # Node / Angular Frontend
 **/node_modules/
 **/dist/
@@ -21,23 +29,25 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Databases & Runtime Data
+# Databases & Local Runtime Storage
 *.sqlite
 *.sqlite3
 *.db
-backend/data/
-training/data/
-*.log
+backend/data/uploads/
+backend/data/bm25_index.pkl
+backend/data/sanctions/
 
-# Large Model Binaries & Weights
+# Large Model Binaries, Weights & LoRA Checkpoints
 *.gguf
 *.bin
 *.safetensors
 *.pt
 *.pth
 *.onnx
+training/output/
+training/output/*
 
-# IDEs & System
+# IDEs & System Caches
 .idea/
 .vscode/
 *.swp
