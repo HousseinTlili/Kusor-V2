@@ -197,6 +197,9 @@ class GraphTemporal(Resource):
             elif d.number == "2024-88":
                 relations.append({"type": "MODIFIES", "target": "1991-24", "desc": "Division et couverture des risques"})
 
+            first_chunk = d.chunks.first() if hasattr(d, "chunks") and d.chunks else None
+            summary_text = (first_chunk.content[:180] + "...") if first_chunk and first_chunk.content else "Dispositions prudentielles et réglementaires de la BCT."
+
             records.append({
                 "id": d.id,
                 "circular_number": d.number,
@@ -208,7 +211,7 @@ class GraphTemporal(Resource):
                 "status_badge": badge,
                 "current_status": d.status,
                 "relations": relations,
-                "summary": d.content[:180] + "..." if d.content else "Dispositions prudentielles et réglementaires de la BCT.",
+                "summary": summary_text,
                 "c": {
                     "properties": {
                         "reference": d.number,
