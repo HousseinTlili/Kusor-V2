@@ -132,11 +132,19 @@ def create_app(config_name: str = "development") -> Flask:
     api.add_namespace(impact_ns, path="/impact")
 
     # ------------------------------------------------------------------
-    # Specialized System & Diagnostic Routes
+    # Specialized System, Swagger UI & Diagnostic Routes
     # ------------------------------------------------------------------
     @app.route("/health", methods=["GET"])
     def health():
         return jsonify({"status": "ok"}), 200
+
+    @app.route("/docs")
+    @app.route("/swagger")
+    @app.route("/apidocs")
+    @app.route("/swagger-ui")
+    def swagger_ui():
+        """Official interactive Swagger UI 5.x."""
+        return send_from_directory(STATIC_PROTOTYPES, "swagger_ui.html")
 
     @app.route("/test")
     @app.route("/console")

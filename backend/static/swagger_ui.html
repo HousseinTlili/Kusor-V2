@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>KUSOR — Documentation API Interactive (Swagger / OpenAPI)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.11.0/swagger-ui.css" />
+  <link rel="icon" type="image/png" href="/assets/attijari_logo.png" />
+  <style>
+    html {
+      box-sizing: border-box;
+      overflow: -moz-scrollbars-vertical;
+      overflow-y: scroll;
+    }
+    *, *:before, *:after {
+      box-sizing: inherit;
+    }
+    body {
+      margin: 0;
+      background: #f8fafc;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    
+    /* Top Header Bar */
+    .custom-swagger-header {
+      background: linear-gradient(135deg, #0a0c14 0%, #0f172a 100%);
+      border-bottom: 2px solid #2563eb;
+      padding: 0.85rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #ffffff;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    }
+    .custom-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      text-decoration: none;
+      color: white;
+    }
+    .custom-logo {
+      height: 38px;
+      width: 38px;
+      object-fit: contain;
+      background: #ffffff;
+      padding: 2px;
+      border-radius: 8px;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+    .brand-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+    .brand-subtitle {
+      font-size: 0.75rem;
+      color: #94a3b8;
+      display: block;
+    }
+    .header-links {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .nav-btn {
+      background: rgba(37, 99, 235, 0.2);
+      border: 1px solid rgba(59, 130, 246, 0.4);
+      color: #60a5fa;
+      padding: 0.45rem 0.95rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+    .nav-btn:hover {
+      background: #2563eb;
+      color: white;
+    }
+
+    /* Swagger Customizations */
+    .swagger-ui .topbar { display: none !important; }
+    .swagger-ui .info { margin: 1.5rem 0 2rem 0; }
+    .swagger-ui .info .title {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+    .swagger-ui .scheme-container {
+      background: #ffffff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      border-radius: 10px;
+      margin-bottom: 1.5rem;
+      padding: 1rem 1.5rem;
+    }
+    .swagger-ui .opblock {
+      border-radius: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      margin-bottom: 0.75rem;
+    }
+    .swagger-ui .opblock .opblock-summary {
+      padding: 0.65rem 1rem;
+    }
+    .swagger-ui .btn.authorize {
+      background: #10b981;
+      border-color: #10b981;
+      color: #ffffff;
+    }
+    .swagger-ui .btn.authorize svg {
+      fill: #ffffff;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header Bar -->
+  <header class="custom-swagger-header">
+    <a href="/dashboard" class="custom-brand">
+      <img src="/assets/attijari_logo.png" alt="Attijari Bank" class="custom-logo" />
+      <div>
+        <span class="brand-title">KUSOR • Swagger OpenAPI</span>
+        <span class="brand-subtitle">Assistant Réglementaire Bancaire BCT & GraphRAG</span>
+      </div>
+    </a>
+    <div class="header-links">
+      <a href="/dashboard" class="nav-btn">📊 Tableau de Bord</a>
+      <a href="/chat" class="nav-btn">💬 Assistant Chat</a>
+      <a href="/graph" class="nav-btn">🕸️ Graphe Neo4j</a>
+      <a href="/api/swagger.json" target="_blank" class="nav-btn">📄 Spec JSON</a>
+    </div>
+  </header>
+
+  <!-- Swagger UI Container -->
+  <div id="swagger-ui"></div>
+
+  <!-- Swagger UI Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.11.0/swagger-ui-bundle.js" charset="UTF-8"></script>
+  <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.11.0/swagger-ui-standalone-preset.js" charset="UTF-8"></script>
+  <script>
+    window.onload = function() {
+      const ui = SwaggerUIBundle({
+        url: "/api/swagger.json",
+        dom_id: '#swagger-ui',
+        deepLinking: true,
+        presets: [
+          SwaggerUIBundle.presets.apis,
+          SwaggerUIStandalonePreset
+        ],
+        plugins: [
+          SwaggerUIBundle.plugins.DownloadUrl
+        ],
+        layout: "StandaloneLayout",
+        persistAuthorization: true,
+        filter: true,
+        displayRequestDuration: true,
+        docExpansion: "list",
+        defaultModelsExpandDepth: 1,
+        defaultModelExpandDepth: 1,
+        tryItOutEnabled: true
+      });
+      window.ui = ui;
+    };
+  </script>
+</body>
+</html>
