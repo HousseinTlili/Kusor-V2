@@ -2,6 +2,8 @@ import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../core/services/api.service';
+import { ExportService, AuditReportData } from '../../core/services/export.service';
+import { PiiAnonymizerService } from '../../core/services/pii-anonymizer.service';
 import { SeverityBadgeComponent } from '../../shared/components/severity-badge/severity-badge.component';
 
 @Component({
@@ -17,6 +19,16 @@ import { SeverityBadgeComponent } from '../../shared/components/severity-badge/s
           <div class="badge-row">
             <span class="bank-badge">Attijari Bank • Direction Centrale des Engagements</span>
             <span class="norm-badge">Norme BCT n° 2016-01 (Ratio ≤ 40%)</span>
+            <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold cursor-pointer border transition-all"
+                  [class.bg-emerald-500-10]="pii.isPiiShieldActive()"
+                  [class.text-emerald-400]="pii.isPiiShieldActive()"
+                  [class.border-emerald-500-30]="pii.isPiiShieldActive()"
+                  [class.bg-slate-500-10]="!pii.isPiiShieldActive()"
+                  [class.text-slate-400]="!pii.isPiiShieldActive()"
+                  (click)="pii.toggleShield()"
+                  title="Protection automatique des données personnelles (INPDP / RGPD)">
+              {{ pii.isPiiShieldActive() ? '🛡️ Bouclier PII Actif (INPDP)' : '⚠️ PII Non Masqué' }}
+            </span>
           </div>
           <h1 class="page-title">Supervision & Pré-filtrage des Risques de Crédit</h1>
           <p class="page-subtitle">
@@ -152,8 +164,16 @@ import { SeverityBadgeComponent } from '../../shared/components/severity-badge/s
                   Dossier Ref : <strong>{{ report().dossier_id }}</strong> • Type : <strong>{{ loanType | uppercase }}</strong>
                 </div>
               </div>
-              <div class="verdict-tag" [class.verdict-approved]="report().overall_verdict === 'APPROVED' || report().overall_verdict === 'CONFORME'" [class.verdict-rejected]="report().overall_verdict === 'REJECTED' || report().overall_verdict === 'REFUSE'">
-                {{ report().overall_verdict === 'APPROVED' || report().overall_verdict === 'CONFORME' ? '✓ ÉLIGIBLE & CONFORME BCT' : '⚠️ NON CONFORME / REFUS BCT' }}
+              <div class="flex items-center gap-3">
+                <button (click)="exportAuditReport()" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-blue-500/20 transition-all cursor-pointer">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                  </svg>
+                  <span>Imprimer Rapport Certifié (.PDF)</span>
+                </button>
+                <div class="verdict-tag" [class.verdict-approved]="report().overall_verdict === 'APPROVED' || report().overall_verdict === 'CONFORME'" [class.verdict-rejected]="report().overall_verdict === 'REJECTED' || report().overall_verdict === 'REFUSE'">
+                  {{ report().overall_verdict === 'APPROVED' || report().overall_verdict === 'CONFORME' ? '✓ ÉLIGIBLE & CONFORME BCT' : '⚠️ NON CONFORME / REFUS BCT' }}
+                </div>
               </div>
             </div>
 
@@ -725,6 +745,9 @@ import { SeverityBadgeComponent } from '../../shared/components/severity-badge/s
 })
 export class CreditComponent {
   api = inject(ApiService);
+  exportService = inject(ExportService);
+  pii = inject(PiiAnonymizerService);
+
   applicantName = 'Ahmed Ben Ali';
   loanType = 'personal';
   income = 3500;
@@ -776,9 +799,13 @@ export class CreditComponent {
     if (!this.applicantName) return;
     this.loading.set(true);
 
+    const safeName = this.pii.isPiiShieldActive() 
+      ? this.pii.anonymize(this.applicantName).sanitizedText 
+      : this.applicantName;
+
     this.api.prescreenCredit({
       dossier_id: `cred_${Date.now().toString().slice(-4)}`,
-      applicant_name: this.applicantName,
+      applicant_name: safeName,
       loan_type: this.loanType,
       files: this.uploadedFiles,
       financial_data: {
@@ -793,6 +820,54 @@ export class CreditComponent {
       },
       error: () => this.loading.set(false)
     });
+  }
+
+  exportAuditReport(): void {
+    const rep = this.report();
+    if (!rep) return;
+
+    const isConforme = rep.overall_verdict === 'APPROVED' || rep.overall_verdict === 'CONFORME';
+    const debtRatio = ((rep.numerical_validation?.debt_ratio || 0) * 100).toFixed(1);
+
+    const inspectedItems = [
+      {
+        rule: 'Norme Prudentielle BCT 2016-01 (Ratio d\'endettement ≤ 40%)',
+        circularReference: 'Circulaire BCT N° 2016-01',
+        status: rep.numerical_validation?.debt_ratio_compliant ? 'CONFORME' : 'NON_CONFORME',
+        details: `Taux d'endettement calculé à ${debtRatio}% pour un plafond légal fixé à 40.0%.`
+      },
+      {
+        rule: 'Complétude du Dossier & Justificatifs de Revenus',
+        circularReference: 'Circulaire BCT N° 2016-01 & Règles Générales',
+        status: rep.document_completeness?.verdict === 'COMPLETE' ? 'CONFORME' : 'NON_CONFORME',
+        details: `Pièces justificatives vérifiées : ${this.uploadedFiles.join(', ')}.`
+      }
+    ];
+
+    if (rep.blocking_issues && rep.blocking_issues.length > 0) {
+      rep.blocking_issues.forEach((issue: string, idx: number) => {
+        inspectedItems.push({
+          rule: `Point de Vigilance #${idx + 1}`,
+          circularReference: 'Norme Prudentielle BCT',
+          status: 'NON_CONFORME',
+          details: issue
+        });
+      });
+    }
+
+    const reportData: AuditReportData = {
+      reportTitle: `Rapport de Pré-filtrage Crédit & Solvabilité — ${rep.applicant_name}`,
+      reportType: `Supervision Crédit Particuliers / Professionnels (${this.loanType.toUpperCase()})`,
+      referenceId: rep.dossier_id || `CRED-${Date.now().toString().slice(-4)}`,
+      auditorName: 'Nour — Inspecteur Risques & Engagements Attijari Bank',
+      auditDate: new Date().toISOString().split('T')[0],
+      complianceScore: isConforme ? 95 : 40,
+      verdict: isConforme ? 'CONFORME' : 'NON_CONFORME',
+      executiveSummary: `Évaluation automatisée de la solvabilité de l'emprunteur ${rep.applicant_name}. Taux d'endettement constaté : ${debtRatio}%. ${isConforme ? 'Dossier conforme aux exigences prudentielles de la Circulaire BCT 2016-01.' : 'Dépassement du seuil réglementaire d\'endettement ou dossier incomplet.'}`,
+      inspectedItems: inspectedItems as any
+    };
+
+    this.exportService.printCertifiedReport(reportData);
   }
 }
 

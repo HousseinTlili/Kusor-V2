@@ -9,6 +9,7 @@ import { ContractComponent } from './pages/contract/contract.component';
 import { KycComponent } from './pages/kyc/kyc.component';
 import { ImpactViewerComponent } from './pages/impact-viewer/impact-viewer.component';
 import { TemporalExplorerComponent } from './pages/temporal-explorer/temporal-explorer.component';
+import { DiffViewerComponent } from './pages/diff-viewer/diff-viewer.component';
 import { authGuard, adminGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
@@ -21,6 +22,7 @@ export const routes: Routes = [
       { path: 'chat', component: ChatComponent },
       { path: 'admin', component: DocumentsComponent, canActivate: [adminGuard] },
       { path: 'graph', component: GraphComponent },
+      { path: 'diff-viewer', component: DiffViewerComponent },
       { path: 'credit', component: CreditComponent },
       { path: 'contract', component: ContractComponent },
       { path: 'kyc', component: KycComponent },

@@ -1,0 +1,158 @@
+<div class="diff-page">
+  
+  <!-- Header Banner -->
+  <header class="diff-header">
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <div class="space-y-1">
+        <div class="badge-header">
+          <span>🔍 Diff Réglementaire & Comparateur de Versions BCT</span>
+        </div>
+        <h1 class="text-2xl md:text-3xl font-black tracking-tight text-[var(--text-primary)]">
+          Analyse d'Écart & Évolution des Circulaires
+        </h1>
+        <p class="text-xs md:text-sm text-[var(--text-secondary)] max-w-3xl leading-relaxed">
+          Visualisation différentielle côte à côte des circulaires modifiées par la Banque Centrale de Tunisie : détection automatique des articles abrogés, modifiés et ajoutés.
+        </p>
+      </div>
+
+      <!-- Action Button: Export PDF -->
+      <button 
+        (click)="exportDiffReport()" 
+        class="self-start lg:self-center px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-blue-500/25 transition-all"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+        </svg>
+        <span>Imprimer Rapport d'Écart Scellé (.PDF)</span>
+      </button>
+    </div>
+
+    <!-- Pair Selector Cards -->
+    <div class="selector-grid">
+      @for (pair of pairs; track pair.id) {
+        <div 
+          (click)="selectPair(pair)" 
+          [class.active]="selectedPair().id === pair.id"
+          class="pair-card"
+        >
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-[10px] font-extrabold uppercase text-blue-500">{{ pair.theme }}</span>
+          </div>
+          <div class="text-xs font-black text-[var(--text-primary)]">
+            {{ pair.oldCircular.number }} ➔ {{ pair.newCircular.number }}
+          </div>
+        </div>
+      }
+    </div>
+  </header>
+
+  <!-- Side-by-Side Comparison Container -->
+  <main class="diff-comparison-container">
+    
+    <!-- Left Column: Ancienne Circulaire -->
+    <section class="column-card column-old">
+      <div class="column-header">
+        <div>
+          <span class="text-[10px] font-extrabold uppercase text-red-500">Texte Précédent (Modifié / Abrogé)</span>
+          <h2 class="text-sm font-extrabold text-[var(--text-primary)] mt-0.5">{{ selectedPair().oldCircular.title }}</h2>
+        </div>
+        <span class="px-2.5 py-1 rounded bg-red-500/10 text-red-600 dark:text-red-400 font-extrabold text-[10px] border border-red-500/20">
+          {{ selectedPair().oldCircular.date }}
+        </span>
+      </div>
+
+      <div class="clauses-list">
+        @for (clause of selectedPair().oldCircular.clauses; track clause.article) {
+          <div 
+            [class.clause-abrogated]="clause.status === 'ABROGE'"
+            [class.clause-modified]="clause.status === 'MODIFIE'"
+            class="clause-box"
+          >
+            <div class="flex items-center justify-between">
+              <span class="font-extrabold text-xs text-[var(--text-primary)]">{{ clause.article }}</span>
+              <span 
+                [class.tag-red]="clause.status === 'ABROGE'"
+                [class.tag-amber]="clause.status === 'MODIFIE'"
+                class="clause-tag"
+              >
+                {{ clause.status }}
+              </span>
+            </div>
+            <p class="text-xs text-[var(--text-secondary)] leading-relaxed">{{ clause.text }}</p>
+          </div>
+        }
+      </div>
+    </section>
+
+    <!-- Right Column: Nouvelle Circulaire Modificative -->
+    <section class="column-card column-new">
+      <div class="column-header">
+        <div>
+          <span class="text-[10px] font-extrabold uppercase text-emerald-500">Texte Modificatif en Vigueur</span>
+          <h2 class="text-sm font-extrabold text-[var(--text-primary)] mt-0.5">{{ selectedPair().newCircular.title }}</h2>
+        </div>
+        <span class="px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-extrabold text-[10px] border border-emerald-500/20">
+          {{ selectedPair().newCircular.date }}
+        </span>
+      </div>
+
+      <div class="clauses-list">
+        @for (clause of selectedPair().newCircular.clauses; track clause.article) {
+          <div 
+            [class.clause-added]="clause.status === 'AJOUTE'"
+            [class.clause-modified]="clause.status === 'MODIFIE'"
+            class="clause-box"
+          >
+            <div class="flex items-center justify-between">
+              <span class="font-extrabold text-xs text-[var(--text-primary)]">{{ clause.article }}</span>
+              <span 
+                [class.tag-green]="clause.status === 'AJOUTE'"
+                [class.tag-amber]="clause.status === 'MODIFIE'"
+                class="clause-tag"
+              >
+                {{ clause.status }}
+              </span>
+            </div>
+            <p class="text-xs text-[var(--text-secondary)] leading-relaxed">{{ clause.text }}</p>
+          </div>
+        }
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Impact Metier Grid -->
+  <section class="impact-summary-card">
+    <div class="border-b border-[var(--border-color)] pb-3">
+      <h2 class="text-sm font-extrabold text-[var(--text-primary)]">
+        Impacts Opérationnels par Département Bancaire (Attijari Bank)
+      </h2>
+      <p class="text-xs text-[var(--text-muted)] mt-0.5">
+        Conséquences de la transition réglementaire {{ selectedPair().oldCircular.number }} ➔ {{ selectedPair().newCircular.number }}
+      </p>
+    </div>
+
+    <div class="impact-grid">
+      <div class="impact-col border-l-2 border-amber-500">
+        <span class="text-[10px] font-extrabold uppercase text-amber-500">Direction des Risques</span>
+        <p class="text-xs text-[var(--text-secondary)] leading-relaxed">{{ selectedPair().impactAnalysis.risques }}</p>
+      </div>
+
+      <div class="impact-col border-l-2 border-blue-500">
+        <span class="text-[10px] font-extrabold uppercase text-blue-500">Pôle Crédit & Réseau</span>
+        <p class="text-xs text-[var(--text-secondary)] leading-relaxed">{{ selectedPair().impactAnalysis.credit }}</p>
+      </div>
+
+      <div class="impact-col border-l-2 border-emerald-500">
+        <span class="text-[10px] font-extrabold uppercase text-emerald-500">Conformité & Juridique</span>
+        <p class="text-xs text-[var(--text-secondary)] leading-relaxed">{{ selectedPair().impactAnalysis.conformite }}</p>
+      </div>
+
+      <div class="impact-col border-l-2 border-purple-500">
+        <span class="text-[10px] font-extrabold uppercase text-purple-500">Direction des SI & Core Banking</span>
+        <p class="text-xs text-[var(--text-secondary)] leading-relaxed">{{ selectedPair().impactAnalysis.systemeInfo }}</p>
+      </div>
+    </div>
+  </section>
+
+</div>
