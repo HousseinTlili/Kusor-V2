@@ -29,6 +29,20 @@ export class GraphComponent implements OnInit {
   viewLevel = signal<'overview' | 'detail'>('overview');
   selectedCluster = signal<string | null>(null);
 
+  // Fixed deterministic layout configuration (Dagre by default so nodes are fixed and stable)
+  selectedLayout = signal<string>('dagre');
+  layoutOrientation = signal<'TB' | 'LR'>('TB');
+  zoomLevel = signal<number>(1.0);
+
+  layoutSettings = computed(() => ({
+    orientation: this.layoutOrientation(),
+    nodePadding: 45,
+    edgePadding: 30,
+    rankPadding: 60,
+    multigraph: true,
+    compound: true
+  }));
+
   // Popular BCT Presets
   presets = [
     { id: '2018-16', label: '2018-16 (Réglementation Générale)' },
@@ -253,6 +267,14 @@ export class GraphComponent implements OnInit {
   selectPreset(presetId: string): void {
     this.searchQuery = presetId;
     this.loadGraph(presetId);
+  }
+
+  setLayout(name: string): void {
+    this.selectedLayout.set(name);
+  }
+
+  toggleOrientation(): void {
+    this.layoutOrientation.update(prev => prev === 'TB' ? 'LR' : 'TB');
   }
 
   askInChat(circularNumber: string): void {

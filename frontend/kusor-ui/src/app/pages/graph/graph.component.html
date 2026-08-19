@@ -120,28 +120,61 @@
           </div>
         } @else {
           <div class="graph-breadcrumb-bar">
-            <span class="breadcrumb-item" [class.active]="viewLevel() === 'overview'" (click)="loadOverview()">
-              Vue d'ensemble (Clusters Annuels)
-            </span>
-            @if (viewLevel() === 'detail') {
-              <span class="breadcrumb-separator">/</span>
-              <span class="breadcrumb-item active">
-                Année {{ selectedCluster() }}
+            <div class="breadcrumb-left">
+              <span class="breadcrumb-item" [class.active]="viewLevel() === 'overview'" (click)="loadOverview()">
+                Vue d'ensemble (Clusters Annuels)
               </span>
-              <button class="btn-secondary back-button" (click)="loadOverview()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
-                </svg>
-                Retour
+              @if (viewLevel() === 'detail') {
+                <span class="breadcrumb-separator">/</span>
+                <span class="breadcrumb-item active">
+                  Année {{ selectedCluster() }}
+                </span>
+                <button class="btn-secondary back-button" (click)="loadOverview()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+                  </svg>
+                  Retour
+                </button>
+              }
+            </div>
+
+            <!-- Layout & Stabilization Controls -->
+            <div class="layout-controls">
+              <button 
+                (click)="setLayout('dagre')"
+                [class.active-layout]="selectedLayout() === 'dagre'"
+                class="layout-btn"
+                title="Disposition Hiérarchique Fixe & Stable (Dagre)"
+              >
+                <span>📌 Disposition Fixe</span>
               </button>
-            }
+              <button 
+                (click)="toggleOrientation()"
+                class="layout-btn"
+                title="Basculer Orientation Verticale / Horizontale"
+              >
+                <span>{{ layoutOrientation() === 'TB' ? '⬇️ Vertical' : '➡️ Horizontal' }}</span>
+              </button>
+              <button 
+                (click)="setLayout('colaForceDirected')"
+                [class.active-layout]="selectedLayout() === 'colaForceDirected'"
+                class="layout-btn"
+                title="Disposition Organique (Forces Dynamiques)"
+              >
+                <span>🌐 Mode Force</span>
+              </button>
+              <span class="node-count-badge">
+                {{ nodes().length }} Nœuds • {{ links().length }} Liens
+              </span>
+            </div>
           </div>
 
           <div class="graph-canvas">
             <ngx-graph
               [nodes]="nodes()"
               [links]="links()"
-              [layout]="'colaForceDirected'"
+              [layout]="selectedLayout()"
+              [layoutSettings]="layoutSettings()"
               [enableZoom]="true"
               [autoZoom]="true"
               [autoCenter]="true"

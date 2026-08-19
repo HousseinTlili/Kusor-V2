@@ -188,19 +188,71 @@
 
 .graph-breadcrumb-bar {
   position: absolute;
-  top: 1rem;
+  top: 1.5rem;
   left: 1.5rem;
-  z-index: 5;
+  right: 1.5rem;
+  z-index: 10;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  background: rgba(15, 23, 42, 0.65);
+  justify-content: space-between;
+  gap: 1rem;
+  background: var(--bg-card);
   backdrop-filter: blur(12px);
-  padding: 0.5rem 1rem;
+  padding: 0.6rem 1.25rem;
   border-radius: 12px;
   border: 1px solid var(--border-color);
   font-size: 0.85rem;
   box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.3);
+
+  .breadcrumb-left {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .layout-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .layout-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba(37, 99, 235, 0.2);
+      border-color: #3b82f6;
+      color: #60a5fa;
+    }
+
+    &.active-layout {
+      background: #2563eb;
+      border-color: #3b82f6;
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+    }
+  }
+
+  .node-count-badge {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.35rem 0.75rem;
+    border-radius: 8px;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: #10b981;
+  }
   
   .breadcrumb-item {
     color: var(--text-secondary);
@@ -209,16 +261,13 @@
     transition: color var(--transition-fast);
     
     &:hover {
-      color: white;
+      color: var(--text-primary);
     }
     
     &.active {
-      color: #a5b4fc; // Light indigo
+      color: #3b82f6;
       cursor: default;
-      font-weight: 600;
-      &:hover {
-        color: #a5b4fc;
-      }
+      font-weight: 700;
     }
   }
   
@@ -238,7 +287,7 @@
     height: auto;
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid var(--border-color);
-    color: white;
+    color: var(--text-primary);
     cursor: pointer;
     transition: background var(--transition-fast);
     
