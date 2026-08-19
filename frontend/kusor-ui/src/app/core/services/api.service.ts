@@ -180,4 +180,15 @@ export class ApiService {
     const params = new HttpParams().set('as_of', asOfDate);
     return this.http.get<any>(`${environment.apiUrl}/graph/temporal`, { params });
   }
+
+  getObligations(circular?: string, type?: string): Observable<any> {
+    let params = new HttpParams();
+    if (circular) {
+      params = params.set('circular', circular);
+    }
+    if (type && type !== 'ALL') {
+      params = params.set('type', type);
+    }
+    return this.http.get<any>(`${environment.apiUrl}/obligations`, { params });
+  }
 }

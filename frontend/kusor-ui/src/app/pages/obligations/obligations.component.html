@@ -1,0 +1,201 @@
+<div class="obligations-page">
+  
+  <!-- 1. Executive Header Banner -->
+  <header class="obligations-header">
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <div class="space-y-1">
+        <div class="badge-header">
+          <span>⚖️ Logique Déontique & Extraction d'Obligations BCT</span>
+        </div>
+        <h1 class="text-2xl md:text-3xl font-black tracking-tight text-[var(--text-primary)]">
+          Référentiel des Obligations & Interdictions Réglementaires
+        </h1>
+        <p class="text-xs md:text-sm text-[var(--text-secondary)] max-w-3xl leading-relaxed">
+          Extraction automatisée et classification déontique des devoirs, seuils, délais et sanctions imposés par la Banque Centrale de Tunisie aux établissements financiers.
+        </p>
+      </div>
+
+      <!-- Action: Export PDF Report -->
+      <button 
+        (click)="exportDeonticReport()" 
+        class="self-start lg:self-center px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-blue-500/25 transition-all cursor-pointer"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+        </svg>
+        <span>Imprimer Référentiel Déontique Scellé (.PDF)</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- 2. KPI Summary Grid -->
+  <section class="kpi-grid">
+    <div class="kpi-card kpi-prohibition">
+      <span class="kpi-title">Interdictions Formelles</span>
+      <span class="kpi-value text-red-500">{{ counts().prohibitions }}</span>
+      <span class="text-[10px] text-[var(--text-muted)]">Clauses d'interdiction stricte</span>
+    </div>
+
+    <div class="kpi-card kpi-requirement">
+      <span class="kpi-title">Obligations Impératives</span>
+      <span class="kpi-value text-blue-500">{{ counts().requirements }}</span>
+      <span class="text-[10px] text-[var(--text-muted)]">Devoirs et actions obligatoires</span>
+    </div>
+
+    <div class="kpi-card kpi-threshold">
+      <span class="kpi-title">Seuils & Ratios Chiffrés</span>
+      <span class="kpi-value text-amber-500">{{ counts().thresholds }}</span>
+      <span class="text-[10px] text-[var(--text-muted)]">Plafonds BCT (DSTI 40%, UBO 25%)</span>
+    </div>
+
+    <div class="kpi-card kpi-deadline">
+      <span class="kpi-title">Délais & Échéances</span>
+      <span class="kpi-value text-purple-500">{{ counts().deadlines }}</span>
+      <span class="text-[10px] text-[var(--text-muted)]">Périodicités (30 jours, 5 ans)</span>
+    </div>
+
+    <div class="kpi-card kpi-exemption">
+      <span class="kpi-title">Dérogations / Facultés</span>
+      <span class="kpi-value text-emerald-500">{{ counts().exemptions }}</span>
+      <span class="text-[10px] text-[var(--text-muted)]">Cas d'exonération prévus</span>
+    </div>
+  </section>
+
+  <!-- 3. Filter Toolbar & Search Bar -->
+  <section class="toolbar-section">
+    <!-- Filter Chips -->
+    <div class="filter-chips">
+      <button 
+        (click)="setTypeFilter('ALL')" 
+        [class.active]="selectedType === 'ALL'"
+        class="chip-btn"
+      >
+        Toutes ({{ counts().total }})
+      </button>
+      <button 
+        (click)="setTypeFilter('PROHIBITION')" 
+        [class.active]="selectedType === 'PROHIBITION'"
+        class="chip-btn text-red-500"
+      >
+        🚫 Interdictions
+      </button>
+      <button 
+        (click)="setTypeFilter('REQUIREMENT')" 
+        [class.active]="selectedType === 'REQUIREMENT'"
+        class="chip-btn text-blue-500"
+      >
+        📌 Obligations
+      </button>
+      <button 
+        (click)="setTypeFilter('THRESHOLD')" 
+        [class.active]="selectedType === 'THRESHOLD'"
+        class="chip-btn text-amber-500"
+      >
+        📊 Seuils & Ratios
+      </button>
+      <button 
+        (click)="setTypeFilter('DEADLINE')" 
+        [class.active]="selectedType === 'DEADLINE'"
+        class="chip-btn text-purple-500"
+      >
+        ⏱️ Délais
+      </button>
+      <button 
+        (click)="setTypeFilter('EXEMPTION')" 
+        [class.active]="selectedType === 'EXEMPTION'"
+        class="chip-btn text-emerald-500"
+      >
+        🟢 Dérogations
+      </button>
+    </div>
+
+    <!-- Instant Search Input -->
+    <input 
+      type="text" 
+      [(ngModel)]="searchQuery"
+      placeholder="Rechercher par mot-clé, article, acteur..." 
+      class="px-3.5 py-2 rounded-lg bg-[var(--bg-input)] border border-[var(--border-color)] text-xs text-[var(--text-primary)] font-medium outline-none focus:border-blue-500 w-full lg:w-72"
+    />
+  </section>
+
+  <!-- 4. Obligations Cards Grid -->
+  @if (loading()) {
+    <div class="flex justify-center items-center h-48 text-[var(--text-muted)] font-medium gap-3">
+      <svg class="animate-spin h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      <span class="text-sm">Extraction des exigences déontiques en cours...</span>
+    </div>
+  } @else {
+    <main class="obligations-grid">
+      @for (obl of filteredObligations(); track obl.id) {
+        <article 
+          [class.type-prohibition]="obl.deontic_type === 'PROHIBITION'"
+          [class.type-requirement]="obl.deontic_type === 'REQUIREMENT'"
+          [class.type-threshold]="obl.deontic_type === 'THRESHOLD'"
+          [class.type-deadline]="obl.deontic_type === 'DEADLINE'"
+          [class.type-exemption]="obl.deontic_type === 'EXEMPTION'"
+          class="obligation-card"
+        >
+          <!-- Card Top -->
+          <div class="card-top">
+            <div>
+              <span class="font-extrabold text-blue-500 text-xs">{{ obl.circular_number }}</span>
+              <span class="text-xs text-[var(--text-muted)] font-bold ml-1.5">• {{ obl.article }}</span>
+              <h3 class="font-extrabold text-sm text-[var(--text-primary)] mt-1">{{ obl.circular_title }}</h3>
+            </div>
+
+            <!-- Deontic Pill Badge -->
+            @if (obl.deontic_type === 'PROHIBITION') {
+              <span class="deontic-pill pill-prohibition">🚫 Interdiction</span>
+            } @else if (obl.deontic_type === 'REQUIREMENT') {
+              <span class="deontic-pill pill-requirement">📌 Obligation</span>
+            } @else if (obl.deontic_type === 'THRESHOLD') {
+              <span class="deontic-pill pill-threshold">📊 Seuil / Ratio</span>
+            } @else if (obl.deontic_type === 'DEADLINE') {
+              <span class="deontic-pill pill-deadline">⏱️ Échéance</span>
+            } @else if (obl.deontic_type === 'EXEMPTION') {
+              <span class="deontic-pill pill-exemption">🟢 Dérogation</span>
+            }
+          </div>
+
+          <!-- Meta tags -->
+          <div class="meta-tags">
+            <span class="tag-item">👤 <strong>Acteur visé :</strong> {{ obl.actor }}</span>
+            <span class="tag-item">⚙️ <strong>Processus :</strong> {{ obl.process }}</span>
+          </div>
+
+          <!-- Rule Text Box -->
+          <div class="rule-text-box">
+            « {{ obl.text }} »
+          </div>
+
+          <!-- Sanction / Legal Risk Box -->
+          <div class="sanction-box">
+            <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <div>
+              <strong>Sanction BCT & Risque Prudentiel :</strong> {{ obl.sanction_risk }}
+            </div>
+          </div>
+
+          <!-- Card Actions Footer -->
+          <div class="card-actions">
+            <span class="text-[10px] text-[var(--text-muted)] font-mono">Ref: {{ obl.id }}</span>
+            <div class="flex items-center gap-2">
+              <button (click)="viewInGraph(obl.circular_number)" class="btn-sub-action">
+                🕸️ Graphe Neo4j
+              </button>
+              <button (click)="askInChat(obl)" class="btn-sub-action">
+                💬 Interroger l'IA
+              </button>
+            </div>
+          </div>
+        </article>
+      }
+    </main>
+  }
+
+</div>

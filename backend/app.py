@@ -119,6 +119,7 @@ def create_app(config_name: str = "development") -> Flask:
     from backend.routes.contract import api as contract_ns
     from backend.routes.kyc import api as kyc_ns
     from backend.routes.impact import api as impact_ns
+    from backend.routes.obligations import api as obligations_ns
 
     api.add_namespace(auth_ns, path="/auth")
     api.add_namespace(docs_ns, path="/documents")
@@ -130,6 +131,7 @@ def create_app(config_name: str = "development") -> Flask:
     api.add_namespace(contract_ns, path="/contract")
     api.add_namespace(kyc_ns, path="/kyc")
     api.add_namespace(impact_ns, path="/impact")
+    api.add_namespace(obligations_ns, path="/obligations")
 
     # ------------------------------------------------------------------
     # Specialized System, Swagger UI & Diagnostic Routes
