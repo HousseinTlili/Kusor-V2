@@ -59,15 +59,16 @@ def main():
             if not doc:
                 continue
                 
-            chunk_id = f"{chunk.document_id}_{chunk.chunk_index}"
+            chunk_id = f"chk_{chunk.id}"
             ids.append(chunk_id)
             texts.append(chunk.content)
             metadatas.append({
-                "document_id": chunk.document_id,
-                "chunk_index": chunk.chunk_index,
-                "page_number": chunk.page_number,
+                "chunk_id": str(chunk.id),
+                "document_id": str(chunk.document_id),
+                "chunk_index": int(chunk.chunk_index) if chunk.chunk_index is not None else 0,
+                "page_number": int(chunk.page_number) if chunk.page_number is not None else 1,
                 "source_filename": f"{doc.number}.pdf",
-                "circular_number": doc.number
+                "circular_number": str(doc.number)
             })
             
             # Embed and insert in batches of batch_size
