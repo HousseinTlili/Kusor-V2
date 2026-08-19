@@ -1,6 +1,9 @@
 import re
 from rank_bm25 import BM25Okapi
 import chromadb
+from config import Config
+
+_settings = Config()
 
 
 class BM25Searcher:
@@ -11,7 +14,10 @@ class BM25Searcher:
     termes juridiques précis).
     """
 
-    def __init__(self, chroma_host="localhost", chroma_port=8001, collection_name="circulars"):
+    def __init__(self, chroma_host=None, chroma_port=None, collection_name="circulars"):
+        chroma_host = chroma_host or _settings.CHROMA_HOST
+        chroma_port = chroma_port or _settings.CHROMA_PORT
+
         # On récupère tous les chunks déjà stockés dans ChromaDB (Module 3)
         # pour construire l'index BM25 à partir des mêmes données.
         client = chromadb.HttpClient(host=chroma_host, port=chroma_port)
@@ -75,4 +81,3 @@ if __name__ == "__main__":
         print(f"--- Résultat {i} (page {r['page_number']}, score={r['score']:.4f}) ---")
         print(r["text"][:200])
         print()
-        

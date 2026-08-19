@@ -1,5 +1,8 @@
 import chromadb
 import ollama
+from config import Config
+
+_settings = Config()
 
 
 class VectorSearcher:
@@ -8,7 +11,9 @@ class VectorSearcher:
     Interroge la collection de chunks déjà indexée par le Module 3.
     """
 
-    def __init__(self, chroma_host="localhost", chroma_port=8001, collection_name="circulars", embedding_model="nomic-embed-text"):
+    def __init__(self, chroma_host=None, chroma_port=None, collection_name="circulars", embedding_model="nomic-embed-text"):
+        chroma_host = chroma_host or _settings.CHROMA_HOST
+        chroma_port = chroma_port or int(_settings.CHROMA_PORT)
         self.client = chromadb.HttpClient(host=chroma_host, port=chroma_port)
         self.collection = self.client.get_collection(name=collection_name)
         self.embedding_model = embedding_model

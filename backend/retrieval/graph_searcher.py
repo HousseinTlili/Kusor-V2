@@ -1,5 +1,8 @@
 import re
 from neo4j import GraphDatabase
+from config import Config
+
+_settings = Config()
 
 
 class GraphSearcher:
@@ -8,8 +11,9 @@ class GraphSearcher:
     Détecte les numéros de circulaires mentionnés dans une question,
     puis traverse le graphe pour trouver les circulaires liées.
     """
-
-    def __init__(self, uri="bolt://localhost:7687", user="neo4j", password="kusor_password"):
+    def __init__(self, uri=None, user="neo4j", password=None):
+        uri = uri or _settings.NEO4J_URI
+        password = password or getattr(_settings, "NEO4J_PASSWORD", "kusor_password")
         self.driver = GraphDatabase.driver(uri, auth=(user, password))
 
     def close(self):

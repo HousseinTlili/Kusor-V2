@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KUSOR — Dashboard Conformité</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600;6..72,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#16324F;
+    --navy-deep:#0E2338;
+    --slate:#3E5C76;
+    --bg:#EEF1F5;
+    --surface:#FFFFFF;
+    --border:#D7DEE6;
+    --text:#131B26;
+    --text-muted:#5B6B7D;
+    --teal:#1E7F6E;
+    --teal-bg:#E4F2EF;
+    --amber:#B8802E;
+    --amber-bg:#FBF1E1;
+    --red:#A6423A;
+    --red-bg:#FAEBEA;
+    --radius:12px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Inter',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+  }
+
+  .topbar{
+    background:linear-gradient(135deg,var(--navy-deep),var(--navy));
+    color:#fff;
+    padding:16px 28px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .brand{display:flex; align-items:baseline; gap:10px;}
+  .brand .mark{font-family:'Newsreader',serif; font-weight:700; font-size:21px;}
+  .brand .tag{font-size:12px; color:#B9C7D6; font-weight:500; border-left:1px solid rgba(255,255,255,0.25); padding-left:10px;}
+  .top-right{display:flex; align-items:center; gap:16px;}
+  .role-chip{
+    background:rgba(255,255,255,0.12);
+    border:1px solid rgba(255,255,255,0.25);
+    padding:5px 12px;
+    border-radius:99px;
+    font-size:12px;
+    font-weight:600;
+  }
+  .date-txt{font-size:12.5px; color:#C6D3E0;}
+  button.icon-btn{
+    background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.2);
+    color:#fff;
+    border-radius:7px;
+    padding:6px 12px;
+    font-size:12px;
+    font-family:'Inter',sans-serif;
+    cursor:pointer;
+  }
+  button.icon-btn:hover{background:rgba(255,255,255,0.16);}
+
+  .nav-links{display:flex; gap:4px; margin-left:24px;}
+  .nav-link{
+    color:#B9C7D6; text-decoration:none; font-size:12.5px; font-weight:600;
+    padding:6px 12px; border-radius:7px; transition:all 0.15s;
+  }
+  .nav-link:hover{background:rgba(255,255,255,0.1); color:#fff;}
+  .nav-link.active{background:rgba(255,255,255,0.15); color:#fff;}
+
+  .wrap{
+    max-width:1360px;
+    margin:0 auto;
+    padding:24px 28px 60px;
+  }
+
+  .data-banner{
+    background:var(--amber-bg);
+    border:1px solid #ECD8B3;
+    color:#6B4A18;
+    font-size:12.5px;
+    padding:9px 16px;
+    border-radius:8px;
+    margin-bottom:20px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .data-banner a{color:#6B4A18; font-weight:600; text-decoration:underline; cursor:pointer;}
+
+  .kpi-row{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:16px;
+    margin-bottom:20px;
+  }
+  @media (max-width:900px){ .kpi-row{grid-template-columns:repeat(2,1fr);} }
+  .kpi-card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:18px 20px;
+    position:relative;
+    overflow:hidden;
+  }
+  .kpi-card .eyebrow{
+    font-size:11px; text-transform:uppercase; letter-spacing:0.06em;
+    color:var(--text-muted); font-weight:600; margin-bottom:8px;
+  }
+  .kpi-card .value{
+    font-family:'Newsreader',serif; font-weight:700; font-size:30px; color:var(--navy-deep);
+    display:flex; align-items:baseline; gap:6px;
+  }
+  .kpi-card .value .unit{font-size:14px; font-weight:500; color:var(--text-muted); font-family:'Inter',sans-serif;}
+  .kpi-card .delta{font-size:12px; margin-top:6px; font-weight:600;}
+  .delta.up{color:var(--teal);}
+  .delta.down{color:var(--red);}
+  .delta.flat{color:var(--text-muted);}
+  .kpi-card .accent-bar{
+    position:absolute; left:0; top:0; bottom:0; width:4px;
+  }
+
+  .main-grid{
+    display:grid;
+    grid-template-columns:1fr 340px;
+    gap:20px;
+  }
+  @media (max-width:980px){ .main-grid{grid-template-columns:1fr;} }
+
+  .col-main{display:flex; flex-direction:column; gap:20px;}
+  .col-side{display:flex; flex-direction:column; gap:20px;}
+
+  .panel{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    overflow:hidden;
+  }
+  .panel-header{
+    padding:16px 20px;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .panel-header h2{
+    font-family:'Newsreader',serif;
+    font-weight:600;
+    font-size:16.5px;
+    color:var(--navy-deep);
+    margin:0;
+  }
+  .panel-header .meta{font-size:11.5px; color:var(--text-muted);}
+  .panel-body{padding:18px 20px;}
+
+  .chart-wrap{position:relative;}
+  .chart-wrap svg{width:100%; height:180px; overflow:visible;}
+  .chart-legend{display:flex; gap:18px; margin-top:10px; font-size:11.5px; color:var(--text-muted);}
+  .legend-dot{display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:5px;}
+
+  .cat-row{display:flex; align-items:center; gap:12px; margin-bottom:12px;}
+  .cat-row:last-child{margin-bottom:0;}
+  .cat-label{width:120px; font-size:12.5px; font-weight:600; color:var(--slate); flex-shrink:0;}
+  .cat-bar-track{flex:1; background:var(--bg); border-radius:5px; height:10px; overflow:hidden;}
+  .cat-bar-fill{height:100%; border-radius:5px; background:linear-gradient(90deg,var(--slate),var(--navy));}
+  .cat-count{width:34px; text-align:right; font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--text-muted);}
+
+  table.circ-table{width:100%; border-collapse:collapse; font-size:13px;}
+  table.circ-table th{
+    text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:0.05em;
+    color:var(--text-muted); font-weight:600; padding:0 10px 10px; border-bottom:1px solid var(--border);
+  }
+  table.circ-table td{padding:11px 10px; border-bottom:1px solid var(--border); vertical-align:middle;}
+  table.circ-table tr:last-child td{border-bottom:none;}
+  .circ-id{font-family:'IBM Plex Mono',monospace; font-weight:600; color:var(--navy);}
+  .status-pill{
+    font-size:10.5px; font-weight:600; padding:3px 9px; border-radius:99px; text-transform:uppercase; letter-spacing:0.03em;
+  }
+  .status-pill.ok{background:var(--teal-bg); color:var(--teal);}
+  .status-pill.pending{background:var(--amber-bg); color:var(--amber);}
+
+  .alert-item{
+    display:flex; gap:10px; padding:12px 0; border-bottom:1px solid var(--border);
+  }
+  .alert-item:last-child{border-bottom:none; padding-bottom:0;}
+  .alert-dot{width:8px; height:8px; border-radius:50%; margin-top:5px; flex-shrink:0;}
+  .alert-dot.high{background:var(--red);}
+  .alert-dot.medium{background:var(--amber);}
+  .alert-text{font-size:12.5px; line-height:1.5;}
+  .alert-text .title{font-weight:600; color:var(--text); display:block; margin-bottom:2px;}
+  .alert-text .time{color:var(--text-muted); font-size:11px;}
+
+  .infra-row{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:9px 0; border-bottom:1px solid var(--border); font-size:13px;
+  }
+  .infra-row:last-child{border-bottom:none;}
+  .infra-name{display:flex; align-items:center; gap:8px; font-weight:500;}
+  .infra-dot{width:7px; height:7px; border-radius:50%;}
+  .infra-dot.ok{background:#3FCB9B;}
+  .infra-dot.warn{background:#E2A23F;}
+  .infra-latency{font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--text-muted);}
+
+  .audit-box{
+    background:var(--teal-bg);
+    border:1px solid #C6E4DC;
+    border-radius:9px;
+    padding:14px;
+    font-size:12.5px;
+  }
+  .audit-box .check{color:var(--teal); font-weight:700; font-size:14px;}
+  .audit-box .label{color:#1A5C4F; margin-top:4px;}
+  .audit-box .meta{color:#3E7A6D; font-size:11px; margin-top:6px;}
+
+  .modal-overlay{position:fixed; inset:0; background:rgba(14,35,56,0.45); display:none; align-items:center; justify-content:center; z-index:50;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:#fff; border-radius:12px; padding:24px; width:440px; max-width:90vw;}
+  .modal h3{font-family:'Newsreader',serif; margin:0 0 4px; color:var(--navy-deep);}
+  .modal p.hint{color:var(--text-muted); font-size:12.5px; margin-top:0;}
+  .field{margin-bottom:14px;}
+  .field label{display:block; font-size:12px; font-weight:600; color:var(--slate); margin-bottom:5px;}
+  .field input{width:100%; padding:9px 10px; border:1px solid var(--border); border-radius:7px; font-size:13px; font-family:'IBM Plex Mono',monospace;}
+  .modal-actions{display:flex; justify-content:flex-end; gap:8px; margin-top:18px;}
+  .btn-secondary{background:#fff; border:1px solid var(--border); padding:8px 16px; border-radius:7px; font-size:13px; font-weight:600; cursor:pointer; color:var(--text-muted);}
+  .btn-primary{background:var(--navy); color:#fff; border:none; padding:8px 16px; border-radius:7px; font-size:13px; font-weight:600; cursor:pointer;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <span class="mark">KUSOR</span>
+    <span class="tag">Dashboard Conformité — vue d'ensemble</span>
+  </div>
+  <nav class="nav-links">
+    <a href="/" class="nav-link">Chat</a>
+    <a href="/test" class="nav-link">Console</a>
+    <a href="/dashboard" class="nav-link active">Dashboard</a>
+    <a href="/admin" class="nav-link">Admin</a>
+  </nav>
+  <div class="top-right">
+    <span class="date-txt" id="todayDate"></span>
+    <span class="role-chip">Conformité</span>
+    <button class="icon-btn" onclick="openSettings()">⚙ Source de données</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="data-banner">
+    <span>📊 Ce tableau de bord affiche des <strong>données d'exemple</strong> pour l'instant. <a onclick="openSettings()">Connecter l'API réelle</a> une fois les endpoints d'agrégation disponibles côté backend.</span>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div class="accent-bar" style="background:var(--navy);"></div>
+      <div class="eyebrow">Circulaires indexées</div>
+      <div class="value">47 <span class="unit">documents</span></div>
+      <div class="delta up">▲ +3 cette semaine</div>
+    </div>
+    <div class="kpi-card">
+      <div class="accent-bar" style="background:var(--slate);"></div>
+      <div class="eyebrow">Questions traitées (7j)</div>
+      <div class="value">128 <span class="unit">requêtes</span></div>
+      <div class="delta up">▲ +18% vs semaine préc.</div>
+    </div>
+    <div class="kpi-card">
+      <div class="accent-bar" style="background:var(--teal);"></div>
+      <div class="eyebrow">Confiance moyenne</div>
+      <div class="value">86 <span class="unit">%</span></div>
+      <div class="delta flat">— stable</div>
+    </div>
+    <div class="kpi-card">
+      <div class="accent-bar" style="background:var(--amber);"></div>
+      <div class="eyebrow">Alertes actives</div>
+      <div class="value">2 <span class="unit">à traiter</span></div>
+      <div class="delta down">▼ -1 depuis hier</div>
+    </div>
+  </div>
+
+  <div class="main-grid">
+    <div class="col-main">
+
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Activité — questions traitées</h2>
+          <span class="meta">7 derniers jours</span>
+        </div>
+        <div class="panel-body">
+          <div class="chart-wrap">
+            <svg id="activityChart" viewBox="0 0 640 180" preserveAspectRatio="none"></svg>
+          </div>
+          <div class="chart-legend">
+            <span><span class="legend-dot" style="background:var(--navy);"></span>Questions traitées</span>
+            <span><span class="legend-dot" style="background:var(--amber);"></span>Confiance faible signalée</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Catégories les plus consultées</h2>
+          <span class="meta">30 derniers jours</span>
+        </div>
+        <div class="panel-body" id="categoryList"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Dernières circulaires ingérées</h2>
+          <span class="meta">Module 3 — pipeline de prétraitement</span>
+        </div>
+        <div class="panel-body">
+          <table class="circ-table">
+            <thead>
+              <tr><th>Référence</th><th>Titre</th><th>Catégorie</th><th>Statut</th></tr>
+            </thead>
+            <tbody id="circTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="col-side">
+
+      <div class="panel">
+        <div class="panel-header"><h2>Alertes & incohérences</h2></div>
+        <div class="panel-body" id="alertsList"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h2>État de l'infrastructure</h2></div>
+        <div class="panel-body" id="infraList"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h2>Registre d'audit</h2></div>
+        <div class="panel-body">
+          <div class="audit-box">
+            <div class="check">✓ Chaîne intègre</div>
+            <div class="label">128 entrées vérifiées, aucune altération détectée</div>
+            <div class="meta">Dernière vérification : aujourd'hui, 09:14</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<div class="modal-overlay" id="settingsOverlay">
+  <div class="modal">
+    <h3>Source de données</h3>
+    <p class="hint">Ce dashboard tourne actuellement sur des données d'exemple codées en dur. Renseigne un endpoint d'agrégation (à créer côté Flask) pour brancher des données réelles.</p>
+    <div class="field">
+      <label>URL de base de l'API</label>
+      <input type="text" id="baseUrlInput" placeholder="http://localhost:5000">
+    </div>
+    <div class="field">
+      <label>Chemin de l'endpoint (GET, retourne le JSON d'agrégation)</label>
+      <input type="text" id="pathInput" placeholder="/api/dashboard/summary">
+    </div>
+    <p class="hint" style="margin-bottom:0;">Tant que cet endpoint n'existe pas côté backend, le dashboard continue d'afficher les données d'exemple — rien ne casse.</p>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeSettings()">Annuler</button>
+      <button class="btn-primary" onclick="saveSettings()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+document.getElementById('todayDate').textContent = new Date().toLocaleDateString('fr-FR', {
+  weekday:'long', year:'numeric', month:'long', day:'numeric'
+});
+
+const mockData = {
+  activity: [12, 15, 9, 22, 18, 26, 26],
+  lowConfidenceFlags: [1, 0, 2, 1, 0, 3, 1],
+  days: ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'],
+  categories: [
+    {label:'Crédit', count:34},
+    {label:'AML/CFT', count:27},
+    {label:'KYC', count:22},
+    {label:'Capital', count:14},
+    {label:'Gouvernance', count:9},
+  ],
+  circulars: [
+    {id:'2024-07', title:'Ratio de liquidité à court terme', cat:'Capital', status:'ok'},
+    {id:'2024-06', title:'Renforcement des dispositifs LCB-FT', cat:'AML/CFT', status:'ok'},
+    {id:'2024-05', title:'Actualisation KYC — personnes politiquement exposées', cat:'KYC', status:'ok'},
+    {id:'2024-04', title:'Créances non performantes — mise à jour', cat:'Crédit', status:'pending'},
+  ],
+  alerts: [
+    {sev:'high', title:'Incohérence temporelle détectée', detail:'La circulaire 2024-04 semble contredire une clause encore active de 2022-01 sur le même sujet.', time:'Il y a 3h'},
+    {sev:'medium', title:'Relation extraite à faible confiance', detail:'Relation MODIFIES entre 2024-06 et 2023-02 à valider manuellement.', time:'Il y a 1j'},
+  ],
+  infra: [
+    {name:'Neo4j (graphe)', status:'ok', latency:'4 ms'},
+    {name:'PostgreSQL (métadonnées)', status:'ok', latency:'2 ms'},
+    {name:'ChromaDB (vecteurs)', status:'ok', latency:'6 ms'},
+    {name:'Ollama (LLM local)', status:'warn', latency:'740 ms'},
+  ],
+};
+
+function renderChart(data){
+  const svg = document.getElementById('activityChart');
+  const W = 640, H = 180, pad = 20;
+  const maxVal = Math.max(...data.activity) * 1.15;
+  const stepX = (W - pad*2) / (data.activity.length - 1);
+
+  const toPoint = (arr, i) => {
+    const x = pad + i*stepX;
+    const y = H - pad - (arr[i]/maxVal)*(H-pad*2);
+    return [x,y];
+  };
+
+  const mainPts = data.activity.map((_,i)=>toPoint(data.activity,i));
+  const linePath = mainPts.map((p,i)=> (i===0?'M':'L')+p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+  const areaPath = linePath + ` L${mainPts[mainPts.length-1][0]},${H-pad} L${mainPts[0][0]},${H-pad} Z`;
+
+  let svgContent = `
+    <defs>
+      <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#16324F" stop-opacity="0.18"/>
+        <stop offset="100%" stop-color="#16324F" stop-opacity="0.02"/>
+      </linearGradient>
+    </defs>
+    <path d="${areaPath}" fill="url(#areaGrad)"/>
+    <path d="${linePath}" fill="none" stroke="#16324F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  `;
+
+  mainPts.forEach((p,i)=>{
+    svgContent += `<circle cx="${p[0]}" cy="${p[1]}" r="3.5" fill="#16324F"/>`;
+    if(data.lowConfidenceFlags[i] > 0){
+      svgContent += `<circle cx="${p[0]}" cy="${p[1]-12}" r="3" fill="#B8802E"/>`;
+    }
+    svgContent += `<text x="${p[0]}" y="${H-2}" text-anchor="middle" font-size="10" fill="#5B6B7D" font-family="Inter">${data.days[i]}</text>`;
+  });
+
+  svg.innerHTML = svgContent;
+}
+
+function renderCategories(categories){
+  const max = Math.max(...categories.map(c=>c.count));
+  const container = document.getElementById('categoryList');
+  container.innerHTML = categories.map(c => `
+    <div class="cat-row">
+      <div class="cat-label">${c.label}</div>
+      <div class="cat-bar-track"><div class="cat-bar-fill" style="width:${(c.count/max*100).toFixed(0)}%"></div></div>
+      <div class="cat-count">${c.count}</div>
+    </div>
+  `).join('');
+}
+
+function renderCirculars(circulars){
+  const tbody = document.getElementById('circTableBody');
+  tbody.innerHTML = circulars.map(c => `
+    <tr>
+      <td class="circ-id">${c.id}</td>
+      <td>${c.title}</td>
+      <td>${c.cat}</td>
+      <td><span class="status-pill ${c.status}">${c.status === 'ok' ? 'Indexée' : 'En cours'}</span></td>
+    </tr>
+  `).join('');
+}
+
+function renderAlerts(alerts){
+  const container = document.getElementById('alertsList');
+  if(!alerts.length){
+    container.innerHTML = `<div style="font-size:12.5px; color:var(--text-muted);">Aucune alerte active.</div>`;
+    return;
+  }
+  container.innerHTML = alerts.map(a => `
+    <div class="alert-item">
+      <span class="alert-dot ${a.sev}"></span>
+      <div class="alert-text">
+        <span class="title">${a.title}</span>
+        ${a.detail}
+        <div class="time">${a.time}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderInfra(infra){
+  const container = document.getElementById('infraList');
+  container.innerHTML = infra.map(s => `
+    <div class="infra-row">
+      <div class="infra-name"><span class="infra-dot ${s.status}"></span>${s.name}</div>
+      <div class="infra-latency">${s.latency}</div>
+    </div>
+  `).join('');
+}
+
+function renderAll(data){
+  renderChart(data);
+  renderCategories(data.categories);
+  renderCirculars(data.circulars);
+  renderAlerts(data.alerts);
+  renderInfra(data.infra);
+}
+
+renderAll(mockData);
+
+let config = {
+  baseUrl: localStorage.getItem('kusor_dash_baseUrl') || '',
+  path: localStorage.getItem('kusor_dash_path') || '/api/dashboard/summary'
+};
+
+function openSettings(){
+  document.getElementById('baseUrlInput').value = config.baseUrl;
+  document.getElementById('pathInput').value = config.path;
+  document.getElementById('settingsOverlay').classList.add('open');
+}
+function closeSettings(){
+  document.getElementById('settingsOverlay').classList.remove('open');
+}
+async function saveSettings(){
+  config.baseUrl = document.getElementById('baseUrlInput').value.trim();
+  config.path = document.getElementById('pathInput').value.trim() || config.path;
+  localStorage.setItem('kusor_dash_baseUrl', config.baseUrl);
+  localStorage.setItem('kusor_dash_path', config.path);
+  closeSettings();
+
+  if(!config.baseUrl) return;
+
+  try{
+    const res = await fetch(config.baseUrl + config.path);
+    if(res.ok){
+      const data = await res.json();
+      renderAll({ ...mockData, ...data });
+    }
+  }catch(e){
+    console.warn('Endpoint dashboard non joignable, données d\'exemple conservées.', e);
+  }
+}
+</script>
+
+</body>
+</html>

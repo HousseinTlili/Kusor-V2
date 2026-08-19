@@ -1,0 +1,8 @@
+.venv
+.venv-ragas
+.env
+__pycache__
+*.pyc
+.git
+static/kusor_console_nav.html
+ragas_evaluation_results.csv

@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KUSOR — Console de test</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600;6..72,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#16324F;
+    --navy-deep:#0E2338;
+    --slate:#3E5C76;
+    --bg:#EEF1F5;
+    --surface:#FFFFFF;
+    --border:#D7DEE6;
+    --text:#131B26;
+    --text-muted:#5B6B7D;
+    --teal:#1E7F6E;
+    --teal-bg:#E4F2EF;
+    --amber:#B8802E;
+    --amber-bg:#FBF1E1;
+    --red:#A6423A;
+    --red-bg:#FAEBEA;
+    --radius:10px;
+    font-family:'Inter',sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+  }
+  .topbar{
+    background:linear-gradient(135deg,var(--navy-deep),var(--navy));
+    color:#fff;
+    padding:18px 28px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    box-shadow:0 2px 12px rgba(14,35,56,0.25);
+  }
+  .brand{
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+  }
+  .brand .mark{
+    font-family:'Newsreader',serif;
+    font-weight:700;
+    font-size:22px;
+    letter-spacing:0.5px;
+  }
+  .brand .tag{
+    font-size:12px;
+    color:#B9C7D6;
+    font-weight:500;
+    border-left:1px solid rgba(255,255,255,0.25);
+    padding-left:10px;
+  }
+  .topbar .status{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    font-size:13px;
+  }
+  .dot{
+    width:8px;height:8px;border-radius:50%;
+    background:var(--text-muted);
+    display:inline-block;
+    margin-right:6px;
+  }
+  .dot.ok{background:#3FCB9B; box-shadow:0 0 0 3px rgba(63,203,155,0.25);}
+  .dot.err{background:#E27168; box-shadow:0 0 0 3px rgba(226,113,104,0.25);}
+  button.icon-btn{
+    background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.2);
+    color:#fff;
+    border-radius:7px;
+    padding:6px 12px;
+    font-size:12px;
+    font-family:'Inter',sans-serif;
+    cursor:pointer;
+    transition:background 0.15s;
+  }
+  button.icon-btn:hover{background:rgba(255,255,255,0.16);}
+  .nav-links{display:flex; gap:4px; margin-left:24px;}
+  .nav-link{
+    color:#B9C7D6; text-decoration:none; font-size:12.5px; font-weight:600;
+    padding:6px 12px; border-radius:7px; transition:all 0.15s;
+  }
+  .nav-link:hover{background:rgba(255,255,255,0.1); color:#fff;}
+  .nav-link.active{background:rgba(255,255,255,0.15); color:#fff;}
+
+  .layout{
+    display:grid;
+    grid-template-columns:1fr 400px;
+    gap:20px;
+    padding:24px;
+    max-width:1400px;
+    margin:0 auto;
+  }
+  @media (max-width:980px){
+    .layout{grid-template-columns:1fr;}
+  }
+
+  .panel{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    overflow:hidden;
+  }
+  .panel-header{
+    padding:14px 18px;
+    border-bottom:1px solid var(--border);
+    font-family:'Newsreader',serif;
+    font-weight:600;
+    font-size:16px;
+    color:var(--navy-deep);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .panel-header .eyebrow{
+    font-family:'Inter',sans-serif;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    color:var(--text-muted);
+    font-weight:600;
+  }
+
+  .pipeline{
+    padding:22px 18px 18px;
+    border-bottom:1px solid var(--border);
+  }
+  .steps{
+    display:flex;
+    align-items:center;
+  }
+  .step{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+    flex:1;
+    position:relative;
+  }
+  .step .node{
+    width:34px;height:34px;
+    border-radius:50%;
+    background:var(--bg);
+    border:2px solid var(--border);
+    display:flex;align-items:center;justify-content:center;
+    font-size:14px;
+    color:var(--text-muted);
+    transition:all 0.3s ease;
+    z-index:2;
+  }
+  .step .label{
+    font-size:11px;
+    color:var(--text-muted);
+    font-weight:600;
+    text-align:center;
+  }
+  .step .sublabel{
+    font-size:10px;
+    color:var(--text-muted);
+    opacity:0.7;
+  }
+  .connector{
+    flex:1;
+    height:2px;
+    background:var(--border);
+    position:relative;
+    top:-19px;
+    margin:0 -4px;
+    z-index:1;
+  }
+  .connector .fill{
+    height:100%;
+    width:0%;
+    background:linear-gradient(90deg,var(--teal),var(--navy));
+    transition:width 0.5s ease;
+  }
+  .step.active .node{
+    border-color:var(--navy);
+    background:var(--navy);
+    color:#fff;
+    animation:pulse 1.2s infinite;
+  }
+  .step.done .node{
+    border-color:var(--teal);
+    background:var(--teal);
+    color:#fff;
+  }
+  .step.error .node{
+    border-color:var(--red);
+    background:var(--red);
+    color:#fff;
+  }
+  .step.active .label, .step.done .label{color:var(--text);}
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(22,50,79,0.35);}
+    70%{box-shadow:0 0 0 8px rgba(22,50,79,0);}
+    100%{box-shadow:0 0 0 0 rgba(22,50,79,0);}
+  }
+
+  .chat-log{
+    padding:18px;
+    max-height:56vh;
+    overflow-y:auto;
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+  }
+  .msg{
+    max-width:88%;
+    padding:12px 14px;
+    border-radius:10px;
+    font-size:14.5px;
+    line-height:1.55;
+  }
+  .msg.user{
+    align-self:flex-end;
+    background:var(--navy);
+    color:#fff;
+    border-bottom-right-radius:3px;
+  }
+  .msg.agent{
+    align-self:flex-start;
+    background:var(--bg);
+    border:1px solid var(--border);
+    border-bottom-left-radius:3px;
+  }
+  .msg.agent .badge-row{
+    display:flex;
+    gap:8px;
+    margin-bottom:8px;
+    flex-wrap:wrap;
+  }
+  .badge{
+    font-size:10.5px;
+    font-weight:600;
+    padding:3px 9px;
+    border-radius:99px;
+    text-transform:uppercase;
+    letter-spacing:0.03em;
+  }
+  .badge.conf-haute{background:var(--teal-bg); color:var(--teal);}
+  .badge.conf-moyenne{background:var(--amber-bg); color:var(--amber);}
+  .badge.conf-faible{background:var(--red-bg); color:var(--red);}
+  .badge.classif{background:#E7ECF3; color:var(--slate);}
+  .escalade{
+    margin-top:10px;
+    padding:10px 12px;
+    background:var(--amber-bg);
+    border-left:3px solid var(--amber);
+    border-radius:6px;
+    font-size:13px;
+    color:#6B4A18;
+  }
+  .sources-toggle{
+    margin-top:10px;
+    font-size:12px;
+    color:var(--slate);
+    cursor:pointer;
+    font-weight:600;
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+  }
+  .sources-list{
+    margin-top:8px;
+    display:none;
+    flex-direction:column;
+    gap:6px;
+  }
+  .sources-list.open{display:flex;}
+  .source-chip{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding:8px 10px;
+    font-size:12px;
+    font-family:'IBM Plex Mono',monospace;
+    color:var(--text-muted);
+  }
+  .msg.error{
+    background:var(--red-bg);
+    border:1px solid #EAC3C0;
+    color:var(--red);
+    align-self:stretch;
+  }
+  .empty-state{
+    text-align:center;
+    color:var(--text-muted);
+    padding:40px 20px;
+    font-size:13.5px;
+  }
+  .empty-state .glyph{
+    font-family:'Newsreader',serif;
+    font-size:32px;
+    color:var(--slate);
+    margin-bottom:8px;
+  }
+
+  .input-row{
+    border-top:1px solid var(--border);
+    padding:14px 18px;
+    display:flex;
+    gap:10px;
+  }
+  .input-row textarea{
+    flex:1;
+    resize:none;
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:10px 12px;
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    min-height:44px;
+    max-height:120px;
+  }
+  .input-row textarea:focus{outline:2px solid var(--navy); outline-offset:1px;}
+  .send-btn{
+    background:var(--navy);
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    padding:0 20px;
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:13.5px;
+    cursor:pointer;
+    transition:background 0.15s;
+  }
+  .send-btn:hover{background:var(--navy-deep);}
+  .send-btn:disabled{background:var(--border); color:var(--text-muted); cursor:not-allowed;}
+
+  .inspector-body{
+    padding:16px 18px;
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+    font-size:13px;
+  }
+  .kv{
+    display:flex;
+    justify-content:space-between;
+    padding:8px 10px;
+    background:var(--bg);
+    border-radius:6px;
+  }
+  .kv .k{color:var(--text-muted); font-weight:500;}
+  .kv .v{font-family:'IBM Plex Mono',monospace; font-size:12px;}
+  .context-item{
+    border:1px solid var(--border);
+    border-radius:7px;
+    padding:10px;
+    font-size:12px;
+  }
+  .context-item .src-title{
+    font-weight:600;
+    color:var(--navy);
+    margin-bottom:4px;
+    font-size:12.5px;
+  }
+  .context-item .src-excerpt{
+    color:var(--text-muted);
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    line-height:1.5;
+  }
+  details.raw-json{
+    border:1px solid var(--border);
+    border-radius:7px;
+    padding:8px 10px;
+  }
+  details.raw-json summary{
+    cursor:pointer;
+    font-weight:600;
+    font-size:12px;
+    color:var(--slate);
+  }
+  details.raw-json pre{
+    margin-top:8px;
+    background:var(--navy-deep);
+    color:#DCE8F5;
+    padding:10px;
+    border-radius:6px;
+    font-size:11px;
+    overflow-x:auto;
+    font-family:'IBM Plex Mono',monospace;
+    max-height:260px;
+  }
+
+  .modal-overlay{
+    position:fixed; inset:0;
+    background:rgba(14,35,56,0.45);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:50;
+  }
+  .modal-overlay.open{display:flex;}
+  .modal{
+    background:#fff;
+    border-radius:12px;
+    padding:24px;
+    width:420px;
+    max-width:90vw;
+  }
+  .modal h3{
+    font-family:'Newsreader',serif;
+    margin:0 0 4px;
+    color:var(--navy-deep);
+  }
+  .modal p.hint{color:var(--text-muted); font-size:12.5px; margin-top:0;}
+  .field{margin-bottom:14px;}
+  .field label{
+    display:block;
+    font-size:12px;
+    font-weight:600;
+    color:var(--slate);
+    margin-bottom:5px;
+  }
+  .field input{
+    width:100%;
+    padding:9px 10px;
+    border:1px solid var(--border);
+    border-radius:7px;
+    font-size:13px;
+    font-family:'IBM Plex Mono',monospace;
+  }
+  .modal-actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:8px;
+    margin-top:18px;
+  }
+  .btn-secondary{
+    background:#fff;
+    border:1px solid var(--border);
+    padding:8px 16px;
+    border-radius:7px;
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+    color:var(--text-muted);
+  }
+  .btn-primary{
+    background:var(--navy);
+    color:#fff;
+    border:none;
+    padding:8px 16px;
+    border-radius:7px;
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <span class="mark">KUSOR</span>
+    <span class="tag">Console de test interne — modules 3 · 4 · 5 · 6 (avant Module 7 / Angular)</span>
+  </div>
+  <nav class="nav-links">
+    <a href="/" class="nav-link">Chat</a>
+<a href="/test" class="nav-link active">Console</a>    <a href="/dashboard" class="nav-link">Dashboard</a>
+    <a href="/admin" class="nav-link">Admin</a>
+  </nav>
+  <div class="status">
+    <span id="connStatus"><span class="dot" id="connDot"></span><span id="connText">Non testé</span></span>
+    <button class="icon-btn" onclick="openSettings()">⚙ Endpoint</button>
+  </div>
+</div>
+
+<div class="layout">
+
+  <div class="panel">
+    <div class="pipeline">
+      <div class="steps" id="pipelineSteps">
+        <div class="step" data-step="analyse">
+          <div class="node">1</div>
+          <div class="label">Analyse</div>
+          <div class="sublabel">classification</div>
+        </div>
+        <div class="connector"><div class="fill" id="fill1"></div></div>
+        <div class="step" data-step="search">
+          <div class="node">2</div>
+          <div class="label">Recherche</div>
+          <div class="sublabel">hybrid + graphe</div>
+        </div>
+        <div class="connector"><div class="fill" id="fill2"></div></div>
+        <div class="step" data-step="generate">
+          <div class="node">3</div>
+          <div class="label">Génération</div>
+          <div class="sublabel">réponse structurée</div>
+        </div>
+        <div class="connector"><div class="fill" id="fill3"></div></div>
+        <div class="step" data-step="done">
+          <div class="node">✓</div>
+          <div class="label">Réponse</div>
+          <div class="sublabel">avec citations</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-log" id="chatLog">
+      <div class="empty-state" id="emptyState">
+        <div class="glyph">§</div>
+        Pose une question sur une circulaire BCT pour tester le pipeline agentic complet.
+      </div>
+    </div>
+
+    <div class="input-row">
+      <textarea id="questionInput" placeholder="Ex. Quelles sont les obligations de la circulaire 2022-01 ?" rows="1"></textarea>
+      <button class="send-btn" id="sendBtn" onclick="sendQuestion()">Envoyer</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      Inspecteur d'exécution
+      <span class="eyebrow">état de l'agent</span>
+    </div>
+    <div class="inspector-body" id="inspectorBody">
+      <div class="kv"><span class="k">Classification</span><span class="v" id="insClassif">—</span></div>
+      <div class="kv"><span class="k">Confiance</span><span class="v" id="insConf">—</span></div>
+      <div class="kv"><span class="k">Latence</span><span class="v" id="insLatency">—</span></div>
+      <div class="kv"><span class="k">Sources retrouvées</span><span class="v" id="insCount">—</span></div>
+
+      <div id="contextList" style="display:flex; flex-direction:column; gap:8px;"></div>
+
+      <details class="raw-json">
+        <summary>Réponse JSON brute</summary>
+        <pre id="rawJson">—</pre>
+      </details>
+    </div>
+  </div>
+
+</div>
+
+<div class="modal-overlay" id="settingsOverlay">
+  <div class="modal">
+    <h3>Configuration de l'endpoint</h3>
+    <p class="hint">Pointe la console vers ton API Flask locale. Le champ "chemin" doit correspondre à la route exposée par routes.py.</p>
+    <div class="field">
+      <label>URL de base</label>
+      <input type="text" id="baseUrlInput" placeholder="http://localhost:5000">
+    </div>
+    <div class="field">
+      <label>Chemin de la route (POST)</label>
+      <input type="text" id="pathInput" placeholder="/api/agent/ask">
+    </div>
+    <p class="hint" style="margin-bottom:0;">⚠ Si l'API Flask n'a pas encore <code>flask-cors</code> activé, les requêtes depuis ce fichier HTML seront bloquées par le navigateur (erreur CORS visible dans la console F12).</p>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeSettings()">Annuler</button>
+      <button class="btn-primary" onclick="saveSettings()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let config = {
+  baseUrl: localStorage.getItem('kusor_baseUrl') || 'http://localhost:5000',
+  path: localStorage.getItem('kusor_path') || '/api/agent/ask'
+};
+
+function openSettings(){
+  document.getElementById('baseUrlInput').value = config.baseUrl;
+  document.getElementById('pathInput').value = config.path;
+  document.getElementById('settingsOverlay').classList.add('open');
+}
+function closeSettings(){
+  document.getElementById('settingsOverlay').classList.remove('open');
+}
+function saveSettings(){
+  config.baseUrl = document.getElementById('baseUrlInput').value.trim() || config.baseUrl;
+  config.path = document.getElementById('pathInput').value.trim() || config.path;
+  localStorage.setItem('kusor_baseUrl', config.baseUrl);
+  localStorage.setItem('kusor_path', config.path);
+  closeSettings();
+  pingHealth();
+}
+
+async function pingHealth(){
+  const dot = document.getElementById('connDot');
+  const text = document.getElementById('connText');
+  try{
+    const res = await fetch(config.baseUrl + '/health', { method:'GET' });
+    if(res.ok){
+      dot.className = 'dot ok'; text.textContent = 'Connecté — ' + config.baseUrl;
+    } else {
+      dot.className = 'dot err'; text.textContent = 'API injoignable (statut ' + res.status + ')';
+    }
+  }catch(e){
+    dot.className = 'dot err'; text.textContent = 'Pas de /health — ' + config.baseUrl + ' (normal si non implémenté)';
+  }
+}
+pingHealth();
+
+function resetPipeline(){
+  ['analyse','search','generate','done'].forEach(s=>{
+    const el = document.querySelector('.step[data-step="'+s+'"]');
+    el.classList.remove('active','done','error');
+  });
+  document.getElementById('fill1').style.width='0%';
+  document.getElementById('fill2').style.width='0%';
+  document.getElementById('fill3').style.width='0%';
+}
+
+function setStep(step, state){
+  const el = document.querySelector('.step[data-step="'+step+'"]');
+  el.classList.remove('active','done','error');
+  el.classList.add(state);
+}
+
+async function animatePipeline(){
+  resetPipeline();
+  setStep('analyse','active');
+  await sleep(350);
+  setStep('analyse','done'); document.getElementById('fill1').style.width='100%';
+  setStep('search','active');
+  await sleep(450);
+  setStep('search','done'); document.getElementById('fill2').style.width='100%';
+  setStep('generate','active');
+}
+
+function finishPipeline(ok){
+  document.getElementById('fill3').style.width='100%';
+  setStep('generate', ok ? 'done' : 'error');
+  setStep('done', ok ? 'done' : 'error');
+}
+
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+function addUserMessage(text){
+  document.getElementById('emptyState')?.remove();
+  const log = document.getElementById('chatLog');
+  const div = document.createElement('div');
+  div.className = 'msg user';
+  div.textContent = text;
+  log.appendChild(div);
+  log.scrollTop = log.scrollHeight;
+}
+
+function confBadgeClass(conf){
+  if(!conf) return 'classif';
+  const c = conf.toLowerCase();
+  if(c.includes('haute') || c.includes('high')) return 'conf-haute';
+  if(c.includes('moyenne') || c.includes('medium')) return 'conf-moyenne';
+  if(c.includes('faible') || c.includes('low')) return 'conf-faible';
+  return 'classif';
+}
+
+function addAgentMessage(data){
+  const log = document.getElementById('chatLog');
+  const div = document.createElement('div');
+  div.className = 'msg agent';
+
+  const answerText = data.answer?.text || data.answer || data.response || data.text || JSON.stringify(data);
+  const classification = data.classification || '—';
+  const confidence = data.confidence || data.confiance || null;
+  const sources = data.answer?.sources || data.sources || data.retrieved_context || [];
+  const escalade = data.answer?.escalade || data.escalade || null;
+
+  let badges = `<span class="badge classif">${escapeHtml(classification)}</span>`;
+  if(confidence){
+    badges += `<span class="badge ${confBadgeClass(confidence)}">${escapeHtml(confidence)}</span>`;
+  }
+
+  let sourcesHtml = '';
+  if(Array.isArray(sources) && sources.length){
+    const chips = sources.map(s=>{
+      const label = typeof s === 'string' ? s : (s.title || s.circular_id || s.source || JSON.stringify(s));
+      return `<div class="source-chip">${escapeHtml(String(label))}</div>`;
+    }).join('');
+    sourcesHtml = `
+      <div class="sources-toggle" onclick="this.nextElementSibling.classList.toggle('open')">▸ ${sources.length} source(s) — afficher</div>
+      <div class="sources-list">${chips}</div>
+    `;
+  }
+
+  let escaladeHtml = '';
+  if(escalade){
+    const msg = typeof escalade === 'string' ? escalade : (escalade.text || JSON.stringify(escalade));
+    escaladeHtml = `<div class="escalade">⚠ ${escapeHtml(msg)}</div>`;
+  }
+
+  div.innerHTML = `
+    <div class="badge-row">${badges}</div>
+    <div>${escapeHtml(String(answerText))}</div>
+    ${escaladeHtml}
+    ${sourcesHtml}
+  `;
+  log.appendChild(div);
+  log.scrollTop = log.scrollHeight;
+}
+
+function addErrorMessage(text){
+  const log = document.getElementById('chatLog');
+  const div = document.createElement('div');
+  div.className = 'msg error';
+  div.textContent = text;
+  log.appendChild(div);
+  log.scrollTop = log.scrollHeight;
+}
+
+function escapeHtml(str){
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+function updateInspector(data, latencyMs){
+  document.getElementById('insClassif').textContent = data.classification || '—';
+  document.getElementById('insConf').textContent = data.confidence || data.confiance || '—';
+  document.getElementById('insLatency').textContent = latencyMs ? latencyMs + ' ms' : '—';
+
+  const sources = data.answer?.sources || data.sources || data.retrieved_context || [];
+  document.getElementById('insCount').textContent = Array.isArray(sources) ? sources.length : '—';
+
+  const list = document.getElementById('contextList');
+  list.innerHTML = '';
+  if(Array.isArray(sources)){
+    sources.forEach(s=>{
+      const title = typeof s === 'string' ? s : (s.title || s.circular_id || s.source || 'Source');
+      const excerpt = typeof s === 'string' ? '' : (s.excerpt || s.text || s.content || '');
+      const item = document.createElement('div');
+      item.className = 'context-item';
+      item.innerHTML = `<div class="src-title">${escapeHtml(String(title))}</div>` +
+        (excerpt ? `<div class="src-excerpt">${escapeHtml(String(excerpt)).slice(0,220)}${excerpt.length>220?'…':''}</div>` : '');
+      list.appendChild(item);
+    });
+  }
+
+  document.getElementById('rawJson').textContent = JSON.stringify(data, null, 2);
+}
+
+async function sendQuestion(){
+  const input = document.getElementById('questionInput');
+  const question = input.value.trim();
+  if(!question) return;
+
+  const btn = document.getElementById('sendBtn');
+  btn.disabled = true;
+  addUserMessage(question);
+  input.value = '';
+
+  const pipelinePromise = animatePipeline();
+  const start = performance.now();
+
+  try{
+    const res = await fetch(config.baseUrl + config.path, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ question })
+    });
+
+    await pipelinePromise;
+    const latency = Math.round(performance.now() - start);
+
+    if(!res.ok){
+      finishPipeline(false);
+      const body = await res.text();
+      addErrorMessage(`Erreur HTTP ${res.status} sur ${config.path} — ${body.slice(0,200)}`);
+      document.getElementById('rawJson').textContent = body;
+    } else {
+      const data = await res.json();
+      finishPipeline(true);
+      addAgentMessage(data);
+      updateInspector(data, latency);
+    }
+  }catch(e){
+    await pipelinePromise;
+    finishPipeline(false);
+    addErrorMessage(
+      `Impossible de joindre l'API (${config.baseUrl}${config.path}). ` +
+      `Vérifie : (1) que Flask tourne, (2) que CORS est activé (flask-cors), (3) l'URL dans ⚙ Endpoint.`
+    );
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+document.getElementById('questionInput').addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter' && !e.shiftKey){
+    e.preventDefault();
+    sendQuestion();
+  }
+});
+</script>
+
+</body>
+</html>

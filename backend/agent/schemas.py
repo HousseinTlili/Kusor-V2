@@ -34,3 +34,39 @@ class AgentState(BaseModel):
     final_response: Optional[AgentResponse] = None
     error: Optional[str] = None
     retry_count: int = 0
+if __name__ == "__main__":
+    citation = SourceCitation(
+        circular_number="2022-01",
+        title="Prévention et résolution des créances non performantes",
+        page=3,
+        excerpt="le traitement précoce et proactif des créances..."
+    )
+
+    response = AgentResponse(
+        answer="La circulaire 2022-01 définit les règles de prévention des créances non performantes.",
+        sources=[citation],
+        confidence_score=0.85,
+        related_circulars=["2021-05"],
+        graph_path_used=True,
+        question_type=QuestionType.FACTUAL
+    )
+
+    print("✅ AgentResponse validé avec succès\n")
+    print(response.model_dump_json(indent=2))
+
+    state = AgentState(question="Quelles sont les règles sur les créances non performantes ?")
+    print("\n✅ AgentState initialisé avec succès")
+    print(state.model_dump_json(indent=2))
+
+    try:
+        AgentResponse(
+            answer="test",
+            sources=[],
+            confidence_score=1.5,
+            related_circulars=[],
+            graph_path_used=False,
+            question_type=QuestionType.FACTUAL
+        )
+        print("\n❌ La validation aurait dû échouer")
+    except Exception:
+        print("\n✅ Validation Pydantic fonctionne (rejet attendu : score > 1.0 refusé)")

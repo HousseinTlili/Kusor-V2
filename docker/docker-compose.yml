@@ -36,6 +36,36 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks: [kusor_net]
 
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: kusor_backend
+    command: sh -c "sleep 15 && python app.py"
+    ports:
+      - '5000:5000'
+    environment:
+      FLASK_ENV: production
+      SECRET_KEY: change_this_to_a_random_secret_later
+      JWT_SECRET_KEY: change_this_too_later
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USER: neo4j
+      NEO4J_PASSWORD: kusor_password
+      CHROMA_HOST: chromadb
+      CHROMA_PORT: 8000
+      DATABASE_URL: postgresql://kusor_user:kusor_password@postgres:5432/kusor_db
+      OLLAMA_BASE_URL: http://host.docker.internal:11434
+      OLLAMA_HOST: http://host.docker.internal:11434
+      LLM_MODEL: qwen2.5:7b
+      EMBEDDING_MODEL: nomic-embed-text
+    depends_on:
+      - chromadb
+      - neo4j
+      - postgres
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    networks: [kusor_net]
+
 volumes:
   neo4j_data:
   chroma_data:
