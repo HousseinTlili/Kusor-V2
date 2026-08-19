@@ -4,4 +4,11 @@ __pycache__/
 *.pyc
 node_modules/
 dist/
+frontend/kusor-ui/dist/
+.angular/
+.pytest_cache/
+*.db
+*.sqlite
+*.sqlite3
 backend/.venv-ragas/
+

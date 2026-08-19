@@ -1,20 +1,19 @@
 import instructor
-from config import Config
+from backend.config import Config
 from openai import OpenAI
 
-from agent.schemas import AgentResponse, QuestionType
-from agent.prompts import SYSTEM_PROMPT
+from backend.agent.schemas import AgentResponse, QuestionType
+from backend.agent.prompts import SYSTEM_PROMPT
 
 
-# Ollama expose une API compatible OpenAI sur /v1 — on peut donc utiliser
-# le client OpenAI standard, juste pointé vers notre instance locale.
-client = instructor.from_openai(
-    OpenAI(
-        base_url=f"{Config().OLLAMA_BASE_URL}/v1",
-        api_key="ollama",  # valeur factice : Ollama ne vérifie pas de vraie clé
-    ),
-    mode=instructor.Mode.JSON,
-)
+def get_instructor_client():
+    return instructor.from_openai(
+        OpenAI(
+            base_url=f"{Config().OLLAMA_BASE_URL}/v1",
+            api_key="ollama",
+        ),
+        mode=instructor.Mode.JSON,
+    )
 
 
 def generate_structured_answer(
@@ -27,26 +26,24 @@ def generate_structured_answer(
     """
     Génère une réponse STRUCTURÉE et VALIDÉE (conforme à AgentResponse)
     en utilisant Instructor pour forcer et vérifier le format de sortie.
-    Si le LLM se trompe de structure, Instructor relance automatiquement
-    la requête avec l'erreur de validation, jusqu'à 3 tentatives.
-
-    temperature=0.2 : réduit la "créativité" du modèle pour limiter les
-    dérives (ex. bascule vers une autre langue en fin de génération) et
-    rendre les réponses plus stables/reproductibles — important pour un
-    outil de conformité réglementaire.
     """
     system_content = SYSTEM_PROMPT.format(context=context, graph_context=graph_context)
+    user_prompt = f"Question : {question}\nQuestion type: {question_type.value}"
+    inst_client = get_instructor_client()
 
-    response = client.chat.completions.create(
+    response = inst_client.chat.completions.create(
         model=model,
         response_model=AgentResponse,
         messages=[
             {"role": "system", "content": system_content},
-            {"role": "user", "content": question},
+            {"role": "user", "content": user_prompt},
         ],
         max_retries=3,
         temperature=0.2,
     )
+
+    response.question_type = question_type
+    return response
 
     # On force le champ question_type puisque le prompt système
     # ne le demande pas explicitement au LLM (classification faite séparément)

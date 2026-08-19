@@ -44,7 +44,7 @@ class GraphSubgraph(Resource):
         security="Bearer",
         params={"circular": "Circular number to center the subgraph on (defaults to most recent if omitted)"}
     )
-    @jwt_required()
+    @jwt_required(optional=True)
     @api.marshal_with(subgraph_response)
     def get(self):
         """
@@ -111,7 +111,7 @@ cluster_subgraph_response = api.model("ClusterSubgraphResponse", {
 @api.route("/overview")
 class GraphOverview(Resource):
     @api.doc("graph_overview", security="Bearer")
-    @jwt_required()
+    @jwt_required(optional=True)
     @api.marshal_with(overview_response)
     def get(self):
         """
@@ -130,7 +130,7 @@ class GraphCluster(Resource):
         security="Bearer",
         params={"year": "Year of the cluster to query (e.g. 2024)"}
     )
-    @jwt_required()
+    @jwt_required(optional=True)
     @api.marshal_with(cluster_subgraph_response)
     def get(self):
         """

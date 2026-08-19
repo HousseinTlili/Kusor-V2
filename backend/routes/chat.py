@@ -26,6 +26,7 @@ chat_message_request = api.model("ChatMessageRequest", {
 chat_response_model = api.model("ChatResponse", {
     "session_id": fields.String(description="The session UUID"),
     "answer": fields.String(description="The assistant's markdown response"),
+    "message": fields.String(description="Message response alias"),
     "sources": fields.List(fields.Nested(source_citation_model), description="Sources cited in the answer"),
     "confidence_score": fields.Float(description="Confidence score (0.0-1.0)"),
     "related_circulars": fields.List(fields.String, description="Related circular numbers"),
@@ -40,6 +41,14 @@ message_history_model = api.model("MessageHistoryItem", {
     "sources": fields.List(fields.Nested(source_citation_model), description="Sources (for assistant messages)"),
     "confidence": fields.Float(description="Confidence score (for assistant messages)"),
     "created_at": fields.String(description="Creation timestamp"),
+})
+
+session_create_request = api.model("SessionCreateRequest", {
+    "title": fields.String(required=False, description="Title of the session"),
+})
+
+session_update_request = api.model("SessionUpdateRequest", {
+    "title": fields.String(required=True, description="Updated session title"),
 })
 
 session_response_model = api.model("SessionResponse", {
@@ -120,6 +129,7 @@ class ChatMessage(Resource):
         return {
             "session_id": session_id,
             "answer": agent_res.answer,
+            "message": agent_res.answer,
             "sources": sources_list,
             "confidence_score": agent_res.confidence_score,
             "related_circulars": agent_res.related_circulars,
@@ -166,7 +176,7 @@ class ChatSessions(Resource):
     @jwt_required()
     @api.marshal_list_with(session_response_model)
     def get(self):
-        """GET /api/chat/sessions — list all sessions for current user"""
+        """GET /api/chat/sessions — list all sessions for current user (Read All)"""
         user_id = get_jwt_identity()
         sessions = ConversationSession.query.filter_by(user_id=user_id).order_by(ConversationSession.created_at.desc()).all()
         
@@ -175,3 +185,96 @@ class ChatSessions(Resource):
             "title": s.title,
             "created_at": s.created_at.isoformat() if s.created_at else None
         } for s in sessions]
+
+    @api.doc("create_session", security="Bearer")
+    @jwt_required()
+    @api.expect(session_create_request, validate=False)
+    @api.marshal_with(session_response_model, code=201)
+    def post(self):
+        """POST /api/chat/sessions — create a new chat session (Create)"""
+        user_id = get_jwt_identity()
+        data = request.json or {}
+        title = data.get("title") or "Nouvelle discussion"
+        session_id = str(uuid.uuid4())
+        session = ConversationSession(
+            id=session_id,
+            user_id=user_id,
+            title=title
+        )
+        db.session.add(session)
+        db.session.commit()
+        return {
+            "id": session.id,
+            "title": session.title,
+            "created_at": session.created_at.isoformat() if session.created_at else None
+        }, 201
+
+
+@api.route("/session/<string:session_id>")
+class ChatSessionDetail(Resource):
+    @api.doc("get_session", security="Bearer")
+    @jwt_required()
+    @api.marshal_with(session_response_model)
+    def get(self, session_id: str):
+        """GET /api/chat/session/:session_id — retrieve single session metadata (Read Single)"""
+        user_id = get_jwt_identity()
+        session = ConversationSession.query.filter_by(id=session_id, user_id=user_id).first()
+        if not session:
+            abort(404, "Session introuvable ou accès refusé")
+        return {
+            "id": session.id,
+            "title": session.title,
+            "created_at": session.created_at.isoformat() if session.created_at else None
+        }
+
+    @api.doc("update_session", security="Bearer")
+    @jwt_required()
+    @api.expect(session_update_request, validate=True)
+    @api.marshal_with(session_response_model)
+    def put(self, session_id: str):
+        """PUT /api/chat/session/:session_id — rename session title (Update)"""
+        user_id = get_jwt_identity()
+        session = ConversationSession.query.filter_by(id=session_id, user_id=user_id).first()
+        if not session:
+            abort(404, "Session introuvable ou accès refusé")
+        
+        data = request.json or {}
+        new_title = data.get("title", "").strip()
+        if not new_title:
+            abort(400, "Le titre ne peut pas être vide")
+        
+        session.title = new_title
+        db.session.commit()
+        return {
+            "id": session.id,
+            "title": session.title,
+            "created_at": session.created_at.isoformat() if session.created_at else None
+        }
+
+    @api.doc("delete_session", security="Bearer")
+    @jwt_required()
+    def delete(self, session_id: str):
+        """DELETE /api/chat/session/:session_id — delete session and all its messages (Delete)"""
+        user_id = get_jwt_identity()
+        session = ConversationSession.query.filter_by(id=session_id, user_id=user_id).first()
+        if not session:
+            abort(404, "Session introuvable ou accès refusé")
+        
+        db.session.delete(session)
+        db.session.commit()
+        return {"message": "Session supprimée avec succès", "id": session_id}, 200
+
+
+@api.route("/sessions/clear")
+class ChatSessionsClear(Resource):
+    @api.doc("clear_all_sessions", security="Bearer")
+    @jwt_required()
+    def delete(self):
+        """DELETE /api/chat/sessions/clear — clear all chat sessions for user (Bulk Delete)"""
+        user_id = get_jwt_identity()
+        sessions = ConversationSession.query.filter_by(user_id=user_id).all()
+        count = len(sessions)
+        for s in sessions:
+            db.session.delete(s)
+        db.session.commit()
+        return {"message": f"{count} discussion(s) supprimée(s) avec succès", "deleted_count": count}, 200

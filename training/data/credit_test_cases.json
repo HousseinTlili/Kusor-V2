@@ -1,0 +1,857 @@
+{
+  "version": "1.0",
+  "description": "Cas de test synthétiques pour le module crédit de KUSOR v3",
+  "generated_date": "2026-08-07",
+  "statistics": {
+    "total": 25,
+    "approve": 8,
+    "review": 10,
+    "reject": 7
+  },
+  "cases": [
+    {
+      "dossier_id": "CRED-2026-001",
+      "credit_type": "Personnel",
+      "applicant_name": "Ben Salah Mohamed",
+      "declared_monthly_income_tnd": 5000,
+      "loan_amount_tnd": 20000,
+      "loan_term_years": 5,
+      "documents_provided": [
+        {
+          "code": "cin_valide",
+          "name": "CIN",
+          "present": true,
+          "expired": false
+        },
+        {
+          "code": "bulletins_salaire_3",
+          "name": "Bulletins de salaire",
+          "present": true,
+          "expired": false
+        },
+        {
+          "code": "attestation_employeur",
+          "name": "Attestation employeur",
+          "present": true,
+          "expired": false
+        }
+      ],
+      "numerical_flags": [],
+      "identity_flags": [],
+      "guarantor": null,
+      "debt_ratio": 30.0,
+      "expected_verdict": "APPROVE",
+      "justification": "Dossier complet, ratio d'endettement acceptable."
+    },
+    {
+      "dossier_id": "CRED-2026-002",
+      "credit_type": "Personnel",
+      "applicant_name": "Trabelsi Fatma",
+      "declared_monthly_income_tnd": 5000,
+      "loan_amount_tnd": 20000,
+      "loan_term_years": 5,
+      "documents_provided": [
+        {
+          "code": "cin_valide",
+          "name": "CIN",
+          "present": true,
+          "expired": false
+        },
+        {
+          "code": "bulletins_salaire_3",
+          "name": "Bulletins de salaire",
+          "present": true,
+          "expired": false
+        },
+        {
+          "code": "attestation_employeur",
+          "name": "Attestation employeur",
+          "present": true,
+          "expired": false
+        }
+      ],
+      "numerical_flags": [],
+      "identity_flags": [],
+      "guarantor": null,
+      "debt_ratio": 30.0,
+      "expected_verdict": "APPROVE",
+      "justification": "Dossier complet, ratio d'endettement acceptable."
+    },
+    {
+      "dossier_id": "CRED-2026-003",
+      "credit_type": "Hypothécaire",
+      "applicant_name": "Chtioui Karim",
+      "declared_monthly_income_tnd": 5000,
+      "loan_amount_tnd": 20000,
+      "loan_term_years": 5,
+      "documents_provided": [
+        {
+          "code": "cin_valide",
+          "name": "CIN",
+          "present": true,
+          "expired": false
+        },
+        {
+          "code": "bulletins_salaire_3",
+          "name": "Bulletins de salaire",
+          "present": true,
+          "expired": false
+        },
+        {
+          "code": "compromis_vente",
+          "name": "Compromis de vente",
+          "present": true,
+          "expired": false
+        },
+        {
+          "code": "rapport_expertise_bien",
+          "name": "Rapport expertise",
+          "present": true,
+          "expired": false
+        }
+      ],
+      "numerical_flags": [],
+      "identity_flags": [],
+      "guarantor": null,
+      "debt_ratio": 30.0,
+      "expected_verdict": "APPROVE",
+      "justification": "Dossier complet, ratio d'endettement acceptable."
+    },
+    {
+      "dossier_id": "CRED-2026-004",
+      "credit_type": "Hypothécaire",
+      "applicant_name": "Belhaj Sonia",
+      "declared_monthly_income_tnd": 5000,
+      "loan_amount_tnd": 20000,
+      "loan_term_years": 5,
+      "documents_provided": [
+        {
+          "code": "cin_valide",
+          "name": "CIN",
+          "present": true,
+          "expired": false
+        },
+        {
+          "code": "bulletins_salaire_3",
+          "name": "Bulletins de salaire",
+          "present": true,
+          "expired": false
+        },
+        {
+          "code": "compromis_vente",
+          "name": "Compromis de vente",
+          "present": true,
+          "expired": false
+        },
+        {
+          "code": "rapport_expertise_bien",
+          "name": "Rapport expertise",
+          "present": true,
+          "expired": false
+        }
+      ],
+      "numerical_flags": [],
+      "identity_flags": [],
+      "guarantor": null,
+      "debt_ratio": 30.0,
+      "expected_verdict": "APPROVE",
+      "justification": "Dossier complet, ratio d'endettement acceptable."
+    },
+    {
+      "dossier_id": "CRED-2026-005",
+      "credit_type": "PME",
+      "applicant_name": "Gharbi Ahmed",
+      "declared_monthly_income_tnd": 5000,
+      "loan_amount_tnd": 20000,
+      "loan_term_years": 5,
+      "documents_provided": [
+        {
+          "code": "etats_financiers_certifies",
+          "name": "Etats financiers",
+          "present": true,
+          "expired": false
+        },
+        {
+          "code": "garanties_proposees",
+          "name": "Garanties proposées",
+          "present": true,
+          "expired": false
+        }
+      ],
+      "numerical_flags": [],
+      "identity_flags": [],
+      "guarantor": null,
+      "debt_ratio": 30.0,
+      "expected_verdict": "APPROVE",
+      "justification": "Dossier complet, ratio d'endettement acceptable."
+    },
+    {
+      "dossier_id": "CRED-2026-006",
+      "credit_type": "PME",
+      "applicant_name": "Mansouri Leila",
+      "declared_monthly_income_tnd": 5000,
+      "loan_amount_tnd": 20000,
+      "loan_term_years": 5,
+      "documents_provided": [
+        {
+          "code": "etats_financiers_certifies",
+          "name": "Etats financiers",
+          "present": true,
+          "expired": false
+        },
+        {
+          "code": "garanties_proposees",
+          "name": "Garanties proposées",
+          "present": true,
+          "expired": false
+        }
+      ],
+      "numerical_flags": [],
+      "identity_flags": [],
+      "guarantor": null,
+      "debt_ratio": 30.0,
+      "expected_verdict": "APPROVE",
+      "justification": "Dossier complet, ratio d'endettement acceptable."
+    },
+    {
+      "dossier_id": "CRED-2026-007",
+      "credit_type": "Corporate",
+      "applicant_name": "Hammami Riadh",
+      "declared_monthly_income_tnd": 5000,
+      "loan_amount_tnd": 20000,
+      "loan_term_years": 5,
+      "documents_provided": [
+        {
+          "code": "etats_financiers_consolides",
+          "name": "Etats financiers",
+          "present": true,
+          "expired": false
+        },
+        {
+          "code": "garanties_proposees",
+          "name": "Garanties proposées",
+          "present": true,
+          "expired": false
+        }
+      ],
+      "numerical_flags": [],
+      "identity_flags": [],
+      "guarantor": null,
+      "debt_ratio": 30.0,
+      "expected_verdict": "APPROVE",
+      "justification": "Dossier complet, ratio d'endettement acceptable."
+    },
+    {
+      "dossier_id": "CRED-2026-008",
+      "credit_type": "Corporate",
+      "applicant_name": "Jebali Amira",
+      "declared_monthly_income_tnd": 5000,
+      "loan_amount_tnd": 20000,
+      "loan_term_years": 5,
+      "documents_provided": [
+        {
+          "code": "etats_financiers_consolides",
+          "name": "Etats financiers",
+          "present": true,
+          "expired": false
+        },
+        {
+          "code": "garanties_proposees",
+          "name": "Garanties proposées",
+          "present": true,
+          "expired": false
+        }
+      ],
+      "numerical_flags": [],
+      "identity_flags": [],
+      "guarantor": null,
+      "debt_ratio": 30.0,
+      "expected_verdict": "APPROVE",
+      "justification": "Dossier complet, ratio d'endettement acceptable."
+    },
+    {
+      "dossier_id": "CRED-2026-009",
+      "credit_type": "Hypothécaire",
+      "applicant_name": "Bouazizi Taoufik",
+      "declared_monthly_income_tnd": 5000,
+      "loan_amount_tnd": 200000,
+      "loan_term_years": 15,
+      "documents_provided": [
+        {
+          "code": "cin_valide",
+          "name": "CIN",
+          "present": true,
+          "expired": false
+        },
+        {
+          "code": "bulletins_salaire_3",
+          "name": "Bulletins de salaire",
+          "present": true,
+          "expired": false
+        },
+        {
+          "code": "compromis_vente",
+          "name": "Compromis de vente",
+          "present": true,
+          "expired": false
+        },
+        {
+          "code": "rapport_expertise_bien",
+          "name": "Rapport expertise",
+          "present": true,
+          "expired": false
+        }
+      ],
+      "numerical_flags": [],
+      "identity_flags": [
+        "Nom légèrement différent sur CIN"
+      ],
+      "guarantor": null,
+      "debt_ratio": 30.0,
+      "expected_verdict": "REVIEW",
+      "justification": "Document conditionnel manquant (assurance vie)."
+    },
+    {
+      "dossier_id": "CRED-2026-010",
+      "credit_type": "PME",
+      "applicant_name": "Mahjoub Nadia",
+      "declared_monthly_income_tnd": 15000,
+      "loan_amount_tnd": 100000,
+      "loan_term_years": 7,
+      "documents_provided": [
+        {
+          "code": "etats_financiers_certifies",
+          "name": "Etats financiers",
+          "present": true,
+          "expired": false
+        },
+        {
+          "code": "garanties_proposees",
+          "name": "Garanties proposées",
+          "present": true,
+          "expired": false
+        }
+      ],
+      "numerical_flags": [],
+      "identity_flags": [
+        "Adresse divergente"
+      ],
+      "guarantor": null,
+      "debt_ratio": 30.0,
+      "expected_verdict": "REVIEW",
+      "justification": "Document conditionnel manquant (business plan)."
+    },
+    {
+      "dossier_id": "CRED-2026-011",
+      "credit_type": "PME",
+      "applicant_name": "Karray Youssef",
+      "declared_monthly_income_tnd": 15000,
+      "loan_amount_tnd": 100000,
+      "loan_term_years": 7,
+      "documents_provided": [
+        {
+          "code": "etats_financiers_certifies",
+          "name": "Etats financiers",
+          "present": true,
+          "expired": false
+        },
+        {
+          "code": "garanties_proposees",
+          "name": "Garanties proposées",
+          "present": true,
+          "expired": false
+        }
+      ],
+      "numerical_flags": [],
+      "identity_flags": [],
+      "guarantor": null,
+      "debt_ratio": 30.0,
+      "expected_verdict": "REVIEW",
+      "justification": "Document conditionnel manquant."
+    },
+    {
+      "dossier_id": "CRED-2026-012",
+      "credit_type": "Personnel",
+      "applicant_name": "Miled Salma",
+      "declared_monthly_income_tnd": 3000,
+      "loan_amount_tnd": 50000,
+      "loan_term_years": 5,
+      "documents_provided": [
+        {
+          "code": "cin_valide",
+          "name": "CIN",
+          "present": true,
+          "expired": false
+        },
+        {
+          "code": "bulletins_salaire_3",
+          "name": "Bulletins de salaire",
+          "present": true,
+          "expired": false
+        },
+        {
+          "code": "attestation_employeur",
+          "name": "Attestation employeur",
+          "present": true,
+          "expired": false
+        }
+      ],
+      "numerical_flags": [],
+      "identity_flags": [],
+      "guarantor": null,
+      "debt_ratio": 38.5,
+      "expected_verdict": "REVIEW",
+      "justification": "Ratio d'endettement à la limite (38.5%)."
+    },
+    {
+      "dossier_id": "CRED-2026-013",
+      "credit_type": "Personnel",
+      "applicant_name": "Rekik Amina",
+      "declared_monthly_income_tnd": 3000,
+      "loan_amount_tnd": 50000,
+      "loan_term_years": 5,
+      "documents_provided": [
+        {
+          "code": "cin_valide",
+          "name": "CIN",
+          "present": true,
+          "expired": false
+        },
+        {
+          "code": "bulletins_salaire_3",
+          "name": "Bulletins de salaire",
+          "present": true,
+          "expired": false
+        },
+        {
+          "code": "attestation_employeur",
+          "name": "Attestation employeur",
+          "present": true,
+          "expired": false
+        }
+      ],
+      "numerical_flags": [],
+      "identity_flags": [],
+      "guarantor": null,
+      "debt_ratio": 38.5,
+      "expected_verdict": "REVIEW",
+      "justification": "Ratio d'endettement à la limite (38.5%)."
+    },
+    {
+      "dossier_id": "CRED-2026-014",
+      "credit_type": "Personnel",
+      "applicant_name": "Sassi Walid",
+      "declared_monthly_income_tnd": 3000,
+      "loan_amount_tnd": 50000,
+      "loan_term_years": 5,
+      "documents_provided": [
+        {
+          "code": "cin_valide",
+          "name": "CIN",
+          "present": true,
+          "expired": false
+        },
+        {
+          "code": "bulletins_salaire_3",
+          "name": "Bulletins de salaire",
+          "present": true,
+          "expired": false
+        },
+        {
+          "code": "attestation_employeur",
+          "name": "Attestation employeur",
+          "present": true,
+          "expired": false
+        }
+      ],
+      "numerical_flags": [],
+      "identity_flags": [],
+      "guarantor": null,
+      "debt_ratio": 38.5,
+      "expected_verdict": "REVIEW",
+      "justification": "Ratio d'endettement à la limite (38.5%)."
+    },
+    {
+      "dossier_id": "CRED-2026-015",
+      "credit_type": "Personnel",
+      "applicant_name": "Frikha Hedi",
+      "declared_monthly_income_tnd": 3000,
+      "loan_amount_tnd": 50000,
+      "loan_term_years": 5,
+      "documents_provided": [
+        {
+          "code": "cin_valide",
+          "name": "CIN",
+          "present": true,
+          "expired": false
+        },
+        {
+          "code": "bulletins_salaire_3",
+          "name": "Bulletins de salaire",
+          "present": true,
+          "expired": false
+        },
+        {
+          "code": "attestation_employeur",
+          "name": "Attestation employeur",
+          "present": true,
+          "expired": false
+        }
+      ],
+      "numerical_flags": [],
+      "identity_flags": [],
+      "guarantor": null,
+      "debt_ratio": 38.5,
+      "expected_verdict": "REVIEW",
+      "justification": "Ratio d'endettement à la limite (38.5%)."
+    },
+    {
+      "dossier_id": "CRED-2026-016",
+      "credit_type": "Personnel",
+      "applicant_name": "Gargouri Imen",
+      "declared_monthly_income_tnd": 4000,
+      "loan_amount_tnd": 20000,
+      "loan_term_years": 3,
+      "documents_provided": [
+        {
+          "code": "cin_valide",
+          "name": "CIN",
+          "present": true,
+          "expired": false
+        },
+        {
+          "code": "bulletins_salaire_3",
+          "name": "Bulletins de salaire",
+          "present": true,
+          "expired": false
+        },
+        {
+          "code": "attestation_employeur",
+          "name": "Attestation employeur",
+          "present": true,
+          "expired": false
+        }
+      ],
+      "numerical_flags": [
+        "Différence mineure de salaire déclaré vs fiches de paie"
+      ],
+      "identity_flags": [],
+      "guarantor": null,
+      "debt_ratio": 25.0,
+      "expected_verdict": "REVIEW",
+      "justification": "Incohérence numérique mineure détectée."
+    },
+    {
+      "dossier_id": "CRED-2026-017",
+      "credit_type": "Personnel",
+      "applicant_name": "Zouari Nizar",
+      "declared_monthly_income_tnd": 4000,
+      "loan_amount_tnd": 20000,
+      "loan_term_years": 3,
+      "documents_provided": [
+        {
+          "code": "cin_valide",
+          "name": "CIN",
+          "present": true,
+          "expired": false
+        },
+        {
+          "code": "bulletins_salaire_3",
+          "name": "Bulletins de salaire",
+          "present": true,
+          "expired": false
+        },
+        {
+          "code": "attestation_employeur",
+          "name": "Attestation employeur",
+          "present": true,
+          "expired": false
+        }
+      ],
+      "numerical_flags": [
+        "Différence mineure de salaire déclaré vs fiches de paie"
+      ],
+      "identity_flags": [],
+      "guarantor": null,
+      "debt_ratio": 25.0,
+      "expected_verdict": "REVIEW",
+      "justification": "Incohérence numérique mineure détectée."
+    },
+    {
+      "dossier_id": "CRED-2026-018",
+      "credit_type": "Personnel",
+      "applicant_name": "Chaabane Rym",
+      "declared_monthly_income_tnd": 4000,
+      "loan_amount_tnd": 20000,
+      "loan_term_years": 3,
+      "documents_provided": [
+        {
+          "code": "cin_valide",
+          "name": "CIN",
+          "present": true,
+          "expired": false
+        },
+        {
+          "code": "bulletins_salaire_3",
+          "name": "Bulletins de salaire",
+          "present": true,
+          "expired": false
+        },
+        {
+          "code": "attestation_employeur",
+          "name": "Attestation employeur",
+          "present": true,
+          "expired": false
+        }
+      ],
+      "numerical_flags": [
+        "Différence mineure de salaire déclaré vs fiches de paie"
+      ],
+      "identity_flags": [],
+      "guarantor": null,
+      "debt_ratio": 25.0,
+      "expected_verdict": "REVIEW",
+      "justification": "Incohérence numérique mineure détectée."
+    },
+    {
+      "dossier_id": "CRED-2026-019",
+      "credit_type": "Personnel",
+      "applicant_name": "Ellouze Omar",
+      "declared_monthly_income_tnd": 2000,
+      "loan_amount_tnd": 30000,
+      "loan_term_years": 10,
+      "documents_provided": [
+        {
+          "code": "cin_valide",
+          "name": "CIN",
+          "present": true,
+          "expired": false
+        },
+        {
+          "code": "bulletins_salaire_3",
+          "name": "Bulletins de salaire",
+          "present": true,
+          "expired": false
+        },
+        {
+          "code": "attestation_employeur",
+          "name": "Attestation employeur",
+          "present": true,
+          "expired": false
+        }
+      ],
+      "numerical_flags": [],
+      "identity_flags": [],
+      "guarantor": {
+        "name": "Garant Test",
+        "age": 68,
+        "loan_term_years": 10,
+        "flag": "age_limit_exceeded"
+      },
+      "debt_ratio": 30.0,
+      "expected_verdict": "REJECT",
+      "justification": "L'âge du garant à l'échéance dépasse 75 ans."
+    },
+    {
+      "dossier_id": "CRED-2026-020",
+      "credit_type": "Personnel",
+      "applicant_name": "Khemiri Asma",
+      "declared_monthly_income_tnd": 2000,
+      "loan_amount_tnd": 30000,
+      "loan_term_years": 10,
+      "documents_provided": [
+        {
+          "code": "cin_valide",
+          "name": "CIN",
+          "present": true,
+          "expired": false
+        },
+        {
+          "code": "bulletins_salaire_3",
+          "name": "Bulletins de salaire",
+          "present": true,
+          "expired": false
+        },
+        {
+          "code": "attestation_employeur",
+          "name": "Attestation employeur",
+          "present": true,
+          "expired": false
+        }
+      ],
+      "numerical_flags": [],
+      "identity_flags": [],
+      "guarantor": {
+        "name": "Garant Test",
+        "age": 68,
+        "loan_term_years": 10,
+        "flag": "age_limit_exceeded"
+      },
+      "debt_ratio": 30.0,
+      "expected_verdict": "REJECT",
+      "justification": "L'âge du garant à l'échéance dépasse 75 ans."
+    },
+    {
+      "dossier_id": "CRED-2026-021",
+      "credit_type": "Personnel",
+      "applicant_name": "Ayari Sami",
+      "declared_monthly_income_tnd": 3000,
+      "loan_amount_tnd": 20000,
+      "loan_term_years": 5,
+      "documents_provided": [
+        {
+          "code": "cin_valide",
+          "name": "CIN",
+          "present": true,
+          "expired": false
+        },
+        {
+          "code": "bulletins_salaire_3",
+          "name": "Bulletins de salaire",
+          "present": false,
+          "expired": false
+        },
+        {
+          "code": "attestation_employeur",
+          "name": "Attestation employeur",
+          "present": true,
+          "expired": false
+        }
+      ],
+      "numerical_flags": [],
+      "identity_flags": [],
+      "guarantor": null,
+      "debt_ratio": 25.0,
+      "expected_verdict": "REJECT",
+      "justification": "Document obligatoire manquant (Bulletins de salaire)."
+    },
+    {
+      "dossier_id": "CRED-2026-022",
+      "credit_type": "Personnel",
+      "applicant_name": "Boussetta Hela",
+      "declared_monthly_income_tnd": 2000,
+      "loan_amount_tnd": 50000,
+      "loan_term_years": 5,
+      "documents_provided": [
+        {
+          "code": "cin_valide",
+          "name": "CIN",
+          "present": true,
+          "expired": false
+        },
+        {
+          "code": "bulletins_salaire_3",
+          "name": "Bulletins de salaire",
+          "present": true,
+          "expired": false
+        },
+        {
+          "code": "attestation_employeur",
+          "name": "Attestation employeur",
+          "present": true,
+          "expired": false
+        }
+      ],
+      "numerical_flags": [],
+      "identity_flags": [],
+      "guarantor": null,
+      "debt_ratio": 48.0,
+      "expected_verdict": "REJECT",
+      "justification": "Ratio d'endettement trop élevé (>45%)."
+    },
+    {
+      "dossier_id": "CRED-2026-023",
+      "credit_type": "Personnel",
+      "applicant_name": "Daoud Skander",
+      "declared_monthly_income_tnd": 2000,
+      "loan_amount_tnd": 50000,
+      "loan_term_years": 5,
+      "documents_provided": [
+        {
+          "code": "cin_valide",
+          "name": "CIN",
+          "present": true,
+          "expired": false
+        },
+        {
+          "code": "bulletins_salaire_3",
+          "name": "Bulletins de salaire",
+          "present": true,
+          "expired": false
+        },
+        {
+          "code": "attestation_employeur",
+          "name": "Attestation employeur",
+          "present": true,
+          "expired": false
+        }
+      ],
+      "numerical_flags": [],
+      "identity_flags": [],
+      "guarantor": null,
+      "debt_ratio": 48.0,
+      "expected_verdict": "REJECT",
+      "justification": "Ratio d'endettement trop élevé (>45%)."
+    },
+    {
+      "dossier_id": "CRED-2026-024",
+      "credit_type": "Corporate",
+      "applicant_name": "Jendoubi Yassine",
+      "declared_monthly_income_tnd": 100000,
+      "loan_amount_tnd": 500000,
+      "loan_term_years": 5,
+      "documents_provided": [
+        {
+          "code": "etats_financiers_consolides",
+          "name": "Etats financiers",
+          "present": true,
+          "expired": false
+        },
+        {
+          "code": "garanties_proposees",
+          "name": "Garanties proposées",
+          "present": true,
+          "expired": false
+        }
+      ],
+      "numerical_flags": [
+        "Chiffre d'affaires déclaré sans rapport avec les états financiers"
+      ],
+      "identity_flags": [],
+      "guarantor": null,
+      "debt_ratio": 20.0,
+      "expected_verdict": "REJECT",
+      "justification": "Incohérence numérique grave dans les états financiers."
+    },
+    {
+      "dossier_id": "CRED-2026-025",
+      "credit_type": "Corporate",
+      "applicant_name": "Ghazouani Wafa",
+      "declared_monthly_income_tnd": 100000,
+      "loan_amount_tnd": 500000,
+      "loan_term_years": 5,
+      "documents_provided": [
+        {
+          "code": "etats_financiers_consolides",
+          "name": "Etats financiers",
+          "present": true,
+          "expired": false
+        },
+        {
+          "code": "garanties_proposees",
+          "name": "Garanties proposées",
+          "present": true,
+          "expired": false
+        }
+      ],
+      "numerical_flags": [
+        "Chiffre d'affaires déclaré sans rapport avec les états financiers"
+      ],
+      "identity_flags": [],
+      "guarantor": null,
+      "debt_ratio": 20.0,
+      "expected_verdict": "REJECT",
+      "justification": "Incohérence numérique grave dans les états financiers."
+    }
+  ]
+}

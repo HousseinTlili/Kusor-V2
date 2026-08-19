@@ -1,7 +1,8 @@
 export interface User {
   id: string;
   username: string;
-  role: 'admin' | 'user';
+  role: 'admin' | 'compliance' | 'legal' | 'credit' | 'user' | string;
+  full_name?: string;
 }
 
 export interface LoginResponse {

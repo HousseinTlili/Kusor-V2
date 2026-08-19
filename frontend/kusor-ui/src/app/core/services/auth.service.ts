@@ -13,8 +13,10 @@ export class AuthService {
 
   // Use Signals for state management
   readonly currentUserSignal = signal<User | null>(this.getStoredUser());
+  readonly currentUser = computed(() => this.currentUserSignal());
   readonly isAuthenticated = computed(() => this.currentUserSignal() !== null);
   readonly isAdmin = computed(() => this.currentUserSignal()?.role === 'admin');
+  readonly userRole = computed(() => this.currentUserSignal()?.role || 'user');
 
   constructor(private http: HttpClient) {}
 

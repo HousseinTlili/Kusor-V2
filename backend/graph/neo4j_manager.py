@@ -14,6 +14,18 @@ class Neo4jManager:
     def close(self):
         self.driver.close()
 
+    def execute_query(self, query: str, parameters: dict = None) -> list:
+        """Exécute une requête Cypher en lecture et retourne la liste des enregistrements."""
+        with self.driver.session() as session:
+            result = session.run(query, parameters or {})
+            return list(result)
+
+    def execute_write(self, query: str, parameters: dict = None) -> list:
+        """Exécute une requête Cypher en écriture et retourne la liste des enregistrements."""
+        with self.driver.session() as session:
+            result = session.run(query, parameters or {})
+            return list(result)
+
     def create_circular_node(self, number: str, title: str = "", date: str = "", category: str = "", status: str = "active"):
         """Crée (ou met à jour) un nœud Circular."""
         query = """
@@ -49,6 +61,18 @@ class Neo4jManager:
         with self.driver.session() as session:
             result = session.run(query, number=number)
             return [{"relation": r["relation"], "target": r["target"]} for r in result]
+
+    def run_query(self, query: str, parameters: dict = None) -> list:
+        """Execute a Cypher query in a session and return records."""
+        with self.driver.session() as session:
+            result = session.run(query, parameters or {})
+            return list(result)
+
+    def run_write(self, query: str, parameters: dict = None) -> list:
+        """Execute a write Cypher query in a session and return records."""
+        with self.driver.session() as session:
+            result = session.run(query, parameters or {})
+            return list(result)
 
 
 if __name__ == "__main__":

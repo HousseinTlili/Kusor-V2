@@ -18,6 +18,24 @@ def admin_required(fn):
         return fn(*args, **kwargs)
     return decorator
 
+def role_required(*allowed_roles: str):
+    """
+    Decorator enforcing that the authenticated user possesses one of the allowed roles.
+    """
+    def decorator(fn):
+        @wraps(fn)
+        def wrapper(*args, **kwargs):
+            verify_jwt_in_request()
+            claims = get_jwt()
+            user_role = claims.get("role", "user")
+            
+            if user_role != "admin" and user_role not in allowed_roles:
+                abort(403, f"Access denied. Role '{user_role}' not authorized.")
+
+            return fn(*args, **kwargs)
+        return wrapper
+    return decorator
+
 def audit_action(action: str, entity_type: str):
     """Decorator: logs the action to AuditLog after execution."""
     def decorator(fn):

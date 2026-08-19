@@ -1,0 +1,40 @@
+{
+  "version": "1.0",
+  "source": "Attijari Bank — Réponse Besoins Données KUSOR v3",
+  "last_updated": "2026-08-07",
+  "checklists": {
+    "personnel": {
+      "label": "Crédit Personnel",
+      "documents": [
+        {"id": "CP-01", "name": "CIN valide", "status": "obligatoire", "code": "cin_valide"},
+        {"id": "CP-02", "name": "3 derniers bulletins de salaire", "status": "obligatoire", "code": "bulletins_salaire_3"},
+        {"id": "CP-03", "name": "Attestation employeur", "status": "obligatoire", "code": "attestation_employeur"}
+      ]
+    },
+    "hypothecaire": {
+      "label": "Crédit Hypothécaire",
+      "documents": [
+        {"id": "CH-01", "name": "CIN valide", "status": "obligatoire", "code": "cin_valide"},
+        {"id": "CH-02", "name": "3 derniers bulletins de salaire", "status": "obligatoire", "code": "bulletins_salaire_3"},
+        {"id": "CH-03", "name": "Compromis de vente", "status": "obligatoire", "code": "compromis_vente"},
+        {"id": "CH-04", "name": "Rapport d'expertise du bien", "status": "obligatoire", "code": "rapport_expertise_bien"},
+        {"id": "CH-05", "name": "Attestation d'assurance-vie", "status": "conditionnel", "code": "attestation_assurance_vie", "condition": "Selon profil de risque"}
+      ]
+    },
+    "pme": {
+      "label": "Crédit PME",
+      "documents": [
+        {"id": "CPME-01", "name": "États financiers certifiés", "status": "obligatoire", "code": "etats_financiers_certifies"},
+        {"id": "CPME-02", "name": "Business plan / prévisionnel", "status": "conditionnel", "code": "business_plan", "condition": "Nouveau projet ou expansion"},
+        {"id": "CPME-03", "name": "Garanties proposées (nantissement, caution)", "status": "obligatoire", "code": "garanties_proposees"}
+      ]
+    },
+    "corporate": {
+      "label": "Crédit Corporate",
+      "documents": [
+        {"id": "CC-01", "name": "États financiers consolidés", "status": "obligatoire", "code": "etats_financiers_consolides"},
+        {"id": "CC-02", "name": "Garanties proposées (nantissement, caution)", "status": "obligatoire", "code": "garanties_proposees"}
+      ]
+    }
+  }
+}

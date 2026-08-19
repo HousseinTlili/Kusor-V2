@@ -1,0 +1,168 @@
+# docker-compose.yml
+# KUSOR v3 — Full infrastructure stack
+
+version: "3.9"
+
+services:
+  # ── PostgreSQL 16 ──────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: kusor-postgres
+    environment:
+      POSTGRES_DB: kusor_db
+      POSTGRES_USER: kusor_user
+      POSTGRES_PASSWORD: kusor_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kusor_user -d kusor_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - kusor_net
+    restart: unless-stopped
+
+  # ── Neo4j 5 Community with APOC ────────────────────
+  neo4j:
+    image: neo4j:5-community
+    container_name: kusor-neo4j
+    environment:
+      NEO4J_AUTH: neo4j/kusor_password
+      NEO4J_PLUGINS: '["apoc"]'
+      NEO4J_dbms_memory_heap_initial__size: 512m
+      NEO4J_dbms_memory_heap_max__size: 1G
+      NEO4J_dbms_memory_pagecache_size: 512m
+    ports:
+      - "7474:7474"   # Browser UI
+      - "7687:7687"   # Bolt protocol
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+    healthcheck:
+      test: ["CMD", "neo4j", "status"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    networks:
+      - kusor_net
+    restart: unless-stopped
+
+  # ── ChromaDB ───────────────────────────────────────
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: kusor-chromadb
+    ports:
+      - "8001:8000"
+    volumes:
+      - chroma_data:/data
+    environment:
+      IS_PERSISTENT: "TRUE"
+      PERSIST_DIRECTORY: /data
+      ANONYMIZED_TELEMETRY: "FALSE"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v2/heartbeat"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - kusor_net
+    restart: unless-stopped
+
+  # ── Ollama (LLM serving) ───────────────────────────
+  ollama:
+    image: ollama/ollama:latest
+    container_name: kusor-ollama
+    ports:
+      - "11435:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 15s
+      timeout: 10s
+      retries: 3
+    networks:
+      - kusor_net
+    restart: unless-stopped
+
+  # ── Backend Flask API ──────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: kusor-backend
+    ports:
+      - "5000:5000"
+    environment:
+      FLASK_ENV: production
+      DATABASE_URL: postgresql://kusor_user:kusor_password@postgres:5432/kusor_db
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USER: neo4j
+      NEO4J_PASSWORD: kusor_password
+      CHROMADB_HOST: chromadb
+      CHROMADB_PORT: 8000
+      OLLAMA_BASE_URL: http://ollama:11434
+    depends_on:
+      postgres:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+    networks:
+      - kusor_net
+    restart: unless-stopped
+
+  # ── Frontend Angular Web UI ────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: kusor-frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend
+    networks:
+      - kusor_net
+    restart: unless-stopped
+
+  # ── n8n Workflow Automation ────────────────────────
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:latest
+    container_name: kusor-n8n
+    ports:
+      - "5678:5678"
+    environment:
+      N8N_PORT: 5678
+      N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: "true"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+      - "kusor-backend:host-gateway"
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./n8n/workflows:/n8n/workflows
+    networks:
+      - kusor_net
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+    name: kusor_pgdata
+  neo4j_data:
+    name: kusor_neo4j_data
+  neo4j_logs:
+    name: kusor_neo4j_logs
+  chroma_data:
+    name: kusor_chroma_data
+  ollama_data:
+    name: kusor_ollama_data
+  n8n_data:
+    name: kusor_n8n_data
+
+networks:
+  kusor_net:
+    driver: bridge
+    name: kusor_network
+

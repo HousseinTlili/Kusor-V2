@@ -32,13 +32,17 @@ class BCTScraper:
 
     def __init__(
         self,
-        db_session: Any,  # SQLAlchemy session
-        document_processor: Any,  # DocumentProcessor
-        graph_builder: Any,  # GraphBuilder
+        db_session: Any = None,
+        document_processor: Any = None,
+        graph_builder: Any = None,
+        pdf_download_dir: Optional[str] = None,
+        **kwargs: Any
     ) -> None:
         self.db_session = db_session
         self.document_processor = document_processor
         self.graph_builder = graph_builder
+        if pdf_download_dir:
+            self.PDF_DOWNLOAD_DIR = pdf_download_dir
 
     def scrape_circulars(self) -> List[CircularMetadata]:
         """

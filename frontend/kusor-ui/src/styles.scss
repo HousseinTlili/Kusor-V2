@@ -1,38 +1,84 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
-
-:root {
-  --bg-dark: #0a0b10;
-  --bg-card: rgba(16, 20, 32, 0.65);
-  --bg-card-hover: rgba(22, 28, 45, 0.8);
-  --bg-gradient-top: rgba(79, 70, 229, 0.08);
+/* Attijari Bank Theme Tokens */
+:root,
+html.dark,
+body.dark {
+  --bg-dark: #0a0c14;
+  --bg-page: #0a0c14;
+  --bg-sidebar: #0e121e;
+  --border-sidebar: rgba(255, 255, 255, 0.07);
+  --bg-card: rgba(16, 20, 32, 0.75);
+  --bg-card-hover: rgba(24, 30, 48, 0.9);
+  --bg-input: rgba(255, 255, 255, 0.04);
+  --bg-page-subtle: rgba(255, 255, 255, 0.02);
   
-  --primary: #4f46e5;
-  --primary-hover: #6366f1;
-  --primary-glow: rgba(79, 70, 229, 0.35);
+  --primary: #f59e0b;
+  --primary-hover: #d97706;
+  --primary-glow: rgba(245, 158, 11, 0.35);
   
-  --accent-gold: #fbbf24;
-  --accent-gold-glow: rgba(251, 191, 36, 0.2);
+  --accent-gold: #f59e0b;
+  --accent-gold-hover: #d97706;
+  --accent-gold-glow: rgba(245, 158, 11, 0.3);
   
   --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
   
-  --border-color: rgba(255, 255, 255, 0.06);
-  --border-color-hover: rgba(255, 255, 255, 0.12);
+  --border-color: rgba(255, 255, 255, 0.08);
+  --border-color-hover: rgba(245, 158, 11, 0.3);
+  --border-input: rgba(255, 255, 255, 0.12);
+  --border-card: rgba(255, 255, 255, 0.08);
+  --border-card-hover: rgba(245, 158, 11, 0.4);
   
   --success: #10b981;
   --warning: #f59e0b;
   --danger: #ef4444;
   
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-display: 'Outfit', sans-serif;
+  --font-display: 'Outfit', 'Inter', sans-serif;
   
   --transition-fast: 0.15s ease;
   --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   
-  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-  --glass-blur: blur(12px);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
+  --glass-blur: blur(14px);
+}
+
+html.light,
+body.light {
+  --bg-dark: #f8fafc;
+  --bg-page: #f8fafc;
+  --bg-sidebar: #ffffff;
+  --border-sidebar: #e2e8f0;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f1f5f9;
+  --bg-input: #ffffff;
+  --bg-page-subtle: #f1f5f9;
+  
+  --primary: #d97706;
+  --primary-hover: #b45309;
+  --primary-glow: rgba(217, 119, 6, 0.25);
+  
+  --accent-gold: #d97706;
+  --accent-gold-hover: #b45309;
+  --accent-gold-glow: rgba(217, 119, 6, 0.2);
+  
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+  
+  --border-color: #e2e8f0;
+  --border-color-hover: #cbd5e1;
+  --border-input: #cbd5e1;
+  --border-card: #e2e8f0;
+  --border-card-hover: #d97706;
+  
+  --success: #059669;
+  --warning: #d97706;
+  --danger: #dc2626;
+  
+  --glass-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.06);
+  --glass-blur: blur(8px);
 }
 
 * {

@@ -1,9 +1,33 @@
 <nav class="navbar">
   <div class="nav-container">
     <div class="nav-brand" routerLink="/dashboard">
-      <span class="logo-glow"></span>
-      <span class="brand-text">KUSOR</span>
-      <span class="badge-tag">AI</span>
+      <div class="attijari-brand-wrapper">
+        <svg class="attijari-symbol" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="40" height="40" rx="8" fill="#181920" stroke="rgba(245, 158, 11, 0.3)" stroke-width="1" />
+          <path d="M20 7L32.5 29H7.5L20 7Z" fill="url(#attijari-gold-1)" />
+          <path d="M20 14L28 28H12L20 14Z" fill="#181920" />
+          <path d="M20 20L24.5 28H15.5L20 20Z" fill="url(#attijari-gold-2)" />
+          <defs>
+            <linearGradient id="attijari-gold-1" x1="7.5" y1="7" x2="32.5" y2="29" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#FBBF24" />
+              <stop offset="0.5" stop-color="#F59E0B" />
+              <stop offset="1" stop-color="#D97706" />
+            </linearGradient>
+            <linearGradient id="attijari-gold-2" x1="15.5" y1="20" x2="24.5" y2="28" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#FEF08A" />
+              <stop offset="1" stop-color="#F59E0B" />
+            </linearGradient>
+          </defs>
+        </svg>
+        <div class="attijari-text-block">
+          <div class="attijari-title-row">
+            <span class="attijari-main">Attijari</span>
+            <span class="attijari-bank">bank</span>
+            <span class="attijari-badge">KUSOR AI</span>
+          </div>
+          <span class="attijari-caption">Veille & Conformité Réglementaire BCT</span>
+        </div>
+      </div>
     </div>
 
     @if (authService.isAuthenticated()) {
@@ -15,7 +39,19 @@
           Assistant Chat
         </a>
         <a routerLink="/graph" routerLinkActive="active" class="nav-link">
-          Explorateur Graphe
+          Graphe Neo4j
+        </a>
+        <a routerLink="/credit" routerLinkActive="active" class="nav-link">
+          Crédit
+        </a>
+        <a routerLink="/contract" routerLinkActive="active" class="nav-link">
+          Contrats
+        </a>
+        <a routerLink="/kyc" routerLinkActive="active" class="nav-link">
+          KYC / AML
+        </a>
+        <a routerLink="/impact-viewer" routerLinkActive="active" class="nav-link">
+          Impacts
         </a>
         @if (authService.isAdmin()) {
           <a routerLink="/admin" routerLinkActive="active" class="nav-link nav-admin">
@@ -25,6 +61,25 @@
       </div>
 
       <div class="nav-user-section">
+        <!-- Theme Toggle Button -->
+        <button 
+          (click)="toggleTheme()" 
+          class="btn-theme-toggle" 
+          [title]="themeService.isDark() ? 'Basculer en Mode Clair' : 'Basculer en Mode Sombre'"
+        >
+          @if (themeService.isDark()) {
+            <svg class="theme-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+            </svg>
+            <span class="theme-text">Clair</span>
+          } @else {
+            <svg class="theme-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+            </svg>
+            <span class="theme-text">Sombre</span>
+          }
+        </button>
+
         <span class="username">{{ authService.getCurrentUser()?.username }}</span>
         <button class="btn-logout" (click)="logout()">Déconnexion</button>
       </div>

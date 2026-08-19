@@ -1,29 +1,110 @@
 <div class="chat-page">
-  <!-- Sessions Sidebar -->
+  <!-- Sessions Sidebar (CRUD) -->
   <aside class="chat-sidebar glass-card">
-    <button (click)="createNewSession()" class="new-chat-btn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+    <div class="sidebar-top-actions">
+      <button (click)="createNewSession()" class="new-chat-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+        Nouvelle Discussion
+      </button>
+    </div>
+
+    <!-- Search / Filter Discussions -->
+    <div class="search-sessions-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="search-icon">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
       </svg>
-      Nouvelle Discussion
-    </button>
+      <input 
+        [(ngModel)]="searchTerm" 
+        placeholder="Rechercher une discussion..." 
+        class="search-sessions-input"
+      />
+    </div>
     
     <div class="sessions-list">
-      <div class="sidebar-section-title">Historique</div>
-      @if (sessions().length === 0) {
-        <div class="empty-sessions text-muted">Aucune discussion</div>
+      <div class="sidebar-section-header">
+        <span class="sidebar-section-title">Historique ({{ filteredSessions.length }})</span>
+        @if (sessions().length > 0) {
+          <button (click)="clearAllSessions()" class="btn-clear-all" title="Effacer toutes les discussions">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="trash-icon">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+            </svg>
+          </button>
+        }
+      </div>
+
+      @if (filteredSessions.length === 0) {
+        <div class="empty-sessions text-muted">
+          @if (searchTerm) {
+            Aucun résultat pour "{{ searchTerm }}"
+          } @else {
+            Aucune discussion enregistrée
+          }
+        </div>
       }
-      @for (session of sessions(); track session.id) {
-        <button 
+
+      @for (session of filteredSessions; track session.id) {
+        <div 
           (click)="selectSession(session.id)" 
           [class.active]="activeSessionId() === session.id"
-          class="session-item"
+          class="session-item-row"
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="session-icon">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
-          </svg>
-          <span class="session-title">{{ session.title || 'Discussion sans titre' }}</span>
-        </button>
+          @if (editingSessionId() === session.id) {
+            <!-- Inline Rename Input (Update) -->
+            <div class="inline-rename-box" (click)="$event.stopPropagation()">
+              <input 
+                [(ngModel)]="editingTitle" 
+                (keydown.enter)="saveRename(session, $event)"
+                (keydown.escape)="cancelRename($event)"
+                class="rename-input" 
+                autofocus 
+              />
+              <div class="rename-actions">
+                <button (click)="saveRename(session, $event)" class="btn-action-icon btn-save" title="Enregistrer">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                </button>
+                <button (click)="cancelRename($event)" class="btn-action-icon btn-cancel" title="Annuler">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          } @else {
+            <!-- Normal Session Display -->
+            <div class="session-main-content">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="session-icon">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+              </svg>
+              <span class="session-title" [title]="session.title">{{ session.title || 'Discussion sans titre' }}</span>
+            </div>
+
+            <!-- Session Actions: Rename (Update) & Delete -->
+            <div class="session-crud-actions">
+              <button 
+                (click)="startRename(session, $event)" 
+                class="btn-crud-icon btn-rename" 
+                title="Renommer la discussion"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
+                </svg>
+              </button>
+              <button 
+                (click)="deleteSession(session, $event)" 
+                class="btn-crud-icon btn-delete" 
+                title="Supprimer la discussion"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                </svg>
+              </button>
+            </div>
+          }
+        </div>
       }
     </div>
   </aside>
@@ -117,13 +198,24 @@
       }
     </div>
 
-    <!-- Message Input Bar -->
+    <!-- Message Input Bar with Presets -->
     <footer class="chat-hub-input-bar">
+      <div class="chat-presets-bar">
+        <span class="presets-hint">💡 Questions types :</span>
+        <div class="preset-scroll-container">
+          @for (prompt of promptPresets; track prompt) {
+            <button (click)="inputMessage = prompt; sendMessage()" class="chat-preset-chip">
+              {{ prompt }}
+            </button>
+          }
+        </div>
+      </div>
+
       <form (submit)="sendMessage()" class="chat-input-form">
         <input 
           [(ngModel)]="inputMessage" 
           name="message" 
-          placeholder="Posez votre question réglementaire ici..."
+          placeholder="Posez votre question réglementaire ici (ex: ratio d'endettement, garanties, KYC)..."
           autocomplete="off"
           [disabled]="isSending()"
           class="form-control"

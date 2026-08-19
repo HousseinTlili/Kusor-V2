@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ApiService } from '../../core/services/api.service';
 import { GraphData, GraphNode, GraphEdge, ClusterData, ClusterNode, ClusterEdge } from '../../core/models/graph.model';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
@@ -15,6 +16,7 @@ import { NgxGraphModule } from '@swimlane/ngx-graph';
 })
 export class GraphComponent implements OnInit {
   private apiService = inject(ApiService);
+  private router = inject(Router);
 
   // Raw API graph data
   rawGraphData = signal<GraphData>({ nodes: [], edges: [] });
@@ -26,6 +28,14 @@ export class GraphComponent implements OnInit {
   // Hierarchical view states
   viewLevel = signal<'overview' | 'detail'>('overview');
   selectedCluster = signal<string | null>(null);
+
+  // Popular BCT Presets
+  presets = [
+    { id: '2018-16', label: '2018-16 (Réglementation Générale)' },
+    { id: '2018-12', label: '2018-12 (Supervision Bancaire)' },
+    { id: '2018-09', label: '2018-09 (Établissements Financiers)' },
+    { id: '2018-01', label: '2018-01 (Ratio & Risques)' }
+  ];
 
   // Checkbox filters for relationship types
   relationshipFilters = signal({
@@ -238,5 +248,18 @@ export class GraphComponent implements OnInit {
       case 'MENTIONS': return '#64748b';
       default: return '#94a3b8';
     }
+  }
+
+  selectPreset(presetId: string): void {
+    this.searchQuery = presetId;
+    this.loadGraph(presetId);
+  }
+
+  askInChat(circularNumber: string): void {
+    this.router.navigate(['/chat'], { queryParams: { q: `Que dit la circulaire BCT ${circularNumber} et quelles sont ses obligations principales ?` } });
+  }
+
+  viewImpact(circularNumber: string): void {
+    this.router.navigate(['/impact-viewer'], { queryParams: { circularId: circularNumber } });
   }
 }

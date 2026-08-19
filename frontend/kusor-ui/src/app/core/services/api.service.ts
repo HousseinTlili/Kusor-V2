@@ -77,7 +77,7 @@ export class ApiService {
   }
 
 
-  // --- Chat ---
+  // --- Chat CRUD ---
   sendMessage(message: string, sessionId?: string): Observable<ChatResponse> {
     const body: any = { message };
     if (sessionId) {
@@ -94,9 +94,33 @@ export class ApiService {
     return this.http.get<ChatSession[]>(`${environment.apiUrl}/chat/sessions`);
   }
 
+  createChatSession(title?: string): Observable<ChatSession> {
+    return this.http.post<ChatSession>(`${environment.apiUrl}/chat/sessions`, { title });
+  }
+
+  getChatSession(sessionId: string): Observable<ChatSession> {
+    return this.http.get<ChatSession>(`${environment.apiUrl}/chat/session/${sessionId}`);
+  }
+
+  updateChatSession(sessionId: string, title: string): Observable<ChatSession> {
+    return this.http.put<ChatSession>(`${environment.apiUrl}/chat/session/${sessionId}`, { title });
+  }
+
+  deleteChatSession(sessionId: string): Observable<{ message: string; id: string }> {
+    return this.http.delete<{ message: string; id: string }>(`${environment.apiUrl}/chat/session/${sessionId}`);
+  }
+
+  clearAllChatSessions(): Observable<{ message: string; deleted_count: number }> {
+    return this.http.delete<{ message: string; deleted_count: number }>(`${environment.apiUrl}/chat/sessions/clear`);
+  }
+
   // --- Admin ---
   getStats(): Observable<AdminStats> {
     return this.http.get<AdminStats>(`${environment.apiUrl}/admin/stats`);
+  }
+
+  getSummary(): Observable<any> {
+    return this.http.get<any>(`${environment.apiUrl}/admin/summary`);
   }
 
   triggerSync(): Observable<SyncResult> {
@@ -119,5 +143,41 @@ export class ApiService {
   getClusterSubgraph(year: string): Observable<ClusterSubgraphResponse> {
     const params = new HttpParams().set('year', year);
     return this.http.get<ClusterSubgraphResponse>(`${environment.apiUrl}/graph/cluster`, { params });
+  }
+
+  // --- Specialized Banking Modules (V2) ---
+  prescreenCredit(payload: any): Observable<any> {
+    return this.http.post<any>(`${environment.apiUrl}/credit/prescreen`, payload);
+  }
+
+  analyzeContract(payload: any): Observable<any> {
+    if (payload instanceof FormData) {
+      return this.http.post<any>(`${environment.apiUrl}/contract/analyze`, payload);
+    }
+    return this.http.post<any>(`${environment.apiUrl}/contract/analyze`, payload);
+  }
+
+  checkKyc(payload: any): Observable<any> {
+    if (payload instanceof FormData) {
+      return this.http.post<any>(`${environment.apiUrl}/kyc/check`, payload);
+    }
+    return this.http.post<any>(`${environment.apiUrl}/kyc/check`, payload);
+  }
+
+  runKycCheck(payload: any): Observable<any> {
+    return this.checkKyc(payload);
+  }
+
+  getCircularImpact(circularId: string): Observable<any> {
+    return this.http.get<any>(`${environment.apiUrl}/impact/${circularId}`);
+  }
+
+  getImpactReport(circularId: string): Observable<any> {
+    return this.getCircularImpact(circularId);
+  }
+
+  getTemporalGraph(asOfDate: string): Observable<any> {
+    const params = new HttpParams().set('as_of', asOfDate);
+    return this.http.get<any>(`${environment.apiUrl}/graph/temporal`, { params });
   }
 }

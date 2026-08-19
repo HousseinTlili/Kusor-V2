@@ -79,12 +79,12 @@ class TestGraphBuilder:
         
         graph_builder.create_entity_nodes("2024-01", entities)
         
-        # Verify entity nodes count in Neo4j
-        results = neo4j_manager.execute_query("MATCH (e:Entity) RETURN e")
+        # Verify entity nodes count in Neo4j for test entities
+        results = neo4j_manager.execute_query("MATCH (e:Entity) WHERE e.name IN ['BCT', 'Ministère des Finances'] RETURN e")
         assert len(results) == 2  # BCT and Ministère des Finances
         
-        # Verify relationships count
-        rels = neo4j_manager.execute_query("MATCH (c:Circular)-[r:MENTIONS]->(e:Entity) RETURN count(r) AS rel_count")
+        # Verify relationships count for this specific test circular
+        rels = neo4j_manager.execute_query("MATCH (c:Circular {number: '2024-01'})-[r:MENTIONS]->(e:Entity) RETURN count(r) AS rel_count")
         assert rels[0]["rel_count"] == 2
 
     def test_extract_relationships_regex(self, graph_builder) -> None:

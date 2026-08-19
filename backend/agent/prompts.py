@@ -56,18 +56,25 @@ def build_context_from_chunks(chunks: list[dict]) -> str:
 
     formatted = []
     for i, chunk in enumerate(chunks, 1):
-        page = chunk.get("page_number", "?")
-        doc_id = chunk.get("document_id", "")
-        circular_number = doc_id.replace("circulaire_", "").replace("_", "-") if doc_id else "?"
-        text = chunk.get("text", "")
+        if isinstance(chunk, dict):
+            page = chunk.get("page_number") or chunk.get("page", "?")
+            doc_id = chunk.get("document_id", "")
+            circ_num = chunk.get("circular_number") or (doc_id.replace("circulaire_", "").replace("_", "-") if doc_id else "?")
+            text = chunk.get("text") or chunk.get("content", "")
+        else:
+            page = getattr(chunk, "page_number", getattr(chunk, "page", "?"))
+            doc_id = getattr(chunk, "document_id", "")
+            circ_num = getattr(chunk, "circular_number", "") or (doc_id.replace("circulaire_", "").replace("_", "-") if doc_id else "?")
+            text = getattr(chunk, "content", getattr(chunk, "text", ""))
+
         formatted.append(
-            f"[Extrait {i} — Circulaire N°{circular_number}, page {page}]\n{text}"
+            f"[Extrait {i} — Circulaire N°{circ_num}, page {page}]\n{text}"
         )
 
     return "\n\n".join(formatted)
 
 
-def build_graph_context(relations: list[dict]) -> str:
+def build_graph_context(relations: list) -> str:
     """
     Formate les relations du graphe (Module 4) en texte lisible
     à insérer dans SYSTEM_PROMPT à la place de {graph_context}.
@@ -77,8 +84,12 @@ def build_graph_context(relations: list[dict]) -> str:
 
     formatted = []
     for rel in relations:
-        source = rel.get("source_query", "?")
-        target = rel.get("related_circular", "?")
+        if isinstance(rel, dict):
+            source = rel.get("source_query") or rel.get("source", "?")
+            target = rel.get("related_circular") or rel.get("target", "?")
+        else:
+            source = getattr(rel, "source_query", getattr(rel, "source", "?"))
+            target = getattr(rel, "related_circular", getattr(rel, "target", "?"))
         formatted.append(f"La circulaire {source} est liée à la circulaire {target}.")
 
     return "\n".join(formatted)

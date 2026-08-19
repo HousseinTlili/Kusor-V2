@@ -1,5 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { ApiService } from '../../core/services/api.service';
 import { AdminStats } from '../../core/models/admin.model';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
@@ -13,8 +14,10 @@ import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner
 })
 export class DashboardComponent implements OnInit {
   private apiService = inject(ApiService);
+  private router = inject(Router);
 
   stats = signal<AdminStats | null>(null);
+  summaryData = signal<any>(null);
   isLoading = signal<boolean>(true);
   isSyncing = signal<boolean>(false);
   syncMessage = signal<string | null>(null);
@@ -22,6 +25,7 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadStats();
+    this.loadSummary();
   }
 
   loadStats(): void {
@@ -36,6 +40,21 @@ export class DashboardComponent implements OnInit {
         this.isLoading.set(false);
       }
     });
+  }
+
+  loadSummary(): void {
+    this.apiService.getSummary().subscribe({
+      next: (data) => {
+        this.summaryData.set(data);
+      },
+      error: (err) => {
+        console.error('Error fetching summary data', err);
+      }
+    });
+  }
+
+  navigateTo(path: string, queryParams?: any): void {
+    this.router.navigate([path], { queryParams });
   }
 
   triggerManualSync(): void {

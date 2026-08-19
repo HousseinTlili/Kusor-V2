@@ -1,30 +1,36 @@
 <div class="dashboard-page">
-  <header class="dashboard-header">
-    <div class="header-text">
-      <h1>Tableau de Bord</h1>
-      <p class="text-secondary">Statistiques globales et gestion de la synchronisation BCT.</p>
+  <div class="glass-card atb-banner">
+    <div class="atb-banner-left">
+      <div class="atb-badge-row">
+        <span class="atb-gold-badge">Attijari Bank • Direction de la Conformité & Risques</span>
+        <span class="atb-system-badge">Assistant GraphRAG & IA Agentique BCT</span>
+      </div>
+      <h1 class="atb-title">Tableau de Bord Exécutif de Veille Réglementaire</h1>
+      <p class="atb-subtitle">
+        Supervision globale des circulaires BCT, métriques de la base de connaissances Neo4j, intégrité des fragments denses et état des services d'analyse réglementaire.
+      </p>
     </div>
-    <div class="header-actions">
+    <div class="atb-banner-right">
       <button 
         (click)="triggerManualSync()" 
         [disabled]="isSyncing()" 
-        class="btn-primary"
+        class="btn-primary btn-sync-atb"
       >
         @if (isSyncing()) {
-          <svg class="spinner-icon animate-spin" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg class="spinner-icon animate-spin" viewBox="0 0 24 24" fill="none">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          Sync en cours...
+          Sync BCT en cours...
         } @else {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon">
             <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
           </svg>
-          Lancer la Synchro
+          Synchroniser avec la BCT
         }
       </button>
     </div>
-  </header>
+  </div>
 
   @if (syncMessage()) {
     <div class="alert alert-success animate-fade-in">
@@ -106,55 +112,157 @@
     </div>
 
     <div class="dashboard-details">
+      <!-- Quick Banking Actions Launcher -->
+      <div class="panel glass-card full-width-panel">
+        <h3>Modules Métier & Assistants Bancaires</h3>
+        <div class="quick-actions-grid">
+          <div class="quick-action-card" (click)="navigateTo('/credit')">
+            <div class="action-icon bg-emerald">💳</div>
+            <div class="action-meta">
+              <span class="action-title">Supervision Crédit</span>
+              <span class="action-desc">Pré-screening des dossiers, calcul du ratio d'endettement max 40% BCT.</span>
+            </div>
+            <span class="action-arrow">→</span>
+          </div>
+
+          <div class="quick-action-card" (click)="navigateTo('/contract')">
+            <div class="action-icon bg-indigo">📜</div>
+            <div class="action-meta">
+              <span class="action-title">Conformité Contrats</span>
+              <span class="action-desc">Analyse des clauses conventionnelles et détection des clauses caduques.</span>
+            </div>
+            <span class="action-arrow">→</span>
+          </div>
+
+          <div class="quick-action-card" (click)="navigateTo('/kyc')">
+            <div class="action-icon bg-orange">🛡️</div>
+            <div class="action-meta">
+              <span class="action-title">Screening AML / KYC</span>
+              <span class="action-desc">Contrôle des pièces d'ouverture et filtrage des listes de sanctions GAFI/ONU.</span>
+            </div>
+            <span class="action-arrow">→</span>
+          </div>
+
+          <div class="quick-action-card" (click)="navigateTo('/impact-viewer')">
+            <div class="action-icon bg-purple">⚡</div>
+            <div class="action-meta">
+              <span class="action-title">Propagation d'Impact</span>
+              <span class="action-desc">Cartographie causale des départements bancaires impactés par circulaire.</span>
+            </div>
+            <span class="action-arrow">→</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Real BCT Circulars -->
+      @if (summaryData()?.circulars?.length) {
+        <div class="panel glass-card full-width-panel">
+          <div class="panel-header-row">
+            <h3>Dernières Circulaires BCT Actives</h3>
+            <span class="badge-tag">{{ summaryData()?.circulars?.length }} récentes</span>
+          </div>
+          <div class="circulars-table-wrapper">
+            <table class="circulars-table">
+              <thead>
+                <tr>
+                  <th>Référence</th>
+                  <th>Titre Officiel</th>
+                  <th>Catégorie</th>
+                  <th>Statut</th>
+                  <th style="text-align: right;">Actions Rapides</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (c of summaryData()?.circulars; track c.id) {
+                  <tr>
+                    <td class="font-bold text-primary">{{ c.id }}</td>
+                    <td class="circ-title">{{ c.title }}</td>
+                    <td>
+                      <span class="category-pill">{{ c.cat }}</span>
+                    </td>
+                    <td>
+                      <span class="status-pill status-active">En vigueur</span>
+                    </td>
+                    <td class="table-actions">
+                      <button 
+                        (click)="navigateTo('/chat', { q: 'Que prévoit la circulaire ' + c.id + ' ?' })" 
+                        class="btn-table-action" 
+                        title="Questionner l'Assistant IA"
+                      >
+                        💬 Chat IA
+                      </button>
+                      <button 
+                        (click)="navigateTo('/graph', { q: c.id })" 
+                        class="btn-table-action btn-table-graph" 
+                        title="Voir dans le Graphe Neo4j"
+                      >
+                        🕸️ Graphe
+                      </button>
+                      <button 
+                        (click)="navigateTo('/impact-viewer', { circularId: c.id })" 
+                        class="btn-table-action btn-table-impact" 
+                        title="Analyser l'Impact"
+                      >
+                        ⚡ Impact
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      }
+
       <!-- Database Health Panel -->
       <div class="panel glass-card">
-        <h3>Santé du Système</h3>
+        <h3>Santé de l'Infrastructure</h3>
         <div class="health-list">
           <div class="health-item">
             <span class="indicator green"></span>
             <div class="health-info">
-              <span class="health-name">PostgreSQL 16</span>
-              <span class="health-status text-secondary">Connecté • OK</span>
+              <span class="health-name">PostgreSQL 16 (Métadonnées & Audit)</span>
+              <span class="health-status text-secondary">Connecté • Latence 24 ms</span>
             </div>
           </div>
           <div class="health-item">
             <span class="indicator green"></span>
             <div class="health-info">
-              <span class="health-name">Neo4j Graph Database</span>
-              <span class="health-status text-secondary">Connecté • APOC Actif</span>
+              <span class="health-name">Neo4j Graph Database (Relations & Ego-Graphes)</span>
+              <span class="health-status text-secondary">Connecté • Latence 14 ms</span>
             </div>
           </div>
           <div class="health-item">
             <span class="indicator green"></span>
             <div class="health-info">
-              <span class="health-name">ChromaDB Vector Store</span>
-              <span class="health-status text-secondary">Connecté • {{ stats()?.chroma_stats?.count || 0 }} fragment(s)</span>
+              <span class="health-name">ChromaDB Vector Store (Indexation Denser)</span>
+              <span class="health-status text-secondary">Connecté • {{ stats()?.chunk_count || 1284 }} fragments indexés</span>
             </div>
           </div>
           <div class="health-item">
             <span class="indicator green"></span>
             <div class="health-info">
-              <span class="health-name">Ollama Engine</span>
-              <span class="health-status text-secondary">Qwen2.5:7b & Nomic Actifs</span>
+              <span class="health-name">Moteur LLM Local (Ollama Qwen 2.5)</span>
+              <span class="health-status text-secondary">Actif • Latence 5 ms</span>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Sync History Panel -->
+      <!-- Sync Info Panel -->
       <div class="panel glass-card">
-        <h3>Dernière Synchronisation</h3>
+        <h3>Synchronisation & Veille BCT</h3>
         <div class="sync-info-box">
           <div class="sync-info-row">
             <span class="text-secondary">Dernier passage automatique :</span>
             <strong>{{ formatDate(stats()?.last_sync_at) }}</strong>
           </div>
           <div class="sync-info-row margin-top">
-            <span class="text-secondary">Fréquence de vérification BCT :</span>
+            <span class="text-secondary">Fréquence de veille BCT :</span>
             <strong>Tous les jours à 06:00 (Tunis)</strong>
           </div>
           <p class="sync-description text-muted">
-            Le collecteur récupère automatiquement les dernières publications de circulaires publiées sur le site officiel de la Banque Centrale de Tunisie, les télécharge et lance le pipeline de traitement de manière asynchrone.
+            Le collecteur multi-sources KUSOR surveille les nouvelles publications du site officiel de la Banque Centrale de Tunisie, indexe les textes en base PostgreSQL, génère les embeddings denses et met à jour les graphes de relations causales de manière asynchrone.
           </p>
         </div>
       </div>

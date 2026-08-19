@@ -1,5 +1,13 @@
 from typing import List
 import math
+import sys
+
+# Compatibility polyfill for Python 3.11 pre-releases / torch dynamo
+if not hasattr(sys, 'get_int_max_str_digits'):
+    sys.get_int_max_str_digits = lambda: 4300
+if not hasattr(sys, 'set_int_max_str_digits'):
+    sys.set_int_max_str_digits = lambda *a, **k: None
+
 from sentence_transformers import CrossEncoder
 from backend.retrieval.schemas import RetrievedChunk
 

@@ -1,0 +1,49 @@
+{
+  "version": "1.0",
+  "source": "Attijari Bank — Exemples anonymisés illustratifs",
+  "note": "Données entièrement fictives à titre d'illustration du format attendu",
+  "cases": [
+    {
+      "dossier_id": "DOS-2026-001",
+      "type": "KYC",
+      "client_type": "Individuel",
+      "result": "Conforme",
+      "justification": "Tous les documents obligatoires sont présents et à jour."
+    },
+    {
+      "dossier_id": "DOS-2026-002",
+      "type": "KYC",
+      "client_type": "Corporate",
+      "result": "Non conforme",
+      "justification": "Liste des bénéficiaires effectifs manquante."
+    },
+    {
+      "dossier_id": "DOS-2026-003",
+      "type": "Crédit hypothécaire",
+      "client_type": "Individuel",
+      "result": "Escaladé",
+      "justification": "Montant du prêt supérieur au seuil nécessitant validation hiérarchique."
+    },
+    {
+      "dossier_id": "DOS-2026-004",
+      "type": "KYC",
+      "client_type": "PPE",
+      "result": "Escaladé",
+      "justification": "Origine des fonds jugée insuffisamment détaillée par l'analyste."
+    },
+    {
+      "dossier_id": "DOS-2026-005",
+      "type": "Crédit PME",
+      "client_type": "Corporate",
+      "result": "Non conforme",
+      "justification": "États financiers non certifiés fournis."
+    },
+    {
+      "dossier_id": "DOS-2026-006",
+      "type": "KYC",
+      "client_type": "Individuel",
+      "result": "Conforme",
+      "justification": "Dossier complet, aucune anomalie détectée."
+    }
+  ]
+}

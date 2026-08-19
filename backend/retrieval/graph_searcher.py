@@ -29,7 +29,7 @@ class GraphSearcher:
         matches = re.findall(pattern, question)
         return list(set(matches))
 
-    def search(self, question: str, max_hops: int = 2) -> list[dict]:
+    def search(self, question: str, max_hops: int = 2, top_k: int = 20) -> list[dict]:
         """
         Retourne les circulaires liées aux numéros détectés dans la question,
         en suivant les relations du graphe jusqu'à max_hops sauts de distance.

@@ -1,5 +1,15 @@
 from dataclasses import dataclass, field
-from typing import Optional, List
+from typing import Optional, List, Any
+
+@dataclass
+class SearchResult:
+    """Single result item returned by any search channel."""
+    chunk_id: str = ""
+    content: str = ""
+    score: float = 0.0
+    metadata: dict = field(default_factory=dict)
+    source: str = ""
+
 
 @dataclass
 class RetrievedChunk:
@@ -16,10 +26,16 @@ class RetrievedChunk:
 @dataclass
 class RetrievalResult:
     """Complete result from hybrid retrieval."""
-    chunks: List[RetrievedChunk]
-    query: str
-    vector_count: int
-    bm25_count: int
-    graph_count: int
-    fusion_method: str  # "rrf"
-    reranked: bool
+    chunks: List[RetrievedChunk] = field(default_factory=list)
+    query: str = ""
+    vector_count: int = 0
+    bm25_count: int = 0
+    graph_count: int = 0
+    fusion_method: str = "rrf"
+    reranked: bool = False
+    results: List[Any] = field(default_factory=list)
+    total_candidates: int = 0
+    channels_used: int = 0
+    unique_sources: int = 0
+    graph_used: bool = False
+    obligation_used: bool = False
