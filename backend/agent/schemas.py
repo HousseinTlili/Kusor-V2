@@ -54,12 +54,13 @@ class KYCReport(BaseModel):
     overall_risk: str  # LOW | MEDIUM | HIGH | CRITICAL
     document_checks: List[DocumentCheckResult]
     completeness_score: float
+    extraction_quality_score: float = 1.0
+    extracted_entities: Optional[Dict[str, Any]] = None
     sanctions_results: List[SanctionsScreeningResult]
     sanctions_hit: bool
     regulatory_references: List[str]
     recommendations: List[str]
     agent_confidence: float = 0.95
-
 
 
 # ── Module 3: Contract Risk Models ─────────────────────────────────
@@ -75,9 +76,19 @@ class ClauseAnalysis(BaseModel):
     superseding_circular: Optional[str] = None
 
 
+class ContractMetadata(BaseModel):
+    lender_name: Optional[str] = None
+    borrower_name: Optional[str] = None
+    loan_amount_tnd: Optional[float] = None
+    interest_rate: Optional[str] = None
+    loan_term_months: Optional[int] = None
+    signing_date: Optional[str] = None
+
+
 class ContractReport(BaseModel):
     contract_title: str
     contract_date: Optional[date] = None
+    contract_metadata: Optional[ContractMetadata] = None
     total_clauses: int
     clauses: List[ClauseAnalysis]
     non_conformity_count: int
@@ -86,8 +97,8 @@ class ContractReport(BaseModel):
     overall_risk: str
     temporal_issues: int
     recommendations: List[str]
+    extraction_quality_score: float = 1.0
     note: str = "Comparaison contre texte BCT standard — modèles de contrats banque en attente"
-
 
 
 # ── Module 4: Credit Pre-Screening Models ──────────────────────────
@@ -128,6 +139,8 @@ class CreditReport(BaseModel):
     overall_risk: str     # LOW | MEDIUM | HIGH | CRITICAL
     blocking_issues: List[str]
     regulatory_references: List[str]
+    extraction_quality_score: float = 1.0
+    extracted_entities: Optional[Dict[str, Any]] = None
 
 
 # ── Module 5: Change Propagation Models ───────────────────────────
