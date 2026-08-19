@@ -241,3 +241,42 @@ class DashboardSummary(Resource):
                 {"name": "Ollama Qwen2.5 (LLM local)", "status": ollama_ok, "latency": ollama_latency},
             ]
         }
+
+
+# ----------------------------------------------------------------------
+# Module 10.2: Cryptographic Audit Hash Chain Endpoints (BCT & Internal Audit)
+# ----------------------------------------------------------------------
+@api.route("/audit-chain")
+class AdminAuditChain(Resource):
+    @api.doc("get_audit_chain", security="Bearer")
+    @jwt_required(optional=True)
+    def get(self):
+        """GET /api/admin/audit-chain — returns recent sealed cryptographic audit blocks"""
+        from backend.audit.audit_chain import audit_chain
+        blocks = audit_chain.get_recent_blocks(limit=30)
+        is_valid, total, corrupted = audit_chain.verify_chain_integrity()
+        return {
+            "is_valid": is_valid,
+            "total_blocks": total,
+            "corrupted_blocks": corrupted,
+            "blocks": blocks
+        }, 200
+
+
+@api.route("/audit-chain/verify")
+class AdminAuditChainVerify(Resource):
+    @api.doc("verify_audit_chain", security="Bearer")
+    @jwt_required(optional=True)
+    def get(self):
+        """GET /api/admin/audit-chain/verify — verifies cryptographic SHA-256 integrity from genesis"""
+        from backend.audit.audit_chain import audit_chain
+        is_valid, total, corrupted = audit_chain.verify_chain_integrity()
+        return {
+            "status": "VERIFIED" if is_valid else "TAMPERED",
+            "integrity_valid": is_valid,
+            "total_blocks_checked": total,
+            "corrupted_sequences": corrupted,
+            "algorithm": "SHA-256 (Merkle/Blockchain-style hash chaining)",
+            "message": "Audit trail is 100% integral and verifiable." if is_valid else f"Tampering detected at block(s): {corrupted}"
+        }, 200
+

@@ -140,6 +140,20 @@ class ChatMessage(Resource):
         )
         db.session.add(assistant_msg)
         db.session.commit()
+
+        # Cryptographic Audit Chain Sealing (Section 10.2)
+        try:
+            from backend.audit.audit_chain import audit_chain
+            cited_refs = [s.get("circular_number") for s in sources_list if isinstance(s, dict) and s.get("circular_number")]
+            audit_chain.seal_event(
+                action="RAG_REGULATORY_QUERY",
+                actor_id=user_id or "ANONYMOUS",
+                payload={"session_id": session_id, "question": message_text},
+                response={"answer": agent_res.answer, "confidence": agent_res.confidence_score},
+                sources_cited=cited_refs
+            )
+        except Exception as e:
+            current_app.logger.warning("Audit chain sealing note: %s", e)
         
         return {
             "session_id": session_id,
