@@ -114,7 +114,22 @@ class ChatMessage(Resource):
             )
             
         # Save assistant message to Postgres
-        sources_list = [s.model_dump() for s in agent_res.sources]
+        sources_list = []
+        for s in (agent_res.sources or []):
+            if hasattr(s, "model_dump"):
+                sources_list.append(s.model_dump())
+            elif isinstance(s, dict):
+                sources_list.append(s)
+            else:
+                s_str = str(s)
+                c_num = s_str.split("—")[0].strip() if "—" in s_str else "BCT"
+                sources_list.append({
+                    "circular_number": c_num,
+                    "page": 1,
+                    "title": f"Circulaire N° {c_num}" if c_num != "BCT" else "Circulaire BCT",
+                    "excerpt": s_str
+                })
+
         assistant_msg = ConversationMessage(
             id=str(uuid.uuid4()),
             session_id=session_id,
