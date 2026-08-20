@@ -41,7 +41,13 @@
       "name": "Send Email Digest",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
-      "position": [700, 300]
+      "position": [700, 300],
+      "credentials": {
+        "smtp": {
+          "id": "kusor-smtp-credentials",
+          "name": "KUSOR Gmail SMTP"
+        }
+      }
     }
   ],
   "connections": {

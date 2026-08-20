@@ -91,7 +91,13 @@
       "name": "Send Alert Email",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
-      "position": [850, 300]
+      "position": [850, 300],
+      "credentials": {
+        "smtp": {
+          "id": "kusor-smtp-credentials",
+          "name": "KUSOR Gmail SMTP"
+        }
+      }
     }
   ],
   "connections": {
