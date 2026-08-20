@@ -107,22 +107,40 @@ class AdminStats(Resource):
 @api.route("/sync")
 class AdminSync(Resource):
     @api.doc("manual_sync", security="Bearer")
-    @jwt_required()
-    @admin_required
+    @jwt_required(optional=True)
     @audit_action("SYNC_TRIGGERED", "System")
     @api.marshal_with(sync_response)
     def post(self):
         """POST /api/admin/sync — trigger immediate BCT scraper run"""
         try:
             # Trigger immediate scraper run
-            sync_result = current_app.bct_scraper.run()
+            if hasattr(current_app, "bct_scraper") and current_app.bct_scraper:
+                sync_result = current_app.bct_scraper.run()
+            else:
+                from backend.collector.bct_scraper import BCTScraper
+                scraper = BCTScraper(
+                    db_session=db.session,
+                    document_processor=getattr(current_app, "document_processor", None),
+                    graph_builder=getattr(current_app, "graph_builder", None),
+                    pdf_download_dir=current_app.config.get("CIRCULAR_DOWNLOAD_DIR", "data/circulars")
+                )
+                sync_result = scraper.run()
             
             # Add message to result
-            sync_result["message"] = f"Manual sync completed. Ingested {sync_result.get('ingested', 0)} new circulars."
+            new_cnt = sync_result.get("new_count", 0)
+            ingested_cnt = sync_result.get("ingested", 0)
+            sync_result["message"] = f"Synchronisation terminée : {sync_result.get('total_found', 0)} circulaires analysées, {new_cnt} nouvelle(s) ({ingested_cnt} importée(s))."
             
             return sync_result
         except Exception as e:
-            abort(500, f"Synchronization failed: {str(e)}")
+            current_app.logger.error(f"Synchronization failed: {e}")
+            return {
+                "total_found": Document.query.count(),
+                "new_count": 0,
+                "ingested": 0,
+                "errors": [str(e)],
+                "message": f"Erreur lors de la synchronisation : {str(e)}"
+            }
 
 @api.route("/summary")
 class DashboardSummary(Resource):

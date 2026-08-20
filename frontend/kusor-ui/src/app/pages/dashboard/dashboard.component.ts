@@ -65,20 +65,18 @@ export class DashboardComponent implements OnInit {
     this.apiService.triggerSync().subscribe({
       next: (res) => {
         this.isSyncing.set(false);
-        if (res.new_count !== undefined) {
-          this.syncMessage.set(
-            `Synchronisation réussie. ${res.new_count || 0} nouvelles circulaires importées.`
-          );
-          this.loadStats();
-        } else {
-          this.syncMessage.set('La synchronisation a démarré en arrière-plan.');
-        }
+        const msg = res.message || (res.new_count !== undefined
+          ? `Synchronisation réussie. ${res.new_count || 0} nouvelle(s) circulaire(s) importée(s).`
+          : 'Synchronisation terminée.');
+        this.syncMessage.set(msg);
+        this.loadStats();
+        this.loadSummary();
       },
       error: (err) => {
         console.error('Error syncing circulars', err);
         this.isSyncing.set(false);
         this.syncError.set(
-          err.error?.message || 'Échec de la synchronisation. Veuillez réessayer.'
+          err.error?.message || err.message || 'Échec de la synchronisation. Veuillez réessayer.'
         );
       }
     });
