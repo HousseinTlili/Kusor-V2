@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
-# KUSOR v3 — All-in-One Startup Script
-# Automatically starts Docker infrastructure (PostgreSQL, Neo4j, ChromaDB, n8n)
-# and launches Flask API + Angular Frontend with full process detachment.
+# KUSOR v3 — All-in-One Offline Startup Script
+# Automatically starts local Docker databases and launches Backend API + Angular UI.
 
 set -e
 
@@ -12,68 +11,63 @@ echo "============================================================"
 echo "          🚀 Starting KUSOR v3 Platform Stack..."
 echo "============================================================"
 
-# Stop any existing host processes first
-echo "🛑 Stopping existing backend/frontend processes..."
-pkill -f "python.*backend/app.py" 2>/dev/null || true
-pkill -f "ng serve" 2>/dev/null || true
+# 1. Clean up existing processes on ports 5000 & 4200
+echo "🧹 [1/3] Freeing ports and stopping old processes..."
+pkill -9 -f "backend/app.py" 2>/dev/null || true
+pkill -9 -f "ng serve" 2>/dev/null || true
+fuser -k 5000/tcp 2>/dev/null || true
+fuser -k 4200/tcp 2>/dev/null || true
 sleep 1
 
-# 1. Ensure Docker Services are running (Postgres, Neo4j, ChromaDB, n8n)
-echo "🐳 [1/3] Starting Docker Infrastructure (PostgreSQL, Neo4j, ChromaDB, n8n)..."
+# 2. Start local Docker databases (Postgres, Neo4j, ChromaDB, Ollama, n8n)
+echo "🐳 [2/3] Starting local Docker databases (PostgreSQL, Neo4j, ChromaDB, Ollama)..."
 if command -v docker >/dev/null 2>&1; then
-  docker compose up -d postgres neo4j chromadb n8n >/dev/null 2>&1 || true
-  echo "   ✓ Docker containers (including n8n on port 5678) are active!"
+  docker compose up -d postgres neo4j chromadb ollama n8n 2>/dev/null || true
+  echo "   ✓ Local Docker database containers are active!"
 else
-  echo "   ⚠ Docker command not found, skipping container verification."
+  echo "   ⚠ Docker command not found, skipping container check."
 fi
 
-# 2. Start Backend API as detached daemon
-echo "⚡ [2/3] Starting Flask Backend API on http://localhost:5000..."
-cd "$PROJECT_DIR"
-setsid bash -c "PYTHONPATH='$PROJECT_DIR' '$PROJECT_DIR/backend/.venv/bin/python' -u backend/app.py >> /tmp/kusor_backend.log 2>&1" &
-disown
+# 3. Start Backend Flask API
+echo "⚡ [3/4] Launching Flask Backend API on http://localhost:5000..."
+setsid bash -c "PYTHONPATH='$PROJECT_DIR' '$PROJECT_DIR/backend/.venv/bin/python' -u backend/app.py > /tmp/kusor_backend.log 2>&1" &
 echo $! > /tmp/kusor_backend.pid 2>/dev/null || true
 
-# Wait for backend to be ready
-echo "   Waiting for backend to start..."
-for i in $(seq 1 20); do
-  if curl -sf http://localhost:5000/health > /dev/null 2>&1; then
-    echo "   ✓ Backend is ready!"
+# Wait for backend readiness
+for i in $(seq 1 15); do
+  if curl -sf http://localhost:5000/api/docs > /dev/null 2>&1 || curl -sf http://localhost:5000/health > /dev/null 2>&1; then
+    echo "   ✓ Backend is online and ready!"
     break
-  fi
-  if [ "$i" -eq 20 ]; then
-    echo "   ⚠ Backend did not respond yet. Check: tail -f /tmp/kusor_backend.log"
   fi
   sleep 1
 done
 
-# 3. Start Frontend Angular UI as detached daemon
-echo "🎨 [3/3] Starting Angular Frontend UI on http://localhost:4200..."
+# 4. Start Frontend Angular UI
+echo "🎨 [4/4] Launching Angular Frontend UI on http://localhost:4200..."
 cd "$PROJECT_DIR/frontend/kusor-ui"
-setsid bash -c "npm run start >> /tmp/kusor_frontend.log 2>&1" &
-disown
-cd "$PROJECT_DIR"
+setsid bash -c "NG_CLI_ANALYTICS=false npm start > /tmp/kusor_frontend.log 2>&1" &
 echo $! > /tmp/kusor_frontend.pid 2>/dev/null || true
+cd "$PROJECT_DIR"
 
 echo ""
 echo "============================================================"
-echo "    🎉 KUSOR v3 is now running!"
+echo "    🎉 KUSOR v3 is now LIVE & Running (100% Offline)!"
 echo "============================================================"
-echo "🌐 Website UI:    http://localhost:4200"
-echo "🔌 Backend API:   http://localhost:5000"
-echo "⚡ Automation UI: http://localhost:5678 (n8n Workflows)"
-echo "📑 Swagger Specs: http://localhost:5000/api/docs"
+echo "🌐 Web Interface:      http://localhost:4200"
+echo "🛡️ KYC/AML Screen:     http://localhost:4200/kyc"
+echo "💳 Credit Pre-Screen:  http://localhost:4200/credit"
+echo "⚖️ Contract Analyzer:  http://localhost:4200/contract"
+echo "🕸️ Neo4j Graph View:   http://localhost:4200/graph"
+echo "🔌 Backend REST API:   http://localhost:5000"
+echo "📑 Swagger API Docs:   http://localhost:5000/api/docs"
 echo ""
-echo "🔑 5 Demo Login Credentials (Password for all: Password123!):"
-echo "   1. Admin:       admin"
-echo "   2. Compliance:  compliance"
-echo "   3. Legal:       legal"
-echo "   4. Credit:      credit"
-echo "   5. User:        user"
+echo "🔑 Login Credentials:"
+echo "   • Admin:              admin / Admin123!"
+echo "   • Compliance Officer: compliance_user / User123!"
 echo ""
 echo "📋 View Live Logs:"
-echo "   Backend:  tail -f /tmp/kusor_backend.log"
-echo "   Frontend: tail -f /tmp/kusor_frontend.log"
+echo "   • Backend:  tail -f /tmp/kusor_backend.log"
+echo "   • Frontend: tail -f /tmp/kusor_frontend.log"
 echo ""
-echo "🛑 To stop services: ./stop.sh"
+echo "🛑 To stop all services: ./stop.sh"
 echo "============================================================"
