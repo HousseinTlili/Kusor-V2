@@ -22,6 +22,16 @@ export class LoginComponent {
 
   errorMessage = signal<string | null>(null);
   isLoading = signal<boolean>(false);
+  showPassword = signal<boolean>(false);
+
+  togglePasswordVisibility(): void {
+    this.showPassword.update(val => !val);
+  }
+
+  fillPreset(username: string, password: string): void {
+    this.loginForm.patchValue({ username, password });
+    this.errorMessage.set(null);
+  }
 
   onSubmit(): void {
     if (this.loginForm.invalid) return;
@@ -38,7 +48,7 @@ export class LoginComponent {
       },
       error: (err) => {
         this.isLoading.set(false);
-        this.errorMessage.set(err.error?.message || 'Identifiants invalides');
+        this.errorMessage.set(err.error?.message || err.message || 'Identifiants invalides ou session refusée.');
       }
     });
   }
