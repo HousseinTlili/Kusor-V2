@@ -12,7 +12,7 @@ import { ThemeService } from '../../core/services/theme.service';
   template: `
     <div class="min-h-screen w-full bg-[var(--bg-page)] text-[var(--text-primary)] grid grid-cols-1 lg:grid-cols-12 font-sans transition-colors duration-200 overflow-x-hidden">
       
-      <!-- LEFT HALF: Hero Visual with Theme Image & Attijari AI Branding -->
+      <!-- LEFT HALF: Hero Visual with Theme Image & Compliance Features -->
       <div class="lg:col-span-7 relative hidden lg:flex flex-col justify-between p-10 xl:p-14 overflow-hidden border-r border-[var(--border-card)]">
         
         <!-- Hero Background Image with Gradient Overlay -->
@@ -23,22 +23,15 @@ import { ThemeService } from '../../core/services/theme.service';
           <div class="absolute inset-0 bg-gradient-to-r from-transparent via-[#0F172A]/40 to-[#0F172A]/90"></div>
         </div>
 
-        <!-- Top Left Brand Badge -->
-        <div class="relative z-10 flex items-center space-x-3.5">
-          <img src="assets/attijari_logo.png" alt="Attijari Bank Logo" class="h-11 w-auto object-contain rounded-xl shadow-lg border border-white/20 bg-white/95 p-1 backdrop-blur-sm" />
-          <div class="h-8 w-px bg-white/20"></div>
-          <div>
-            <div class="text-xs font-black uppercase tracking-widest text-[#E85D04]">KUSOR v3</div>
-            <div class="text-[11px] text-slate-300 font-medium">Attijari Bank Tunisie • BCT Compliance</div>
+        <!-- Top Badge -->
+        <div class="relative z-10">
+          <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#E85D04]/20 border border-[#E85D04]/40 text-[#E85D04] text-xs font-bold uppercase tracking-wider backdrop-blur-md">
+            <span>🛡️ Intelligence Réglementaire & Sécurité Bancaire</span>
           </div>
         </div>
 
-        <!-- Center Floating Feature Badges -->
-        <div class="relative z-10 space-y-3 my-auto max-w-lg">
-          <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#E85D04]/20 border border-[#E85D04]/40 text-[#E85D04] text-xs font-bold uppercase tracking-wider backdrop-blur-md">
-            <span>🛡️ Intelligence Réglementaire & Sécurité Bancaire</span>
-          </div>
-
+        <!-- Center Tagline & Feature Pills -->
+        <div class="relative z-10 space-y-4 my-auto max-w-lg">
           <h1 class="text-3xl xl:text-4xl font-black text-white leading-tight tracking-tight drop-shadow-md">
             L'Intelligence Artificielle au Service de la Conformité Bancaire
           </h1>
@@ -48,7 +41,7 @@ import { ThemeService } from '../../core/services/theme.service';
           </p>
 
           <!-- Feature Pills Grid -->
-          <div class="grid grid-cols-2 gap-3 pt-4">
+          <div class="grid grid-cols-2 gap-3 pt-2">
             <div class="p-3 rounded-2xl bg-black/40 border border-white/10 backdrop-blur-md space-y-1">
               <div class="text-base">🪪</div>
               <div class="text-xs font-bold text-white">Contrôle KYC & Sanctions</div>
@@ -83,20 +76,27 @@ import { ThemeService } from '../../core/services/theme.service';
 
       </div>
 
-      <!-- RIGHT HALF: Clean & Modern Login Form -->
-      <div class="lg:col-span-5 flex flex-col justify-between p-6 sm:p-10 xl:p-14 relative z-10 bg-[var(--bg-page)]">
+      <!-- RIGHT HALF: Brand Header, Logo & Modern Login Form -->
+      <div class="lg:col-span-5 flex flex-col justify-between p-6 sm:p-10 xl:p-12 relative z-10 bg-[var(--bg-page)]">
         
-        <!-- Top Toolbar on Right -->
-        <div class="flex items-center justify-between pb-6">
-          <div class="flex lg:hidden items-center space-x-3">
-            <img src="assets/attijari_logo.png" alt="Attijari Bank Logo" class="h-8 w-auto object-contain rounded-lg border border-[var(--border-card)]" />
-            <span class="text-xs font-black uppercase text-[#E85D04]">KUSOR v3</span>
+        <!-- Top Header Bar with Logo and Text on the Right Side -->
+        <div class="flex items-center justify-between pb-6 border-b border-[var(--border-card)]">
+          <!-- Logo and Title on Right Side -->
+          <div class="flex items-center space-x-3.5">
+            <img src="assets/attijari_logo.png" alt="Attijari Bank Logo" 
+              class="h-10 w-auto object-contain rounded-xl shadow-md border border-[var(--border-card)] bg-white p-1" />
+            <div class="h-8 w-px bg-[var(--border-card)]"></div>
+            <div>
+              <div class="text-xs font-black uppercase tracking-widest text-[#E85D04]">KUSOR v3</div>
+              <div class="text-[11px] text-[var(--text-muted)] font-semibold">Attijari Bank Tunisie</div>
+            </div>
           </div>
 
-          <div class="flex items-center space-x-3 ml-auto text-xs font-semibold">
-            <span class="hidden sm:inline-flex items-center px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 text-[11px] font-semibold">
-              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse mr-1.5"></span>
-              Nœud BCT Connecté
+          <!-- Controls: Theme toggle & Status -->
+          <div class="flex items-center space-x-2.5">
+            <span class="hidden sm:inline-flex items-center px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 text-[10px] font-semibold">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse mr-1.5"></span>
+              BCT Connecté
             </span>
 
             <button (click)="theme.toggleTheme()" [title]="theme.isDark() ? 'Activer le mode clair' : 'Activer le mode sombre'"
@@ -115,11 +115,11 @@ import { ThemeService } from '../../core/services/theme.service';
         </div>
 
         <!-- Center Login Form Area -->
-        <div class="my-auto w-full max-w-md mx-auto space-y-6">
+        <div class="my-auto w-full max-w-md mx-auto space-y-6 py-6">
           
           <div class="space-y-1.5">
             <h2 class="text-2xl sm:text-3xl font-black tracking-tight text-[var(--text-primary)]">Connexion au Portail</h2>
-            <p class="text-xs text-[var(--text-muted)]">Accédez à votre espace d'intelligence réglementaire Attijari Bank.</p>
+            <p class="text-xs text-[var(--text-muted)]">Accédez à votre espace d'intelligence réglementaire et conformité BCT.</p>
           </div>
 
           <!-- Error Alert Banner -->
@@ -197,7 +197,7 @@ import { ThemeService } from '../../core/services/theme.service';
         </div>
 
         <!-- Bottom Security Notice -->
-        <div class="pt-6 text-center text-[10px] text-[var(--text-muted)] space-y-1">
+        <div class="pt-6 text-center text-[10px] text-[var(--text-muted)] space-y-1 border-t border-[var(--border-card)]">
           <div>🔒 Authentification sécurisée JWT • Journal d'audit certifié SHA-256</div>
           <div>Attijari Bank Tunisie &copy; 2026. Tous droits réservés.</div>
         </div>
