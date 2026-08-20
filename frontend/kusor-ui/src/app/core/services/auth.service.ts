@@ -1,5 +1,6 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { User, LoginResponse } from '../models/user.model';
@@ -10,6 +11,8 @@ import { User, LoginResponse } from '../models/user.model';
 export class AuthService {
   private readonly tokenKey = 'kusor_token';
   private readonly userKey = 'kusor_user';
+  private http = inject(HttpClient);
+  private router = inject(Router);
 
   // Use Signals for state management
   readonly currentUserSignal = signal<User | null>(this.getStoredUser());
@@ -17,8 +20,6 @@ export class AuthService {
   readonly isAuthenticated = computed(() => this.currentUserSignal() !== null);
   readonly isAdmin = computed(() => this.currentUserSignal()?.role === 'admin');
   readonly userRole = computed(() => this.currentUserSignal()?.role || 'user');
-
-  constructor(private http: HttpClient) {}
 
   login(username: string, password: string): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${environment.apiUrl}/auth/login`, {
@@ -37,6 +38,7 @@ export class AuthService {
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.userKey);
     this.currentUserSignal.set(null);
+    this.router.navigate(['/login']);
   }
 
   getToken(): string | null {
