@@ -10,8 +10,8 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
   const token = authService.getToken();
 
-  // Attach token if present and it's a request to our API
-  if (token) {
+  // Attach token if present and valid string
+  if (token && token.trim() !== '' && token !== 'null' && token !== 'undefined') {
     req = req.clone({
       setHeaders: {
         Authorization: `Bearer ${token}`
@@ -21,10 +21,12 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
-      if (error.status === 401) {
-        // Auto-logout on 401 Unauthorized (token expired or invalid)
+      if (error.status === 401 || error.status === 422) {
+        // Auto-logout on 401 or 422 (token expired or invalid)
         authService.logout();
-        router.navigate(['/login']);
+        if (error.status === 401) {
+          router.navigate(['/login']);
+        }
       }
       return throwError(() => error);
     })

@@ -43,6 +43,33 @@ def create_app(config_name: str = "development") -> Flask:
     jwt.init_app(app)
     migrate.init_app(app, db)
     register_error_handlers(app)
+
+    @jwt.invalid_token_loader
+    def invalid_token_callback(reason):
+        return jsonify({
+            "code": 401,
+            "name": "Unauthorized",
+            "message": "Token de session invalide ou corrompu",
+            "error": str(reason)
+        }), 401
+
+    @jwt.expired_token_loader
+    def expired_token_callback(jwt_header, jwt_payload):
+        return jsonify({
+            "code": 401,
+            "name": "Unauthorized",
+            "message": "Session expirée. Veuillez vous reconnecter.",
+            "error": "token_expired"
+        }), 401
+
+    @jwt.unauthorized_loader
+    def missing_token_callback(reason):
+        return jsonify({
+            "code": 401,
+            "name": "Unauthorized",
+            "message": "Autorisation requise pour cette action",
+            "error": str(reason)
+        }), 401
     
     # Initialize Neo4j and GraphBuilder services
     try:

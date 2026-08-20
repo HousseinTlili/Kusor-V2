@@ -106,8 +106,7 @@ class AdminStats(Resource):
 
 @api.route("/sync")
 class AdminSync(Resource):
-    @api.doc("manual_sync", security="Bearer")
-    @jwt_required(optional=True)
+    @api.doc("manual_sync")
     @audit_action("SYNC_TRIGGERED", "System")
     @api.marshal_with(sync_response)
     def post(self):
