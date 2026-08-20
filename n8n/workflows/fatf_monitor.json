@@ -1,4 +1,5 @@
 {
+  "id": "kusor-fatf-monitor",
   "name": "KUSOR v3 — Daily Multi-Source & FATF Sync",
   "nodes": [
     {

@@ -112,6 +112,18 @@ import { ThemeService } from '../../../core/services/theme.service';
           </a>
         </div>
 
+        <!-- Section: Automatisation -->
+        <div class="nav-group">
+          <div class="nav-group-title">Automatisation</div>
+          <a href="http://localhost:5678" target="_blank" rel="noopener" class="nav-item nav-item-n8n" title="Ouvrir le moteur de workflows n8n (Port 5678)">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+            </svg>
+            <span class="nav-label">Workflows n8n</span>
+            <span class="n8n-badge">5678 ↗</span>
+          </a>
+        </div>
+
         <!-- Section: Administration -->
         @if (auth.isAdmin()) {
           <div class="nav-group">
@@ -326,6 +338,18 @@ import { ThemeService } from '../../../core/services/theme.service';
         .nav-icon {
           color: #38bdf8;
         }
+      }
+
+      .n8n-badge {
+        margin-left: auto;
+        font-size: 0.65rem;
+        padding: 0.15rem 0.45rem;
+        border-radius: 4px;
+        background: rgba(234, 88, 12, 0.15);
+        color: #f97316;
+        border: 1px solid rgba(234, 88, 12, 0.3);
+        font-weight: 700;
+        letter-spacing: 0.02em;
       }
     }
 
