@@ -445,6 +445,18 @@ import { SeverityBadgeComponent } from '../../shared/components/severity-badge/s
       }
     }
 
+    select.form-select {
+      background-color: #0e121e;
+      color: #f8fafc;
+      cursor: pointer;
+
+      option {
+        background-color: #0e121e;
+        color: #f8fafc;
+        padding: 0.5rem;
+      }
+    }
+
     .upload-dropzone {
       border: 1px dashed var(--border-color-hover);
       background: rgba(255, 255, 255, 0.02);

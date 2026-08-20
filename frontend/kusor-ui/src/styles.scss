@@ -206,3 +206,33 @@ h1, h2, h3, h4, h5, h6 {
     color: var(--text-muted);
   }
 }
+
+select.form-control,
+.form-select,
+select {
+  background-color: #0e121e;
+  color: var(--text-primary);
+  cursor: pointer;
+
+  option {
+    background-color: #0e121e;
+    color: #f8fafc;
+    padding: 0.5rem;
+  }
+}
+
+html.light,
+body.light {
+  select.form-control,
+  .form-select,
+  select {
+    background-color: #ffffff;
+    color: var(--text-primary);
+
+    option {
+      background-color: #ffffff;
+      color: #0f172a;
+    }
+  }
+}
+
