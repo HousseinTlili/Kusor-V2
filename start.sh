@@ -18,12 +18,12 @@ pkill -f "python.*app.py" 2>/dev/null || true
 pkill -f "python.*backend/app.py" 2>/dev/null || true
 sleep 1
 
-# 1. Ensure Docker Services are running (Postgres, Neo4j, ChromaDB)
-echo "🐳 [1/2] Démarrage de l'infrastructure Docker (PostgreSQL, Neo4j, ChromaDB)..."
+# 1. Ensure Docker Services are running (Postgres, Neo4j, ChromaDB, n8n)
+echo "🐳 [1/2] Démarrage de l'infrastructure Docker (PostgreSQL, Neo4j, ChromaDB, n8n)..."
 if command -v docker >/dev/null 2>&1; then
   docker update --restart=no kusor_backend 2>/dev/null || true
   docker stop kusor_backend 2>/dev/null || true
-  docker start kusor_postgres kusor_neo4j kusor_chroma 2>/dev/null || true
+  docker start kusor_postgres kusor_neo4j kusor_chroma kusor_n8n 2>/dev/null || true
   echo "   ✓ Conteneurs Docker opérationnels !"
 else
   echo "   ⚠ Commande docker non trouvée, étape ignorée."
@@ -62,6 +62,7 @@ echo "📜 Module Contrats          : http://localhost:5000/contract"
 echo "🛡️ Module AML / KYC         : http://localhost:5000/kyc"
 echo "⚡ Impact Réglementaire     : http://localhost:5000/impact-viewer"
 echo "⏳ Explorateur Temporel     : http://localhost:5000/temporal-explorer"
+echo "🔄 Moteur Workflow n8n      : http://localhost:5678"
 echo "📑 Documentation Swagger    : http://localhost:5000/api/docs"
 echo "🧪 Console de Test R&D      : http://localhost:5000/test"
 echo ""
